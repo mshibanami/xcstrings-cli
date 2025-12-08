@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 1.3.0
+
+### Minor Changes
+
+- 548cfc7: Add --languages and --dry-run options to `remove`
+
 ## 1.2.0
 
 ### Minor Changes
