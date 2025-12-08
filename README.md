@@ -22,13 +22,13 @@ Check it out here: [xcstrings-cli Helper](https://chatgpt.com/g/g-69365945f8bc81
     npm install -g xcstrings-cli
     ```
 
-2. Initialize xcstrings-cli
+2. Initialize xcstrings-cli:
 
     ```bash
     xcstrings init
     ```
 
-This will ask you some questions and create a `xcstrings-cli.json` file in the current directory.
+This will ask you some questions and create an `xcstrings-cli.json` file in the current directory.
 
 ## Usage
 
@@ -40,9 +40,9 @@ xcstrings add \
     --comment "Hello, World" \
     --strings << EOF
 {
-    "ja": "こんにちは、世界.",
+    "ja": "こんにちは、世界。",
     "en": "Hello, World.",
-    "zh-Hans": "你好，世界."
+    "zh-Hans": "你好，世界。"
 }
 EOF
 ```
@@ -53,9 +53,9 @@ EOF
 xcstrings remove --key greeting
 ```
 
-List supported languages:**
+**List supported languages:**
 
-This command lists all languages by checking xcstrings files and your Xcode project settings (`.pbxproj` specified in the config files as `xcodeprojPaths`).
+This command lists all languages by checking xcstrings files and your Xcode project settings (`.pbxproj` specified in the config file as `xcodeprojPaths`).
 
 ```bash
 xcstrings languages
@@ -66,28 +66,35 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 
 ## Command options
 
-- `--help, -h`: `boolean` (Optional)
-    - Show help.
-- `--version, -v`: `boolean` (Optional)
-    - Show version.
-- `--config`: `string` (Optional)
-    - The custom config file path. If not specified, xcstrings-cli will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
+* `--help, -h`: `boolean` (Optional)
+
+  * Show help.
+* `--version, -v`: `boolean` (Optional)
+
+  * Show version.
+* `--config`: `string` (Optional)
+
+  * The custom config file path. If not specified, xcstrings-cli will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
 
 ### `add` command options
 
-- `--strings, -s`: `string | string[] | { [key: string]: string }` (Required)
-    - The strings to add/remove.
-    - If only one string is provided, xcstrings-cli will use it as a default string.
-- `--comment, -c`: `string` (Optional)
-    - The comment of the string to add for translators.
-- `--extractionState, -e`: `string` (Optional, default: `manual`)
-    - The extraction state of the string to add. `translated` or `manual`.
-- `--help`: `boolean` (Optional)
-    - Show help.
+* `--strings, -s`: `string | string[] | { [key: string]: string }` (Required)
+
+  * The strings to add or update.
+  * If only one string is provided, xcstrings-cli will use it as the default string.
+* `--comment, -c`: `string` (Optional)
+
+  * The comment for the string to add, intended for translators.
+* `--extractionState, -e`: `string` (Optional, default: `manual`)
+
+  * The extraction state of the string to add: `translated` or `manual`.
+* `--help`: `boolean` (Optional)
+
+  * Show help.
 
 ## Config file
 
-Put a `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, then xcstrings-cli will use it as a config file.
+Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, and xcstrings-cli will use it as the config file.
 
 ```json5
 {
@@ -106,10 +113,18 @@ Put a `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, th
 
 These are the options for the config file:
 
-- xcstringsPaths: `string[] | { alias: string, path: string }[]`
-    - The path to the xcstrings file.
-    - If only one path is provided, xcstrings-cli will use it as a default xcstrings file.
-    - If multiple paths are provided, xcstrings-cli will ask you to select a xcstrings file.
+* **xcstringsPaths**: `string[] | { alias: string, path: string }[]`
+
+  * If only one path is provided, xcstrings-cli will use it as the default xcstrings file.
+  * If multiple paths are provided, xcstrings-cli will ask you to select an xcstrings file.
+* **xcodeprojPaths**: `string[]` (Optional)
+
+  * Paths to Xcode project files used to detect supported languages.
+  * If not specified, xcstrings-cli will not check the supported languages in your Xcode project.
+* **handleMissingLanguages**: `string` (Optional, default: `ignore`)
+  * How to handle translations for languages that are not included in the `xcstrings languages` output when adding strings. Options are:
+    * `ignore`: Only add translations for languages included in the `xcstrings languages` output.
+    * `add`: Add translations anyway.
 
 ## LICENSE
 
