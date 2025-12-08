@@ -115,27 +115,22 @@ yargs(hideBin(process.argv))
                 argv.dryRun === true,
             );
 
-            const removedLanguages = Object.entries(result.localizationsRemoved)
-                .map(([k, langs]) => `${k}: ${langs.join(', ')}`)
-                .join('; ');
-            const removedKeys = result.keysRemoved.join(', ');
-            const parts: string[] = [];
-            if (removedKeys) parts.push(`keys [${removedKeys}]`);
-            if (removedLanguages) parts.push(`localizations [${removedLanguages}]`);
+            const removedItems = Object.entries(result)
+                .map(([k, langs]) => `- [${langs.join(' ')}] ${k}`)
+                .join('\n');
 
             if (argv.dryRun) {
-                if (parts.length === 0) {
-                    logger.info(chalk.yellow('Dry run: no matching strings found.'));
+                if (removedItems.length === 0) {
+                    logger.info(chalk.yellow('No matching strings found.'));
                 } else {
-                    logger.info(chalk.blue(`Dry run: would remove ${parts.join(' and ')}`));
+                    logger.info(chalk.blue(`Would remove:\n${removedItems}`));
                 }
                 return;
             }
-
-            if (parts.length === 0) {
+            if (removedItems.length === 0) {
                 logger.info(chalk.yellow('No matching strings found.'));
             } else {
-                logger.info(chalk.green(`✓ Removed ${parts.join(' and ')}`));
+                logger.info(chalk.green(`✓ Removed\n${removedItems}`));
             }
         },
     )

@@ -79,6 +79,34 @@ describe('commands', () => {
 
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
         expect(content.strings.closeAction.localizations).toHaveProperty('ja');
-        expect(result.localizationsRemoved['closeAction']).toContain('ja');
+        expect(result['closeAction']).toContain('ja');
+    });
+
+    it('remove: returns removed localizations when deleting a key entirely', async () => {
+        const tempFile = await setupTempFile('manual-comment-3langs.xcstrings');
+
+        const result = await remove(tempFile, 'closeAction');
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings).not.toHaveProperty('closeAction');
+        expect(result['closeAction']).toEqual(
+            expect.arrayContaining(['en', 'ja', 'zh-Hans']),
+        );
+        expect(result['closeAction']).toHaveLength(3);
+        expect((result as any).keysRemoved).toBeUndefined();
+    });
+
+    it('remove: removing all languages deletes key and reports removed localizations', async () => {
+        const tempFile = await setupTempFile('manual-comment-3langs.xcstrings');
+
+        const result = await remove(tempFile, undefined, ['en', 'ja', 'zh-Hans']);
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings).not.toHaveProperty('closeAction');
+        expect(content.strings).toHaveProperty('nonTranslatableString');
+        expect(result['closeAction']).toEqual(
+            expect.arrayContaining(['en', 'ja', 'zh-Hans']),
+        );
+        expect(result['closeAction']).toHaveLength(3);
     });
 });

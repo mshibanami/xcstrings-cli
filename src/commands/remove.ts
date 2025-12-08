@@ -1,24 +1,19 @@
 import { readXCStrings, writeXCStrings, XCStringUnit } from './_shared';
 
-export interface RemoveResult {
-    keysRemoved: string[];
-    localizationsRemoved: Record<string, string[]>;
-}
-
 function removeLanguagesFromUnit(
     unit: XCStringUnit,
     languages: string[],
     dryRun: boolean,
     key: string,
-    result: RemoveResult,
+    result: Record<string, string[]>,
 ): void {
     if (!unit.localizations) {
         return;
     }
     for (const lang of languages) {
         if (unit.localizations[lang]) {
-            result.localizationsRemoved[key] ??= [];
-            result.localizationsRemoved[key].push(lang);
+            result[key] ??= [];
+            result[key].push(lang);
             if (!dryRun) {
                 delete unit.localizations[lang];
             }
@@ -34,9 +29,9 @@ export async function remove(
     key?: string,
     languages?: string[],
     dryRun = false,
-): Promise<RemoveResult> {
+): Promise<Record<string, string[]>> {
     const data = await readXCStrings(path);
-    const result: RemoveResult = { keysRemoved: [], localizationsRemoved: {} };
+    const result: Record<string, string[]> = {};
 
     const strings = data.strings || {};
     data.strings = strings;
@@ -50,7 +45,8 @@ export async function remove(
             continue;
         }
         if (!languages || languages.length === 0) {
-            result.keysRemoved.push(targetKey);
+            const removedLangs = Object.keys(unit.localizations ?? {});
+            result[targetKey] = removedLangs;
             if (!dryRun) {
                 delete strings[targetKey];
             }
@@ -59,13 +55,10 @@ export async function remove(
         }
         removeLanguagesFromUnit(unit, languages, dryRun, targetKey, result);
 
-        const removedCount = result.localizationsRemoved[targetKey]?.length ?? 0;
+        const removedCount = result[targetKey]?.length ?? 0;
         const hasLocalizations = unit.localizations && Object.keys(unit.localizations).length > 0;
 
         if (!hasLocalizations && removedCount > 0) {
-            if (!result.keysRemoved.includes(targetKey)) {
-                result.keysRemoved.push(targetKey);
-            }
             if (!dryRun) {
                 delete strings[targetKey];
             }
