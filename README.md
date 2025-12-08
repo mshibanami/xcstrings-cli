@@ -23,7 +23,6 @@ Check it out here: [xcstrings-cli Helper](https://chatgpt.com/g/g-69365945f8bc81
     ```
 
 2. Initialize xcstrings-cli:
-
     ```bash
     xcstrings init
     ```
@@ -67,26 +66,20 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 ## Command options
 
 * `--help, -h`: `boolean` (Optional)
-
   * Show help.
 * `--version, -v`: `boolean` (Optional)
-
   * Show version.
 * `--config`: `string` (Optional)
-
   * The custom config file path. If not specified, xcstrings-cli will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
 
 ### `add` command options
 
 * `--strings, -s`: `string | string[] | { [key: string]: string }` (Required)
-
   * The strings to add or update.
   * If only one string is provided, xcstrings-cli will use it as the default string.
 * `--comment, -c`: `string` (Optional)
-
   * The comment for the string to add, intended for translators.
 * `--extractionState, -e`: `string` (Optional, default: `manual`)
-
   * The extraction state of the string to add: `translated` or `manual`.
 * `--help`: `boolean` (Optional)
 
@@ -114,17 +107,15 @@ Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, a
 These are the options for the config file:
 
 * **xcstringsPaths**: `string[] | { alias: string, path: string }[]`
-
   * If only one path is provided, xcstrings-cli will use it as the default xcstrings file.
   * If multiple paths are provided, xcstrings-cli will ask you to select an xcstrings file.
 * **xcodeprojPaths**: `string[]` (Optional)
-
   * Paths to Xcode project files used to detect supported languages.
   * If not specified, xcstrings-cli will not check the supported languages in your Xcode project.
-* **missingLanguagePolicy**: `string` (Optional, default: `ignore`)
+* **missingLanguagePolicy**: `string` (Optional, default: `skip`)
   * How to handle translations for languages that are not included in the `xcstrings languages` output when adding strings. Options are:
-    * `ignore`: Only add translations for languages included in the `xcstrings languages` output.
-    * `add`: Add translations anyway.
+    * `skip`: Only add translations for languages included in the `xcstrings languages` output.
+    * `include`: Add translations anyway.
 
 ## LICENSE
 
