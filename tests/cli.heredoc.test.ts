@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { setupTempFile, cleanupTempFiles } from './utils/testFileHelper';
+import { writeFile } from 'node:fs/promises';
 import { spawn } from 'child_process';
 
 afterEach(async () => await cleanupTempFiles());
@@ -14,13 +15,20 @@ describe('cli: heredoc stdin', () => {
 
         const node = process.execPath;
         const cliPath = resolve(process.cwd(), 'dist', 'index.js');
-        const args = ['--enable-source-maps', cliPath, 'add', '--key', 'greeting', '--comment', 'Hello, World', '--strings', '--path', tempFile];
-
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'add' }), 'utf-8');
+        const args = [
+            '--enable-source-maps', cliPath,
+            'add',
+            '--key', 'greeting',
+            '--comment', 'Hello, World',
+            '--strings',
+            '--path', tempFile,
+            '--config', tempConfigPath
+        ];
         const child = spawn(node, args, { stdio: ['pipe', 'pipe', 'pipe'] });
-
         child.stdin.write(stdin);
         child.stdin.end();
-
         await new Promise<void>((resolvePromise, reject) => {
             let stdout = '';
             let stderr = '';

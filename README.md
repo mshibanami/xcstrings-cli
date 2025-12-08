@@ -121,7 +121,7 @@ These are the options for the config file:
 
   * Paths to Xcode project files used to detect supported languages.
   * If not specified, xcstrings-cli will not check the supported languages in your Xcode project.
-* **handleMissingLanguages**: `string` (Optional, default: `ignore`)
+* **missingLanguagePolicy**: `string` (Optional, default: `ignore`)
   * How to handle translations for languages that are not included in the `xcstrings languages` output when adding strings. Options are:
     * `ignore`: Only add translations for languages included in the `xcstrings languages` output.
     * `add`: Add translations anyway.

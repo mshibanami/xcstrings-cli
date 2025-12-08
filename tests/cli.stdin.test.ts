@@ -1,5 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { parseStringsArg, runAddCommand } from '../src/utils/cli';
+import { writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { setupTempFile, cleanupTempFiles } from './utils/testFileHelper';
 
@@ -34,8 +36,16 @@ describe('cli: stdin strings', () => {
         const stdin = `{"en":"Hello","ja":"こんにちは","zh-Hans":"你好，世界."}`;
 
         const tempFile = await setupTempFile('no-strings.xcstrings');
-        await runAddCommand(tempFile, 'greeting', 'Hello, World', true, async () => Promise.resolve(stdin));
-
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'add' }), 'utf-8');
+        await runAddCommand({
+            path: tempFile,
+            key: 'greeting',
+            comment: 'Hello, World',
+            stringsArg: true,
+            stdinReader: async () => Promise.resolve(stdin),
+            configPath: tempConfigPath
+        });
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
         expect(content.strings).toHaveProperty('greeting');
         expect(content.strings.greeting.localizations.en.stringUnit.value).toBe('Hello');

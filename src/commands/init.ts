@@ -146,7 +146,9 @@ ${xcstringsArray}
     // Array of paths to .xcodeproj directories. Used for discovering supported languages.
     xcodeprojPaths: [
 ${xcodeprojArray}
-    ]
+    ],
+    // Behavior for handling missing languages when adding strings.
+    missingLanguagePolicy: "skip",
 }
 `;
 

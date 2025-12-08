@@ -48,13 +48,21 @@ export async function parseStringsArg(
     return undefined;
 }
 
-export async function runAddCommand(
-    path: string,
-    key: string,
-    comment: string | undefined,
-    stringsArg: unknown,
-    stdinReader: () => Promise<string> = readStdinToString,
-): Promise<void> {
+export async function runAddCommand({
+    path,
+    key,
+    comment,
+    stringsArg,
+    stdinReader = readStdinToString,
+    configPath
+}: {
+    path: string;
+    key: string;
+    comment: string | undefined;
+    stringsArg: unknown;
+    stdinReader?: () => Promise<string>;
+    configPath?: string;
+}): Promise<void> {
     const strings = await parseStringsArg(stringsArg, stdinReader);
-    await add(path, key, comment, strings);
+    await add(path, key, comment, strings, configPath);
 }

@@ -16,9 +16,12 @@ const explorer = cosmiconfig(moduleName, {
     cache: false,
 });
 
+export type MissingLanguagePolicy = 'skip' | 'include';
+
 export interface Config {
     xcstringsPaths?: (string | { alias: string; path: string })[];
     xcodeprojPaths?: string[];
+    missingLanguagePolicy?: MissingLanguagePolicy;
 }
 
 export async function loadConfig(explicitPath?: string): Promise<Config | null> {

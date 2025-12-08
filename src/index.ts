@@ -72,7 +72,14 @@ yargs(hideBin(process.argv))
                 describe: 'The strings JSON'
             }),
         async (argv) => {
-            await runAddCommand(argv.path as string, argv.key as string, argv.comment as string | undefined, argv.strings as unknown);
+            await runAddCommand({
+                path: argv.path,
+                key: argv.key,
+                comment: argv.comment,
+                stringsArg: argv.strings,
+                stdinReader: undefined,
+                configPath: argv.config
+            });
             logger.info(chalk.green(`✓ Added key "${argv.key}"`));
         },
     )
