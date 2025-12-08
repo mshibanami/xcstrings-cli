@@ -161,14 +161,19 @@ yargs(hideBin(process.argv))
     .recommendCommands()
     .showHelpOnFail(true)
     .fail((msg, err, yargsInstance) => {
+        const message = msg || err?.message;
+        if (message) {
+            console.error(chalk.red(message));
+            console.log();
+            yargsInstance.showHelp();
+            process.exit(1);
+        }
+
         if (err) {
             console.error(err);
-            throw err;
+            process.exit(1);
         }
-        if (msg) {
-            console.error(chalk.red(msg));
-            console.log();
-        }
+
         yargsInstance.showHelp();
         process.exit(1);
     })
