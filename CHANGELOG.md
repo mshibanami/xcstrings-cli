@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 1.4.0
+
+### Minor Changes
+
+- b232daf: Tweak the output.
+
 ## 1.3.0
 
 ### Minor Changes
