@@ -16,7 +16,7 @@ describe('cli: heredoc stdin', () => {
         const node = process.execPath;
         const cliPath = resolve(process.cwd(), 'dist', 'index.js');
         const tempConfigPath = resolve(tempFile + '.config.json');
-        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'add' }), 'utf-8');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
         const args = [
             '--enable-source-maps', cliPath,
             'add',

@@ -26,7 +26,7 @@ export async function add(
 
     if (strings) {
         const config = await loadConfig(configPath);
-        const handleMissing: MissingLanguagePolicy = config?.missingLanguagePolicy ?? 'skip';
+        const handleMissing: MissingLanguagePolicy = config?.missingLanguagePolicy || 'skip';
         const supportedLanguages = await languages(path, configPath);
         const toAdd: Array<[string, string]> = [];
         for (const [lang, value] of Object.entries(strings)) {

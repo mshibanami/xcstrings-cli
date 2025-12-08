@@ -37,7 +37,7 @@ describe('cli: stdin strings', () => {
 
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const tempConfigPath = resolve(tempFile + '.config.json');
-        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'add' }), 'utf-8');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
         await runAddCommand({
             path: tempFile,
             key: 'greeting',

@@ -11,7 +11,7 @@ describe('commands', () => {
     it('add: should add a string to no-strings.xcstrings', async () => {
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const tempConfigPath = resolve(tempFile + '.config.json');
-        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'add' }), 'utf-8');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
         await add(tempFile, 'greeting', 'Hello World', {
             en: 'Hello',
             ja: 'こんにちは'
