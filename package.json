@@ -1,0 +1,51 @@
+{
+    "name": "xcstrings-cli",
+    "version": "1.0.0",
+    "description": "A command line tool for handling xcstrings files.",
+    "type": "module",
+    "bin": {
+        "xcstrings": "./dist/index.js"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "pretest": "pnpm build",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "lint": "prettier --check .",
+        "format": "prettier --write .",
+        "changeset": "changeset",
+        "version": "changeset version",
+        "release": "pnpm build && changeset publish"
+    },
+    "keywords": [
+        "xcstrings",
+        "cli",
+        "localization",
+        "i18n",
+        "ios",
+        "macos",
+        "xcode"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "@changesets/cli": "^2.29.8",
+        "@types/json5": "^2.2.0",
+        "@types/node": "^24.10.1",
+        "@types/yargs": "^17.0.35",
+        "prettier": "^3.7.4",
+        "typescript": "^5.9.3",
+        "vite": "^7.2.6",
+        "vitest": "^4.0.15",
+        "yargs": "^18.0.0"
+    },
+    "dependencies": {
+        "@bacons/xcode": "1.0.0-alpha.27",
+        "@inquirer/prompts": "^8.0.2",
+        "chalk": "^5.6.2",
+        "cosmiconfig": "^9.0.0",
+        "json5": "^2.2.3",
+        "pino": "^8.16.0"
+    }
+}
