@@ -20,10 +20,6 @@ Check it out here: [xcstrings-cli Helper](https://chatgpt.com/g/g-69365945f8bc81
 1. Install xcstrings-cli using npm:
     ```bash
     npm install -g xcstrings-cli
-    # or
-    yarn global add xcstrings-cli
-    # or
-    pnpm global add xcstrings-cli
     ```
 
 2. Initialize xcstrings-cli
