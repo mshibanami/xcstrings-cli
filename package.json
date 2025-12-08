@@ -6,6 +6,11 @@
     "bin": {
         "xcstrings": "./dist/index.js"
     },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
     "scripts": {
         "dev": "vite",
         "build": "vite build",
