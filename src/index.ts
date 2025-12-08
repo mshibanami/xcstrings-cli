@@ -86,14 +86,57 @@ yargs(hideBin(process.argv))
     .command(
         'remove',
         'Remove a string',
-        (yargs) => yargs.option('key', {
-            type: 'string',
-            describe: 'The key to remove',
-            demandOption: true,
-        }),
+        (yargs) => yargs
+            .option('key', {
+                type: 'string',
+                describe: 'The key to remove',
+            })
+            .option('languages', {
+                type: 'string',
+                array: true,
+                describe: 'Languages to remove',
+            })
+            .option('dry-run', {
+                type: 'boolean',
+                default: false,
+                describe: 'Show what would be removed without writing changes',
+            })
+            .check((argv) => {
+                if (argv.key || (argv.languages && (argv.languages as string[]).length > 0)) {
+                    return true;
+                }
+                throw new Error('Either --key or --languages must be provided');
+            }),
         async (argv) => {
-            await remove(argv.path as string, argv.key as string);
-            logger.info(chalk.green(`✓ Removed key "${argv.key}"`));
+            const result = await remove(
+                argv.path as string,
+                argv.key as string | undefined,
+                argv.languages as string[] | undefined,
+                argv.dryRun === true,
+            );
+
+            const removedLanguages = Object.entries(result.localizationsRemoved)
+                .map(([k, langs]) => `${k}: ${langs.join(', ')}`)
+                .join('; ');
+            const removedKeys = result.keysRemoved.join(', ');
+            const parts: string[] = [];
+            if (removedKeys) parts.push(`keys [${removedKeys}]`);
+            if (removedLanguages) parts.push(`localizations [${removedLanguages}]`);
+
+            if (argv.dryRun) {
+                if (parts.length === 0) {
+                    logger.info(chalk.yellow('Dry run: no matching strings found.'));
+                } else {
+                    logger.info(chalk.blue(`Dry run: would remove ${parts.join(' and ')}`));
+                }
+                return;
+            }
+
+            if (parts.length === 0) {
+                logger.info(chalk.yellow('No matching strings found.'));
+            } else {
+                logger.info(chalk.green(`✓ Removed ${parts.join(' and ')}`));
+            }
         },
     )
     .command(

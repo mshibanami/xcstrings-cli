@@ -48,4 +48,37 @@ describe('commands', () => {
         expect(content.strings).not.toHaveProperty('closeAction');
         expect(content).toHaveProperty('sourceLanguage', 'en');
     });
+
+    it('remove: should remove specific languages for a key', async () => {
+        const tempFile = await setupTempFile('manual-comment-3langs.xcstrings');
+
+        await remove(tempFile, 'closeAction', ['ja']);
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings.closeAction.localizations).not.toHaveProperty('ja');
+        expect(content.strings.closeAction.localizations).toHaveProperty('en');
+        expect(content.strings.closeAction.localizations).toHaveProperty('zh-Hans');
+    });
+
+    it('remove: should remove languages across all keys when key is not provided', async () => {
+        const tempFile = await setupTempFile('manual-comment-3langs.xcstrings');
+
+        await remove(tempFile, undefined, ['zh-Hans']);
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings.closeAction.localizations).not.toHaveProperty('zh-Hans');
+        expect(content.strings.closeAction.localizations).toHaveProperty('ja');
+        expect(content.strings.closeAction.localizations).toHaveProperty('en');
+        expect(content.strings).toHaveProperty('nonTranslatableString');
+    });
+
+    it('remove: should support dry-run without modifying file', async () => {
+        const tempFile = await setupTempFile('manual-comment-3langs.xcstrings');
+
+        const result = await remove(tempFile, 'closeAction', ['ja'], true);
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings.closeAction.localizations).toHaveProperty('ja');
+        expect(result.localizationsRemoved['closeAction']).toContain('ja');
+    });
 });
