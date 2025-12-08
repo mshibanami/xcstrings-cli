@@ -66,6 +66,7 @@ export async function init(): Promise<void> {
     let selectedXCStrings: string[] = [];
     if (xcstringsFiles.length > 0) {
         console.log(chalk.green(`✓ Found ${xcstringsFiles.length} .xcstrings file(s)`));
+        console.log();
 
         const choices = xcstringsFiles.map((file) => ({
             name: chalk.white(relative(cwd, file)) + chalk.dim(` (${file})`),
@@ -86,6 +87,7 @@ export async function init(): Promise<void> {
     let selectedXcodeproj: string[] = [];
     if (xcodeprojDirs.length > 0) {
         console.log(chalk.green(`✓ Found ${xcodeprojDirs.length} .xcodeproj director${xcodeprojDirs.length === 1 ? 'y' : 'ies'}`));
+        console.log();
 
         const choices = xcodeprojDirs.map((dir) => ({
             name: chalk.white(relative(cwd, dir) || dir) + chalk.dim(` (${dir})`),
@@ -139,11 +141,11 @@ export async function init(): Promise<void> {
     const xcodeprojArray = selectedXcodeproj.map((p) => `        "${p}"`).join(',\n');
 
     const config = `{
-    // Array of paths to .xcstrings files to manage. Specify relative or absolute paths.
+    // Paths to .xcstrings files to manage. Specify relative or absolute paths.
     xcstringsPaths: [
 ${xcstringsArray}
     ],
-    // Array of paths to .xcodeproj directories. Used for discovering supported languages.
+    // Paths to .xcodeproj directories. Used for discovering supported languages.
     xcodeprojPaths: [
 ${xcodeprojArray}
     ],
