@@ -52,6 +52,12 @@ EOF
 xcstrings remove --key greeting
 ```
 
+**Remove all strings of specific languages:**
+
+```bash
+xcstrings remove --languages ja zh-Hans
+```
+
 **List supported languages:**
 
 This command lists all languages by checking xcstrings files and your Xcode project settings (`.pbxproj` specified in the config file as `xcodeprojPaths`).
@@ -81,9 +87,15 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
   * The comment for the string to add, intended for translators.
 * `--extractionState, -e`: `string` (Optional, default: `manual`)
   * The extraction state of the string to add: `translated` or `manual`.
-* `--help`: `boolean` (Optional)
 
-  * Show help.
+### `remove` command options
+
+* `--key, -k`: `string` (Optional if `languages` is specified)
+  * The key of the string to remove. If not specified, xcstrings-cli will remove all strings for the specified languages.
+* `--languages, -l`: `string[]` (Optional if `key` is specified)
+  * The languages to remove. If not specified, xcstrings-cli will remove the string for all languages.
+* `--dry-run`: `boolean` (Optional, default: `false`)
+  * If set to `true`, xcstrings-cli will only show what would be removed without actually removing anything.
 
 ## Config file
 
