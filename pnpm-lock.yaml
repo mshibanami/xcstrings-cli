@@ -26,6 +26,9 @@ importers:
       pino:
         specifier: ^8.16.0
         version: 8.21.0
+      yargs:
+        specifier: ^18.0.0
+        version: 18.0.0
     devDependencies:
       '@changesets/cli':
         specifier: ^2.29.8
@@ -51,9 +54,6 @@ importers:
       vitest:
         specifier: ^4.0.15
         version: 4.0.15(@types/node@24.10.1)
-      yargs:
-        specifier: ^18.0.0
-        version: 18.0.0
 
 packages:
 
