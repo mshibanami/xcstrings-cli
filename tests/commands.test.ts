@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { add, remove } from '../src/commands/index';
+import { add } from '../src/commands/add';
+import { remove } from '../src/commands/remove';
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';

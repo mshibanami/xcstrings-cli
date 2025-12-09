@@ -1,6 +1,6 @@
 
 import { describe, it, expect } from 'vitest';
-import { formatXCStrings } from '../src/commands/index';
+import { formatXCStrings } from '../src/commands/_shared';
 
 describe('formatXCStrings', () => {
     it('should add space before colon in simple objects', () => {
