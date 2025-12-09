@@ -1,5 +1,20 @@
 # xcstrings-cli
 
+## 1.5.0
+
+### Minor Changes
+
+- 821ff02: Various changes
+    - Support YAML format for `--strings` input.
+    - Add `--strings-format` option to specify input format.
+    - `add` command: Accept alias specified in config for `--path` option.
+
+- ea74535: Various changes.
+    - Added --string option to `add` command
+    - Fixed wrong/misleading descriptions in README
+    - Added missing aliases.
+    - Filtered "Base" region from languages output since it's not a real language.
+
 ## 1.4.0
 
 ### Minor Changes
