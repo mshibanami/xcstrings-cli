@@ -52,7 +52,13 @@ yargs(hideBin(process.argv))
             })
             .option('strings', {
                 type: 'string',
-                describe: 'The strings JSON'
+                describe: 'The strings JSON or YAML'
+            })
+            .option('strings-format', {
+                type: 'string',
+                choices: ['auto', 'json', 'yaml'] as const,
+                default: 'auto',
+                describe: 'Format for the data provided with --strings'
             }),
         async (argv) => {
             await runAddCommand({
@@ -60,6 +66,7 @@ yargs(hideBin(process.argv))
                 key: argv.key,
                 comment: argv.comment,
                 stringsArg: argv.strings,
+                stringsFormat: argv['strings-format'] as 'auto' | 'json' | 'yaml',
                 defaultString: argv.text,
                 language: argv.language,
                 stdinReader: undefined,

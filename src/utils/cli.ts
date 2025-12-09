@@ -1,4 +1,55 @@
+import JSON5 from 'json5';
+import yaml from 'js-yaml';
 import { add } from '../commands/index.js';
+
+export type StringsFormat = 'auto' | 'json' | 'yaml';
+
+const parseObject = (value: unknown, kind: 'json' | 'yaml'): Record<string, string> => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return value as Record<string, string>;
+    }
+    throw new Error(`Parsed --strings as ${kind}, but it was not an object.`);
+};
+
+const errorMessage = (err: unknown): string => err instanceof Error ? err.message : String(err);
+
+const parseContent = (content: string, format: StringsFormat): Record<string, string> => {
+    const trimmed = content.trim();
+    if (!trimmed) {
+        return {};
+    }
+
+    if (format === 'json') {
+        try {
+            return parseObject(JSON5.parse(trimmed), 'json');
+        } catch (err) {
+            throw new Error(`Failed to parse --strings as JSON. Hint: check --strings-format=json. ${errorMessage(err)}`);
+        }
+    }
+
+    if (format === 'yaml') {
+        try {
+            return parseObject(yaml.load(trimmed), 'yaml');
+        } catch (err) {
+            throw new Error(`Failed to parse --strings as YAML. Hint: check --strings-format=yaml. ${errorMessage(err)}`);
+        }
+    }
+
+    const errors: string[] = [];
+    try {
+        return parseObject(JSON5.parse(trimmed), 'json');
+    } catch (err) {
+        errors.push(`json error: ${errorMessage(err)}`);
+    }
+
+    try {
+        return parseObject(yaml.load(trimmed), 'yaml');
+    } catch (err) {
+        errors.push(`yaml error: ${errorMessage(err)}`);
+    }
+
+    throw new Error(`Failed to parse --strings input. Provide valid JSON or YAML, or specify --strings-format. ${errors.join(' | ')}`);
+};
 
 export async function readStdinToString(): Promise<string> {
     return new Promise((resolve) => {
@@ -19,6 +70,7 @@ export async function readStdinToString(): Promise<string> {
 export async function parseStringsArg(
     stringsArg: unknown,
     stdinReader: () => Promise<string> = readStdinToString,
+    format: StringsFormat = 'auto',
 ): Promise<Record<string, string> | undefined> {
     if (stringsArg === undefined) {
         return undefined;
@@ -26,16 +78,16 @@ export async function parseStringsArg(
     if (stringsArg === '') {
         const stdin = await stdinReader();
         if (!stdin.trim()) return undefined;
-        return JSON.parse(stdin);
+        return parseContent(stdin, format);
     }
     if (typeof stringsArg === 'string') {
-        return JSON.parse(stringsArg);
+        return parseContent(stringsArg, format);
     }
     if (Array.isArray(stringsArg)) {
         const merged: Record<string, string> = {};
         for (const item of stringsArg) {
             if (typeof item === 'string') {
-                Object.assign(merged, JSON.parse(item));
+                Object.assign(merged, parseContent(item, format));
             }
         }
         return merged;
@@ -43,7 +95,7 @@ export async function parseStringsArg(
     if (typeof stringsArg === 'boolean' && stringsArg === true) {
         const stdin = await stdinReader();
         if (!stdin.trim()) return undefined;
-        return JSON.parse(stdin);
+        return parseContent(stdin, format);
     }
     return undefined;
 }
@@ -53,6 +105,7 @@ export async function runAddCommand({
     key,
     comment,
     stringsArg,
+    stringsFormat,
     defaultString,
     language,
     stdinReader = readStdinToString,
@@ -62,11 +115,12 @@ export async function runAddCommand({
     key: string;
     comment: string | undefined;
     stringsArg: unknown;
+    stringsFormat?: StringsFormat;
     defaultString?: string;
     language?: string;
     stdinReader?: () => Promise<string>;
     configPath?: string;
 }): Promise<void> {
-    const strings = await parseStringsArg(stringsArg, stdinReader);
+    const strings = await parseStringsArg(stringsArg, stdinReader, stringsFormat);
     await add(path, key, comment, strings, configPath, defaultString, language);
 }
