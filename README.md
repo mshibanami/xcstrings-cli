@@ -98,8 +98,13 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 * `--text`: `string` (Optional)
     * The string value for the language. If omitted, the key is created without a localization for the default language.
 * `--strings`: `string` (Optional)
-    * Translation-including JSON for the key. Pass inline JSON, or provide the flag without a value to read JSON from stdin (heredoc/pipe).
-    * If omitted entirely, the key is created without localizations (comment-only keys are supported).
+    * Translation-including JSON or YAML for the key. Pass inline JSON, or provide the flag without a value to read it from stdin (heredoc/pipe).
+    * The format is determined by `--strings-format`.
+* `--strings-format`: `string` (Optional, default: `auto`)
+    * The format of the data provided with `--strings`. Options are:
+        * `auto`: Auto-detect format based on content (JSON or YAML).
+        * `json`: JSON format. (It uses `json5` internally.)
+        * `yaml`: YAML format. (It uses `js-yaml` internally.)
 * `--comment`: `string` (Optional)
     * The comment for the string to add, intended for translators.
 
