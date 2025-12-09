@@ -23,6 +23,7 @@ describe('cli: heredoc stdin', () => {
             '--key', 'greeting',
             '--comment', 'Hello, World',
             '--strings',
+            '--strings-format', 'json',
             '--path', tempFile,
             '--config', tempConfigPath
         ];

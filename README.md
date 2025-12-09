@@ -102,7 +102,7 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
     * The format is determined by `--strings-format`.
 * `--strings-format`: `string` (Optional, default: `auto`)
     * The format of the data provided with `--strings`. Options are:
-        * `auto`: Auto-detect format based on content (JSON or YAML).
+        * `auto`: Auto-detect format based on content.
         * `json`: JSON format. (It uses `json5` internally.)
         * `yaml`: YAML format. (It uses `js-yaml` internally.)
 * `--comment`: `string` (Optional)
