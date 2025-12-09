@@ -90,16 +90,19 @@ yargs(hideBin(process.argv))
             .option('key', {
                 type: 'string',
                 describe: 'The key to remove',
+                alias: 'k',
             })
             .option('languages', {
                 type: 'string',
                 array: true,
                 describe: 'Languages to remove',
+                alias: 'l',
             })
             .option('dry-run', {
                 type: 'boolean',
                 default: false,
                 describe: 'Show what would be removed without writing changes',
+                alias: 'n',
             })
             .check((argv) => {
                 if (argv.key || (argv.languages && (argv.languages as string[]).length > 0)) {

@@ -93,7 +93,7 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
   * The key of the string to remove. If not specified, xcstrings-cli will remove all strings for the specified languages.
 * `--languages, -l`: `string[]` (Optional if `key` is specified)
   * The languages to remove. If not specified, xcstrings-cli will remove the string for all languages.
-* `--dry-run`: `boolean` (Optional, default: `false`)
+* `--dry-run, -n`: `boolean` (Optional, default: `false`)
   * If set to `true`, xcstrings-cli will only show what would be removed without actually removing anything.
 
 ## Config file
