@@ -84,6 +84,7 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
     * The custom config file path. If not specified, xcstrings-cli will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
 * `--path`: `string` (Optional)
     * The xcstrings file path. Defaults to `Localizable.xcstrings` in the current directory, or to the first `xcstringsPaths` entry in the config when present.
+    * You can also specify the alias you set in the config file. (`xcstringsPaths` entry with `alias` field)
 
 ### `add` command options
 

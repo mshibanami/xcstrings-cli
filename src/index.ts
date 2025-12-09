@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 import { loadConfig } from './utils/config.js';
 import logger from './utils/logger.js';
 import { runAddCommand } from './utils/cli.js';
-import { select } from '@inquirer/prompts';
+import { resolveXCStringsPath } from './utils/path.js';
 import chalk from 'chalk';
 
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
@@ -25,34 +25,8 @@ yargs(hideBin(process.argv))
         default: defaultPath
     })
     .middleware(async (argv) => {
-        if (argv.path !== defaultPath) {
-            return;
-        }
-
         const config = await loadConfig(argv.config as string | undefined);
-
-        if (!config || !config.xcstringsPaths || config.xcstringsPaths.length === 0) {
-            return;
-        }
-
-        if (config.xcstringsPaths.length === 1) {
-            const entry = config.xcstringsPaths[0];
-            argv.path = typeof entry === 'string' ? entry : entry.path;
-        } else {
-            const choices = config.xcstringsPaths.map((entry) => {
-                if (typeof entry === 'string') {
-                    return { name: entry, value: entry };
-                } else {
-                    return { name: `${entry.alias} (${entry.path})`, value: entry.path };
-                }
-            });
-
-            const selectedPath = await select({
-                message: 'Select xcstrings file:',
-                choices: choices,
-            });
-            argv.path = selectedPath;
-        }
+        argv.path = await resolveXCStringsPath(argv.path as string, config, defaultPath);
     })
     .command(
         'add',
