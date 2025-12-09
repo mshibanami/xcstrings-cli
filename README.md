@@ -13,6 +13,8 @@ This is a command-line tool designed for working with **xcstrings** files, we fo
 We also provide a Custom GPT that can help you generate translations and output them in the form of an `xcstrings` command.  
 Check it out here: [xcstrings-cli Helper](https://chatgpt.com/g/g-69365945f8bc8191be3146f880238957-xcstrings-cli-helper).
 
+The configuration for the helper is available in [helpers/helper-config.md](./helpers/helper-config.md).
+
 ## Installation
 
 1. Install xcstrings-cli using npm:
