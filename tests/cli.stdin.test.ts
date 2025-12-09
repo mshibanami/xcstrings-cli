@@ -68,4 +68,21 @@ describe('cli: stdin strings', () => {
         expect(result?.en).toBe('Hello');
         expect(result?.ja).toBe('こんにちは');
     });
+
+    it('runAddCommand: should add default-language string when provided via --string', async () => {
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+
+        await runAddCommand({
+            path: tempFile,
+            key: 'greeting-default-only',
+            comment: 'Hello, World',
+            stringsArg: undefined,
+            defaultString: 'Hello',
+            stdinReader: async () => Promise.resolve(''),
+            configPath: undefined,
+        });
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings['greeting-default-only'].localizations.en.stringUnit.value).toBe('Hello');
+    });
 });

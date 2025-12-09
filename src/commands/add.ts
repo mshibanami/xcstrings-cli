@@ -7,9 +7,16 @@ export async function add(
     key: string,
     comment: string | undefined,
     strings: Record<string, string> | undefined,
-    configPath?: string
+    configPath?: string,
+    defaultString?: string
 ): Promise<void> {
     const data = await readXCStrings(path);
+
+    if (!data.sourceLanguage) {
+        throw new Error('The xcstrings file is missing "sourceLanguage".');
+    }
+
+    const sourceLanguage = data.sourceLanguage;
 
     if (!data.strings) {
         data.strings = {};
@@ -24,13 +31,28 @@ export async function add(
         unit.comment = comment;
     }
 
-    if (strings) {
+    if (defaultString !== undefined) {
+        unit.localizations = unit.localizations || {};
+        unit.localizations[sourceLanguage] = {
+            stringUnit: {
+                state: 'translated',
+                value: defaultString,
+            },
+        };
+    }
+
+    const mergedStrings = strings ? { ...strings } : undefined;
+
+    if (mergedStrings) {
         const config = await loadConfig(configPath);
         const handleMissing: MissingLanguagePolicy = config?.missingLanguagePolicy || 'skip';
         const supportedLanguages = await languages(path, configPath);
         const toAdd: Array<[string, string]> = [];
-        for (const [lang, value] of Object.entries(strings)) {
-            if (supportedLanguages.includes(lang) || handleMissing === 'include') {
+        for (const [lang, value] of Object.entries(mergedStrings)) {
+            if (defaultString !== undefined && lang === sourceLanguage) {
+                continue;
+            }
+            if (lang === sourceLanguage || supportedLanguages.includes(lang) || handleMissing === 'include') {
                 toAdd.push([lang, value]);
             }
         }

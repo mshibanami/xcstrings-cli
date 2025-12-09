@@ -67,6 +67,10 @@ yargs(hideBin(process.argv))
                 type: 'string',
                 describe: 'The comment for the string',
             })
+            .option('string', {
+                type: 'string',
+                describe: 'The string value for the default language',
+            })
             .option('strings', {
                 type: 'string',
                 describe: 'The strings JSON'
@@ -77,6 +81,7 @@ yargs(hideBin(process.argv))
                 key: argv.key,
                 comment: argv.comment,
                 stringsArg: argv.strings,
+                defaultString: argv.string,
                 stdinReader: undefined,
                 configPath: argv.config
             });

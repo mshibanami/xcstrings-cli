@@ -33,7 +33,41 @@ describe('commands', () => {
         });
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
         expect(content.strings).toHaveProperty('greeting2');
-        expect(content.strings.greeting2.localizations).toBeUndefined();
+        expect(content.strings.greeting2.localizations.en.stringUnit.value).toBe('Hello');
+        expect(content.strings.greeting2.localizations).not.toHaveProperty('ja');
+    });
+
+    it('add: should add default-language string when provided without translations', async () => {
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+
+        await add(tempFile, 'greeting-default', 'Hello World', undefined, undefined, 'Hello');
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings['greeting-default'].localizations.en.stringUnit.value).toBe('Hello');
+        expect(content.strings['greeting-default'].extractionState).toBe('manual');
+    });
+
+    it('add: default-language string should override the same language provided in --strings', async () => {
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+
+        await add(tempFile, 'greeting-override', undefined, {
+            en: 'Hi',
+            ja: 'こんにちは',
+        }, tempConfigPath, 'Hello');
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings['greeting-override'].localizations.en.stringUnit.value).toBe('Hello');
+        expect(content.strings['greeting-override'].localizations.ja.stringUnit.value).toBe('こんにちは');
+    });
+
+    it('add: should throw when xcstrings lacks sourceLanguage', async () => {
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+        await writeFile(tempFile, JSON.stringify({ strings: {} }), 'utf-8');
+
+        await expect(add(tempFile, 'greeting-missing-source', undefined, undefined, undefined, 'Hello'))
+            .rejects.toThrow(/sourceLanguage/);
     });
 
     it('remove: should remove a string from manual-comment-3langs.xcstrings', async () => {

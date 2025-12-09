@@ -53,6 +53,7 @@ export async function runAddCommand({
     key,
     comment,
     stringsArg,
+    defaultString,
     stdinReader = readStdinToString,
     configPath
 }: {
@@ -60,9 +61,10 @@ export async function runAddCommand({
     key: string;
     comment: string | undefined;
     stringsArg: unknown;
+    defaultString?: string;
     stdinReader?: () => Promise<string>;
     configPath?: string;
 }): Promise<void> {
     const strings = await parseStringsArg(stringsArg, stdinReader);
-    await add(path, key, comment, strings, configPath);
+    await add(path, key, comment, strings, configPath, defaultString);
 }
