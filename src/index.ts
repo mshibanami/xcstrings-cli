@@ -67,7 +67,7 @@ yargs(hideBin(process.argv))
                 type: 'string',
                 describe: 'The comment for the string',
             })
-            .option('string', {
+            .option('text', {
                 type: 'string',
                 describe: 'The string value for the default language',
             })

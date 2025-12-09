@@ -89,8 +89,8 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 
 * `--key, -k`: `string` (Required)
     * The key of the string to add.
-* `--string`: `string` (Optional)
-    * The string value for the default language (`sourceLanguage` in the `xcstrings` file). If omitted, the key is created without a localization for the default language.
+* `--text`: `string` (Optional)
+    * The string value for the language. If omitted, the key is created without a localization for the default language.
 * `--strings`: `string` (Optional)
     * Translation-including JSON for the key. Pass inline JSON, or provide the flag without a value to read JSON from stdin (heredoc/pipe).
     * If omitted entirely, the key is created without localizations (comment-only keys are supported).
