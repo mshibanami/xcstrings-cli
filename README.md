@@ -72,29 +72,30 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 ## Command options
 
 * `--help, -h`: `boolean` (Optional)
-  * Show help.
+    * Show help.
 * `--version, -v`: `boolean` (Optional)
-  * Show version.
+    * Show version.
 * `--config`: `string` (Optional)
-  * The custom config file path. If not specified, xcstrings-cli will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
+    * The custom config file path. If not specified, xcstrings-cli will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
 * `--path`: `string` (Optional)
-  * The xcstrings file path. Defaults to `Localizable.xcstrings` in the current directory, or to the first `xcstringsPaths` entry in the config when present.
+    * The xcstrings file path. Defaults to `Localizable.xcstrings` in the current directory, or to the first `xcstringsPaths` entry in the config when present.
 
 ### `add` command options
 
 * `--strings`: `string` (Optional)
-  * JSON for translations. Pass inline JSON or provide the flag without a value to read JSON from stdin (heredoc/pipe). If omitted entirely, the key is created without localizations (comment-only keys are supported).
+    * Translation-including JSON for the key. Pass inline JSON, or provide the flag without a value to read JSON from stdin (heredoc/pipe).
+    * If omitted entirely, the key is created without localizations (comment-only keys are supported).
 * `--comment`: `string` (Optional)
-  * The comment for the string to add, intended for translators.
+    * The comment for the string to add, intended for translators.
 
 ### `remove` command options
 
 * `--key, -k`: `string` (Optional if `languages` is specified)
-  * The key of the string to remove. If not specified, xcstrings-cli will remove all strings for the specified languages.
+    * The key of the string to remove. If not specified, xcstrings-cli will remove all strings for the specified languages.
 * `--languages, -l`: `string[]` (Optional if `key` is specified)
-  * The languages to remove. If not specified, xcstrings-cli will remove the string for all languages.
+    * The languages to remove. If not specified, xcstrings-cli will remove the string for all languages.
 * `--dry-run, -n`: `boolean` (Optional, default: `false`)
-  * If set to `true`, xcstrings-cli will only show what would be removed without actually removing anything.
+    * If set to `true`, xcstrings-cli will only show what would be removed without actually removing anything.
 
 ## Config file
 
@@ -105,8 +106,8 @@ Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, a
     "xcstringsPaths": [
         "Shared/L10n/Localizable.xcstrings",
         {
-          "alias": "utils",
-          "path": "packages/Utils/Sources/Utils/Resources/Localizable.xcstrings"
+            "alias": "utils",
+            "path": "packages/Utils/Sources/Utils/Resources/Localizable.xcstrings"
         }
     ],
     "xcodeprojPaths": [
@@ -118,13 +119,13 @@ Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, a
 These are the options for the config file:
 
 * **xcstringsPaths**: `string[] | { alias: string, path: string }[]`
-  * If only one path is provided, xcstrings-cli will use it as the default xcstrings file.
-  * If multiple paths are provided, xcstrings-cli will ask you to select an xcstrings file.
+    * If only one path is provided, xcstrings-cli will use it as the default xcstrings file.
+    * If multiple paths are provided, xcstrings-cli will ask you to select an xcstrings file.
 * **xcodeprojPaths**: `string[]` (Optional)
-  * Paths to Xcode project files used to detect supported languages.
-  * If not specified, xcstrings-cli will not check the supported languages in your Xcode project.
+    * Paths to Xcode project files used to detect supported languages.
+    * If not specified, xcstrings-cli will not check the supported languages in your Xcode project.
 * **missingLanguagePolicy**: `string` (Optional, default: `skip`)
-  * How to handle translations for languages that are not included in the `xcstrings languages` output when adding strings. Options are:
+    * How to handle translations for languages that are not included in the `xcstrings languages` output when adding strings. Options are:
     * `skip`: Only add translations for languages included in the `xcstrings languages` output. (Default)
     * `include`: Add translations even when they are not recognized by the Xcode project or xcstrings language list.
 
