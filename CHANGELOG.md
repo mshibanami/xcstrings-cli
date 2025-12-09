@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.1.0
+
+### Minor Changes
+
+- dcdf00d: Add `list` command
+
 ## 2.0.0
 
 ### Major Changes
