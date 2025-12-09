@@ -35,7 +35,7 @@ This will ask you some questions and create an `xcstrings-cli.json` file in the 
 # Add with key, comment, and default language string
 xcstrings add --key greeting --comment "A greeting message." --string "Hello, World."
 
-# Add with key, comment, and translations JSON
+# Add with key, comment, and translations JSON via heredoc
 xcstrings add \
     --key greeting \
     --comment "A greeting message." \
@@ -45,6 +45,16 @@ xcstrings add \
     "ja": "こんにちは、世界。",
     "zh-Hans": "你好，世界。"
 }
+EOF
+
+# Add with key, comment, and translations YAML via heredoc
+xcstrings add \
+    --key greeting \
+    --comment "A greeting message." \
+    --strings << EOF
+en: Hello, World.
+ja: こんにちは、世界。
+zh-Hans: 你好，世界。
 EOF
 
 # Add with only key and comment
