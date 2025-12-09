@@ -34,16 +34,23 @@ This will ask you some questions and create an `xcstrings-cli.json` file in the 
 **Add a string:**
 
 ```bash
+# Add with key, comment, and default language string
+xcstrings add --key greeting --comment "A greeting message." --string "Hello, World."
+
+# Add with key, comment, and translations JSON
 xcstrings add \
     --key greeting \
-    --comment "Hello, World" \
+    --comment "A greeting message." \
     --strings << EOF
 {
-    "ja": "こんにちは、世界。",
     "en": "Hello, World.",
+    "ja": "こんにちは、世界。",
     "zh-Hans": "你好，世界。"
 }
 EOF
+
+# Add with only key and comment
+xcstrings add --key greeting --comment "A greeting message."
 ```
 
 **Remove a string:**
@@ -82,6 +89,10 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 
 ### `add` command options
 
+* `--key, -k`: `string` (Required)
+    * The key of the string to add.
+* `--string`: `string` (Optional)
+    * The string value for the default language (`sourceLanguage` in the `xcstrings` file). If omitted, the key is created without a localization for the default language.
 * `--strings`: `string` (Optional)
     * Translation-including JSON for the key. Pass inline JSON, or provide the flag without a value to read JSON from stdin (heredoc/pipe).
     * If omitted entirely, the key is created without localizations (comment-only keys are supported).
