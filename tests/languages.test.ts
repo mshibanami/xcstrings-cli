@@ -4,11 +4,11 @@ import { resolve } from 'node:path';
 import { FIXTURES_DIR } from './utils/resources';
 
 describe('languages', () => {
-    it('should extract knownRegions from xcodeproj', () => {
+    it('should extract knownRegions from xcodeproj without Base', () => {
         const xcodeprojPath = resolve(FIXTURES_DIR, 'test.xcodeproj');
         const languages = getLanguagesFromXcodeproj(xcodeprojPath);
 
-        expect(languages).toEqual(['en', 'Base', 'ja', 'de']);
+        expect(languages).toEqual(['de', 'en', 'ja']);
     });
 
     it('should extract languages from xcstrings file', async () => {

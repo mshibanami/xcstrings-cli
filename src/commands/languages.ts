@@ -7,7 +7,8 @@ export function getLanguagesFromXcodeproj(xcodeprojPath: string): string[] {
     const pbxprojPath = resolve(xcodeprojPath, 'project.pbxproj');
     const project = XcodeProject.open(pbxprojPath);
     const rootObject = project.rootObject;
-    return rootObject.props.knownRegions ?? [];
+    const knownRegions = rootObject.props.knownRegions ?? [];
+    return knownRegions.filter((lang: string) => lang !== 'Base').sort();
 }
 
 export async function getLanguagesFromXCStrings(xcstringsPath: string): Promise<string[]> {
