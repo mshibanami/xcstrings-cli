@@ -2,13 +2,14 @@
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { remove, init, languages } from './commands/index.js';
+import { remove, init, languages, list } from './commands/index.js';
 import { resolve } from 'node:path';
 import { loadConfig } from './utils/config.js';
 import logger from './utils/logger.js';
 import { runAddCommand, StringsFormat } from './utils/cli.js';
 import { resolveXCStringsPath } from './utils/path.js';
 import chalk from 'chalk';
+import { resolveFilter } from './utils/filters.js';
 
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
 
@@ -144,6 +145,98 @@ yargs(hideBin(process.argv))
         async (argv) => {
             const result = await languages(argv.path as string, argv.config as string | undefined);
             logger.info(result.join(' '));
+        },
+    )
+    .command(
+        'list',
+        'List strings in the xcstrings file',
+        (yargs) => yargs
+            .option('key', {
+                type: 'string',
+                describe: 'Filter keys by glob (default)',
+            })
+            .option('key-glob', {
+                type: 'string',
+                describe: 'Filter keys by glob (explicit)',
+            })
+            .option('key-regex', {
+                type: 'string',
+                describe: 'Filter keys by regex',
+            })
+            .option('key-substring', {
+                type: 'string',
+                describe: 'Filter keys by substring match',
+            })
+            .option('text', {
+                type: 'string',
+                describe: 'Filter translations by glob (default)',
+            })
+            .option('text-glob', {
+                type: 'string',
+                describe: 'Filter translations by glob (explicit)',
+            })
+            .option('text-regex', {
+                type: 'string',
+                describe: 'Filter translations by regex',
+            })
+            .option('text-substring', {
+                type: 'string',
+                describe: 'Filter translations by substring match',
+            })
+            .option('languages', {
+                type: 'string',
+                array: true,
+                alias: 'l',
+                describe: 'Include only these languages',
+            })
+            .option('format', {
+                type: 'string',
+                describe: 'Mustache template. Available variables: {{language}}, {{key}}, {{text}}',
+            })
+            .check((argv) => {
+                const keyGlobCount = [argv.key, argv['key-glob']].filter((v) => v !== undefined).length;
+                const keyRegexCount = argv['key-regex'] ? 1 : 0;
+                const keySubstringCount = argv['key-substring'] ? 1 : 0;
+                if (keyGlobCount + keyRegexCount + keySubstringCount > 1) {
+                    throw new Error('Specify only one of --key/--key-glob, --key-regex, or --key-substring');
+                }
+
+                const textGlobCount = [argv.text, argv['text-glob']].filter((v) => v !== undefined).length;
+                const textRegexCount = argv['text-regex'] ? 1 : 0;
+                const textSubstringCount = argv['text-substring'] ? 1 : 0;
+                if (textGlobCount + textRegexCount + textSubstringCount > 1) {
+                    throw new Error('Specify only one of --text/--text-glob, --text-regex, or --text-substring');
+                }
+
+                return true;
+            }),
+        async (argv) => {
+            const keyGlobValues = [argv.key, argv['key-glob']].filter((v) => v !== undefined) as string[];
+            const textGlobValues = [argv.text, argv['text-glob']].filter((v) => v !== undefined) as string[];
+
+            const keyFilter = resolveFilter('key', {
+                glob: keyGlobValues[0],
+                regex: argv['key-regex'] as string | undefined,
+                substring: argv['key-substring'] as string | undefined,
+            });
+
+            const textFilter = resolveFilter('text', {
+                glob: textGlobValues[0],
+                regex: argv['text-regex'] as string | undefined,
+                substring: argv['text-substring'] as string | undefined,
+            });
+
+            const output = await list({
+                path: argv.path as string,
+                languages: argv.languages as string[] | undefined,
+                keyFilter,
+                textFilter,
+                format: argv.format as string | undefined,
+            });
+
+            if (output) {
+                console.log(output);
+            }
         },
     )
     .demandCommand(1, '')

@@ -37,8 +37,9 @@
     "license": "MIT",
     "devDependencies": {
         "@changesets/cli": "^2.29.8",
-        "@types/json5": "^2.2.0",
         "@types/js-yaml": "^4.0.9",
+        "@types/json5": "^2.2.0",
+        "@types/mustache": "^4.2.6",
         "@types/node": "^24.10.1",
         "@types/yargs": "^17.0.35",
         "prettier": "^3.7.4",
@@ -53,6 +54,7 @@
         "cosmiconfig": "^9.0.0",
         "js-yaml": "^4.1.0",
         "json5": "^2.2.3",
+        "mustache": "^4.2.0",
         "pino": "^8.16.0",
         "yargs": "^18.0.0"
     }
