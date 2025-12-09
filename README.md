@@ -93,6 +93,7 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
     * The language of the string provided with `--text`.
     * Ignored if `--text` is not provided.
     * If not specified, it uses the source language defined as `sourceLanguage` in the xcstrings file.
+    * Validation follows `missingLanguagePolicy`: `skip` requires the language to be supported; `include` allows any language.
 * `--text`: `string` (Optional)
     * The string value for the language. If omitted, the key is created without a localization for the default language.
 * `--strings`: `string` (Optional)
