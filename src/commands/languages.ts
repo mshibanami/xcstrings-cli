@@ -2,6 +2,19 @@ import { XcodeProject } from '@bacons/xcode';
 import { resolve } from 'node:path';
 import { loadConfig } from '../utils/config';
 import { readXCStrings } from './_shared';
+import { CommandModule } from 'yargs';
+import logger from '../utils/logger.js';
+
+export function createLanguagesCommand(): CommandModule {
+    return {
+        command: 'languages',
+        describe: 'List supported languages from xcodeproj or xcstrings',
+        handler: async (argv) => {
+            const result = await languages(argv.path as string, argv.config as string | undefined);
+            logger.info(result.join(' '));
+        },
+    } satisfies CommandModule;
+}
 
 export function getLanguagesFromXcodeproj(xcodeprojPath: string): string[] {
     const pbxprojPath = resolve(xcodeprojPath, 'project.pbxproj');

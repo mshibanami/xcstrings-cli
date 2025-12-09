@@ -1,6 +1,60 @@
 import { readXCStrings, writeXCStrings, XCStringUnit } from './_shared';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';
 import { languages } from './languages';
+import { CommandModule } from 'yargs';
+import { runAddCommand, StringsFormat } from '../utils/cli.js';
+import logger from '../utils/logger.js';
+import chalk from 'chalk';
+
+export function createAddCommand(): CommandModule {
+    return {
+        command: 'add',
+        describe: 'Add a string',
+        builder: (yargs) => yargs
+            .option('key', {
+                type: 'string',
+                describe: 'The key of the string',
+                demandOption: true,
+            })
+            .option('comment', {
+                type: 'string',
+                describe: 'The comment for the string',
+            })
+            .option('language', {
+                type: 'string',
+                alias: 'l',
+                describe: 'The language of the string provided with --text',
+            })
+            .option('text', {
+                type: 'string',
+                describe: 'The string value for the default language',
+            })
+            .option('strings', {
+                type: 'string',
+                describe: 'The strings JSON or YAML'
+            })
+            .option('strings-format', {
+                type: 'string',
+                choices: ['auto', 'json', 'yaml'] as const,
+                default: 'auto',
+                describe: 'Format for the data provided with --strings'
+            }),
+        handler: async (argv) => {
+            await runAddCommand({
+                path: argv.path as string,
+                key: argv.key as string,
+                comment: argv.comment as string | undefined,
+                stringsArg: argv.strings,
+                stringsFormat: argv['strings-format'] as StringsFormat,
+                defaultString: argv.text as string | undefined,
+                language: argv.language as string | undefined,
+                stdinReader: undefined,
+                configPath: argv.config as string | undefined
+            });
+            logger.info(chalk.green(`✓ Added key "${argv.key}"`));
+        },
+    } satisfies CommandModule;
+}
 
 export async function add(
     path: string,

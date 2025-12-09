@@ -1,6 +1,6 @@
 import JSON5 from 'json5';
 import yaml from 'js-yaml';
-import { add } from '../commands/index.js';
+import { add } from '../commands/add';
 
 export type StringsFormat = 'auto' | 'yaml' | 'json';
 

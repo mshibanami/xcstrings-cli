@@ -2,8 +2,19 @@ import { writeFile, readdir } from 'node:fs/promises';
 import { resolve, relative } from 'node:path';
 import chalk from 'chalk';
 import { checkbox, confirm } from '@inquirer/prompts';
+import { CommandModule } from 'yargs';
 
 const INIT_FILE_NAME = 'xcstrings-cli.json5';
+
+export function createInitCommand(): CommandModule {
+    return {
+        command: 'init',
+        describe: 'Initialize configuration file',
+        handler: async () => {
+            await init();
+        },
+    } satisfies CommandModule;
+}
 
 async function findXCStringsFiles(dir: string): Promise<string[]> {
     const results: string[] = [];
