@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.0.0
+
+### Major Changes
+
+- aa05124: Changed the command name `xcstrings` to `xcs`.
+
 ## 1.6.1
 
 ### Patch Changes
