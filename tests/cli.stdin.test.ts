@@ -85,4 +85,25 @@ describe('cli: stdin strings', () => {
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
         expect(content.strings['greeting-default-only'].localizations.en.stringUnit.value).toBe('Hello');
     });
+
+    it('runAddCommand: should add text to specified language when provided via --language', async () => {
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+
+        await runAddCommand({
+            path: tempFile,
+            key: 'greeting-ja-only',
+            comment: 'Hello, World',
+            stringsArg: undefined,
+            defaultString: 'こんにちは',
+            language: 'ja',
+            stdinReader: async () => Promise.resolve(''),
+            configPath: tempConfigPath,
+        });
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings['greeting-ja-only'].localizations.ja.stringUnit.value).toBe('こんにちは');
+        expect(content.strings['greeting-ja-only'].localizations.en).toBeUndefined();
+    });
 });

@@ -62,6 +62,18 @@ describe('commands', () => {
         expect(content.strings['greeting-override'].localizations.ja.stringUnit.value).toBe('こんにちは');
     });
 
+    it('add: should add text to the specified language when provided', async () => {
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+
+        await add(tempFile, 'greeting-ja-text', 'Hello World', undefined, tempConfigPath, 'こんにちは', 'ja');
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings['greeting-ja-text'].localizations.ja.stringUnit.value).toBe('こんにちは');
+        expect(content.strings['greeting-ja-text'].localizations.en).toBeUndefined();
+    });
+
     it('add: should throw when xcstrings lacks sourceLanguage', async () => {
         const tempFile = await setupTempFile('no-strings.xcstrings');
         await writeFile(tempFile, JSON.stringify({ strings: {} }), 'utf-8');

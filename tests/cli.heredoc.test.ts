@@ -49,4 +49,40 @@ describe('cli: heredoc stdin', () => {
         expect(content.strings.greeting.localizations.ja.stringUnit.value).toBe('こんにちは');
         expect(content.strings.greeting.localizations['zh-Hans'].stringUnit.value).toBe('你好，世界.');
     });
+
+    it('should add text to specified language when --language is provided', async () => {
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+
+        const node = process.execPath;
+        const cliPath = resolve(process.cwd(), 'dist', 'index.js');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+        const args = [
+            '--enable-source-maps', cliPath,
+            'add',
+            '--key', 'greeting-ja-only',
+            '--comment', 'Hello, World',
+            '--text', 'こんにちは',
+            '--language', 'ja',
+            '--path', tempFile,
+            '--config', tempConfigPath
+        ];
+        const child = spawn(node, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+        await new Promise<void>((resolvePromise, reject) => {
+            let stderr = '';
+            child.stderr.on('data', (chunk) => stderr += chunk);
+            child.on('exit', (code) => {
+                if (code !== 0) {
+                    reject(new Error(`Process exited with non-zero code ${code}. Stderr: ${stderr}`));
+                } else {
+                    resolvePromise();
+                }
+            });
+        });
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings).toHaveProperty('greeting-ja-only');
+        expect(content.strings['greeting-ja-only'].localizations.ja.stringUnit.value).toBe('こんにちは');
+        expect(content.strings['greeting-ja-only'].localizations.en).toBeUndefined();
+    });
 });
