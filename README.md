@@ -15,7 +15,7 @@ We also provide a Custom GPT that can help you generate translations and output 
 
     This will install the `xcs` command globally.
 
-2. Initialize xcstrings-cli:
+2. Create a configuration file for your project by running:
     ```bash
     xcs init
     ```
