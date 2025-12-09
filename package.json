@@ -6,6 +6,7 @@
     "bin": {
         "xcstrings": "./dist/index.js"
     },
+    "repository": "https://github.com/mshibanami/xcstrings-cli.git",
     "files": [
         "dist",
         "README.md",
