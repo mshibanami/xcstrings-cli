@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 1.6.1
+
+### Patch Changes
+
+- 62e06f2: Update README
+
 ## 1.6.0
 
 ### Minor Changes
