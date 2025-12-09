@@ -1,10 +1,10 @@
-# xcstrings-cli
+# xcstrings-cli (`xcs`)
 
 [![Test](https://github.com/mshibanami/Docsloth/actions/workflows/test.yml/badge.svg)](https://github.com/mshibanami/Docsloth/actions/workflows/test.yml) [![npm version](https://badge.fury.io/js/xcstrings-cli.svg)](https://badge.fury.io/js/xcstrings-cli) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This is a command-line tool designed for working with **xcstrings** files, such as adding and removing localized strings. It supports JSON5 and YAML formats for inputting translations.
+This is a command-line tool designed for working with **String Catalog** (`.xcstrings`) files, such as adding and removing localized strings. It supports JSON5 and YAML formats for inputting translations.
 
-We also provide a Custom GPT that can help you generate translations and output them in the form of an `xcstrings` command. Check it out here: [xcstrings-cli Helper](https://chatgpt.com/g/g-69365945f8bc8191be3146f880238957-xcstrings-cli-helper). (The configuration is in [helpers/helper-config.md](./helpers/helper-config.md).)
+We also provide a Custom GPT that can help you generate translations and output them in the form of an `xcs` command. Check it out here: [xcstrings-cli Helper](https://chatgpt.com/g/g-69365945f8bc8191be3146f880238957-xcstrings-cli-helper). (The configuration is in [helpers/helper-config.md](./helpers/helper-config.md).)
 
 ## Installation
 
@@ -13,12 +13,14 @@ We also provide a Custom GPT that can help you generate translations and output 
     npm install -g xcstrings-cli
     ```
 
+    This will install the `xcs` command globally.
+
 2. Initialize xcstrings-cli:
     ```bash
-    xcstrings init
+    xcs init
     ```
 
-This will ask you some questions and create an `xcstrings-cli.json` file in the current directory.
+    This will ask you some questions and create an `xcstrings-cli.json` file in the current directory.
 
 ## Usage
 
@@ -26,10 +28,10 @@ This will ask you some questions and create an `xcstrings-cli.json` file in the 
 
 ```bash
 # Add with key, comment, and default language string
-xcstrings add --key greeting --comment "A greeting message." --string "Hello, World."
+xcs add --key greeting --comment "A greeting message." --string "Hello, World."
 
 # Add with key, comment, and translations YAML via heredoc
-xcstrings add \
+xcs add \
     --key greeting \
     --comment "A greeting message." \
     --strings << EOF
@@ -39,7 +41,7 @@ zh-Hans: 你好，世界。
 EOF
 
 # Or add translations JSON
-xcstrings add \
+xcs add \
     --key greeting \
     --comment "A greeting message." \
     --strings << EOF
@@ -51,26 +53,26 @@ xcstrings add \
 EOF
 
 # Add translations via file
-xcstrings add \
+xcs add \
     --key greeting \
     --comment "A greeting message." \
     --strings-format yaml \
     --strings < translations.yaml
 
 # Add with only key and comment
-xcstrings add --key greeting --comment "A greeting message."
+xcs add --key greeting --comment "A greeting message."
 ```
 
 **Remove a string:**
 
 ```bash
-xcstrings remove --key greeting
+xcs remove --key greeting
 ```
 
 **Remove all strings of specific languages:**
 
 ```bash
-xcstrings remove --languages ja zh-Hans
+xcs remove --languages ja zh-Hans
 ```
 
 **List supported languages:**
@@ -78,12 +80,11 @@ xcstrings remove --languages ja zh-Hans
 If `xcodeprojPaths` is configured, this command lists languages from your Xcode project (knownRegions) and excludes `Base`. If `xcodeprojPaths` is not configured, it lists languages observed in the xcstrings file.
 
 ```bash
-xcstrings languages
+xcs languages
 # en ja zh-Hans
 ```
 
-You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the list of commands and options.
-
+You can use `xcs --help` or `xcs <sub-command> --help` to see the list of commands and options.
 ## Command options
 
 * `--help, -h`: `boolean` (Optional)
@@ -91,7 +92,7 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 * `--version, -v`: `boolean` (Optional)
     * Show version.
 * `--config`: `string` (Optional)
-    * The custom config file path. If not specified, xcstrings-cli will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
+    * The custom config file path. If not specified, `xcs` will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
 * `--path`: `string` (Optional)
     * The xcstrings file path. Defaults to `Localizable.xcstrings` in the current directory, or to the first `xcstringsPaths` entry in the config when present.
     * You can also specify the alias you set in the config file. (`xcstringsPaths` entry with `alias` field)
@@ -123,14 +124,13 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 * `--key, -k`: `string` (Optional if `languages` is specified)
     * The key of the string to remove. If not specified, xcstrings-cli will remove all strings for the specified languages.
 * `--languages, -l`: `string[]` (Optional if `key` is specified)
-    * The languages to remove. If not specified, xcstrings-cli will remove the string for all languages.
+    * The languages to remove. If not specified, `xcs` will remove the string for all languages.
 * `--dry-run, -n`: `boolean` (Optional, default: `false`)
-    * If set to `true`, xcstrings-cli will only show what would be removed without actually removing anything.
+    * If set to `true`, `xcs` will only show what would be removed without actually removing anything.
 
 ## Config file
 
-Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, and xcstrings-cli will use it as the config file.
-
+Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, and xcs will use it as the config file.
 ```json5
 {
     "xcstringsPaths": [
@@ -148,16 +148,17 @@ Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, a
 
 These are the options for the config file:
 
-* **xcstringsPaths**: `string[] | { alias: string, path: string }[]`
-    * If only one path is provided, xcstrings-cli will use it as the default xcstrings file.
-    * If multiple paths are provided, xcstrings-cli will ask you to select an xcstrings file.
+* **xcstringsPaths**: `string[] | { alias: string, path: string }[]` (Optional)
+    * Paths to xcstrings files used by `xcs`.
+    * If only one path is provided, `xcs` will use it as the default xcstrings file.
+    * If multiple paths are provided, `xcs` will ask you to select an xcstrings file.a
 * **xcodeprojPaths**: `string[]` (Optional)
     * Paths to Xcode project files used to detect supported languages.
-    * If not specified, xcstrings-cli will not check the supported languages in your Xcode project.
+    * If not specified, `xcs` will not check the supported languages in your Xcode project.
 * **missingLanguagePolicy**: `string` (Optional, default: `skip`)
-    * How to handle translations for languages that are not included in the `xcstrings languages` output when adding strings. Options are:
-    * `skip`: Only add translations for languages included in the `xcstrings languages` output. (Default)
-    * `include`: Add translations even when they are not recognized by the Xcode project or xcstrings language list.
+    * How to handle translations for languages that are not included in the `xcs languages` output when adding strings. Options are:
+    * `skip`: Only add translations for languages included in the `xcs languages` output. (Default)
+    * `include`: Add translations even when they are not recognized by the Xcode project or xcs language list.
 
 ## LICENSE
 

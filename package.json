@@ -4,7 +4,7 @@
     "description": "A command line tool for handling xcstrings files.",
     "type": "module",
     "bin": {
-        "xcstrings": "./dist/index.js"
+        "xcs": "./dist/index.js"
     },
     "repository": "https://github.com/mshibanami/xcstrings-cli.git",
     "files": [
