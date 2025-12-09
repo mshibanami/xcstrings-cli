@@ -2,9 +2,9 @@ import JSON5 from 'json5';
 import yaml from 'js-yaml';
 import { add } from '../commands/index.js';
 
-export type StringsFormat = 'auto' | 'json' | 'yaml';
+export type StringsFormat = 'auto' | 'yaml' | 'json';
 
-const parseObject = (value: unknown, kind: 'json' | 'yaml'): Record<string, string> => {
+const parseObject = (value: unknown, kind: Omit<StringsFormat, 'auto'>): Record<string, string> => {
     if (value && typeof value === 'object' && !Array.isArray(value)) {
         return value as Record<string, string>;
     }
@@ -18,7 +18,6 @@ const parseContent = (content: string, format: StringsFormat): Record<string, st
     if (!trimmed) {
         return {};
     }
-
     if (format === 'json') {
         try {
             return parseObject(JSON5.parse(trimmed), 'json');
@@ -26,7 +25,6 @@ const parseContent = (content: string, format: StringsFormat): Record<string, st
             throw new Error(`Failed to parse --strings as JSON. Hint: check --strings-format=json. ${errorMessage(err)}`);
         }
     }
-
     if (format === 'yaml') {
         try {
             return parseObject(yaml.load(trimmed), 'yaml');
@@ -34,21 +32,18 @@ const parseContent = (content: string, format: StringsFormat): Record<string, st
             throw new Error(`Failed to parse --strings as YAML. Hint: check --strings-format=yaml. ${errorMessage(err)}`);
         }
     }
-
     const errors: string[] = [];
-    try {
-        return parseObject(JSON5.parse(trimmed), 'json');
-    } catch (err) {
-        errors.push(`json error: ${errorMessage(err)}`);
-    }
-
     try {
         return parseObject(yaml.load(trimmed), 'yaml');
     } catch (err) {
         errors.push(`yaml error: ${errorMessage(err)}`);
     }
-
-    throw new Error(`Failed to parse --strings input. Provide valid JSON or YAML, or specify --strings-format. ${errors.join(' | ')}`);
+    try {
+        return parseObject(JSON5.parse(trimmed), 'json');
+    } catch (err) {
+        errors.push(`json error: ${errorMessage(err)}`);
+    }
+    throw new Error(`Failed to parse --strings input. Provide valid YAML or JSON, or specify --strings-format. ${errors.join(' | ')}`);
 };
 
 export async function readStdinToString(): Promise<string> {

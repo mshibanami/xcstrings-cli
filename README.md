@@ -35,7 +35,17 @@ This will ask you some questions and create an `xcstrings-cli.json` file in the 
 # Add with key, comment, and default language string
 xcstrings add --key greeting --comment "A greeting message." --string "Hello, World."
 
-# Add with key, comment, and translations JSON via heredoc
+# Add with key, comment, and translations YAML via heredoc
+xcstrings add \
+    --key greeting \
+    --comment "A greeting message." \
+    --strings << EOF
+en: Hello, World.
+ja: こんにちは、世界。
+zh-Hans: 你好，世界。
+EOF
+
+# Or add translations JSON
 xcstrings add \
     --key greeting \
     --comment "A greeting message." \
@@ -45,16 +55,6 @@ xcstrings add \
     "ja": "こんにちは、世界。",
     "zh-Hans": "你好，世界。"
 }
-EOF
-
-# Add with key, comment, and translations YAML via heredoc
-xcstrings add \
-    --key greeting \
-    --comment "A greeting message." \
-    --strings << EOF
-en: Hello, World.
-ja: こんにちは、世界。
-zh-Hans: 你好，世界。
 EOF
 
 # Add with only key and comment
@@ -113,8 +113,8 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
 * `--strings-format`: `string` (Optional, default: `auto`)
     * The format of the data provided with `--strings`. Options are:
         * `auto`: Auto-detect format based on content.
-        * `json`: JSON format. (It uses `json5` internally.)
         * `yaml`: YAML format. (It uses `js-yaml` internally.)
+        * `json`: JSON format. (It uses `json5` internally.)
 * `--comment`: `string` (Optional)
     * The comment for the string to add, intended for translators.
 

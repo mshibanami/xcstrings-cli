@@ -6,7 +6,7 @@ import { remove, init, languages } from './commands/index.js';
 import { resolve } from 'node:path';
 import { loadConfig } from './utils/config.js';
 import logger from './utils/logger.js';
-import { runAddCommand } from './utils/cli.js';
+import { runAddCommand, StringsFormat } from './utils/cli.js';
 import { resolveXCStringsPath } from './utils/path.js';
 import chalk from 'chalk';
 
@@ -66,7 +66,7 @@ yargs(hideBin(process.argv))
                 key: argv.key,
                 comment: argv.comment,
                 stringsArg: argv.strings,
-                stringsFormat: argv['strings-format'] as 'auto' | 'json' | 'yaml',
+                stringsFormat: argv['strings-format'] as StringsFormat,
                 defaultString: argv.text,
                 language: argv.language,
                 stdinReader: undefined,

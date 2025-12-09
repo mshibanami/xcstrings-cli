@@ -26,19 +26,18 @@ A formatted shell command that adds translations in the specified languages like
 xcstrings add \
   --key "<localization_key>" \
   --comment "<comment>" \
+  --strings-format yaml \
   --strings << EOF
-{
-  "ja": "...",
-  "en": "...",
-  "zh-Hans": "...",
-   ...
-}
+ja: ...
+en: ...
+zh-Hans: ...
+...
 EOF
 ```
 
 Please note:
 
-* The `strings` parameter is a JSON which contains properly escaped values and be valid as JSON.
+* The `strings` parameter is a YAML which contains properly escaped values and be valid as YAML.
 * The output should only include the command itself, without additional commentary or explanation.
 
 ## Translation Guide
