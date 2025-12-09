@@ -60,7 +60,7 @@ xcstrings remove --languages ja zh-Hans
 
 **List supported languages:**
 
-This command lists all languages by checking xcstrings files and your Xcode project settings (`.pbxproj` specified in the config file as `xcodeprojPaths`).
+If `xcodeprojPaths` is configured, this command lists languages from your Xcode project (knownRegions) and excludes `Base`. If `xcodeprojPaths` is not configured, it lists languages observed in the xcstrings file.
 
 ```bash
 xcstrings languages
@@ -77,16 +77,15 @@ You can use `xcstrings --help` or `xcstrings <sub-command> --help` to see the li
   * Show version.
 * `--config`: `string` (Optional)
   * The custom config file path. If not specified, xcstrings-cli will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
+* `--path`: `string` (Optional)
+  * The xcstrings file path. Defaults to `Localizable.xcstrings` in the current directory, or to the first `xcstringsPaths` entry in the config when present.
 
 ### `add` command options
 
-* `--strings, -s`: `string | string[] | { [key: string]: string }` (Required)
-  * The strings to add or update.
-  * If only one string is provided, xcstrings-cli will use it as the default string.
-* `--comment, -c`: `string` (Optional)
+* `--strings`: `string` (Optional)
+  * JSON for translations. Pass inline JSON or provide the flag without a value to read JSON from stdin (heredoc/pipe). If omitted entirely, the key is created without localizations (comment-only keys are supported).
+* `--comment`: `string` (Optional)
   * The comment for the string to add, intended for translators.
-* `--extractionState, -e`: `string` (Optional, default: `manual`)
-  * The extraction state of the string to add: `translated` or `manual`.
 
 ### `remove` command options
 
@@ -126,8 +125,8 @@ These are the options for the config file:
   * If not specified, xcstrings-cli will not check the supported languages in your Xcode project.
 * **missingLanguagePolicy**: `string` (Optional, default: `skip`)
   * How to handle translations for languages that are not included in the `xcstrings languages` output when adding strings. Options are:
-    * `skip`: Only add translations for languages included in the `xcstrings languages` output.
-    * `include`: Add translations anyway.
+    * `skip`: Only add translations for languages included in the `xcstrings languages` output. (Default)
+    * `include`: Add translations even when they are not recognized by the Xcode project or xcstrings language list.
 
 ## LICENSE
 
