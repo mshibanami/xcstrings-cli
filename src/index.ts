@@ -67,6 +67,11 @@ yargs(hideBin(process.argv))
                 type: 'string',
                 describe: 'The comment for the string',
             })
+            .option('language', {
+                type: 'string',
+                alias: 'l',
+                describe: 'The language of the string provided with --text',
+            })
             .option('text', {
                 type: 'string',
                 describe: 'The string value for the default language',
@@ -81,7 +86,8 @@ yargs(hideBin(process.argv))
                 key: argv.key,
                 comment: argv.comment,
                 stringsArg: argv.strings,
-                defaultString: argv.string,
+                defaultString: argv.text,
+                language: argv.language,
                 stdinReader: undefined,
                 configPath: argv.config
             });

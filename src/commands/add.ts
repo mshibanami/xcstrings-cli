@@ -8,7 +8,8 @@ export async function add(
     comment: string | undefined,
     strings: Record<string, string> | undefined,
     configPath?: string,
-    defaultString?: string
+    defaultString?: string,
+    language?: string
 ): Promise<void> {
     const data = await readXCStrings(path);
 
@@ -22,6 +23,20 @@ export async function add(
         data.strings = {};
     }
 
+    const config = await loadConfig(configPath);
+    const handleMissing: MissingLanguagePolicy = config?.missingLanguagePolicy || 'skip';
+    let supportedLanguages: string[] | undefined;
+
+    const ensureSupported = async (lang: string): Promise<boolean> => {
+        if (handleMissing === 'include') {
+            return true;
+        }
+        if (!supportedLanguages) {
+            supportedLanguages = await languages(path, configPath);
+        }
+        return supportedLanguages.includes(lang);
+    };
+
     const unit: XCStringUnit = {
         ...data.strings[key],
         extractionState: 'manual',
@@ -32,8 +47,12 @@ export async function add(
     }
 
     if (defaultString !== undefined) {
+        const targetLanguage = language ?? sourceLanguage;
+        if (!(await ensureSupported(targetLanguage))) {
+            throw new Error(`Language "${targetLanguage}" is not supported.`);
+        }
         unit.localizations = unit.localizations || {};
-        unit.localizations[sourceLanguage] = {
+        unit.localizations[targetLanguage] = {
             stringUnit: {
                 state: 'translated',
                 value: defaultString,
@@ -44,15 +63,16 @@ export async function add(
     const mergedStrings = strings ? { ...strings } : undefined;
 
     if (mergedStrings) {
-        const config = await loadConfig(configPath);
-        const handleMissing: MissingLanguagePolicy = config?.missingLanguagePolicy || 'skip';
-        const supportedLanguages = await languages(path, configPath);
         const toAdd: Array<[string, string]> = [];
         for (const [lang, value] of Object.entries(mergedStrings)) {
-            if (defaultString !== undefined && lang === sourceLanguage) {
+            const targetLanguage = language ?? sourceLanguage;
+            if (defaultString !== undefined && lang === targetLanguage) {
                 continue;
             }
-            if (lang === sourceLanguage || supportedLanguages.includes(lang) || handleMissing === 'include') {
+            const supported = handleMissing === 'include'
+                ? true
+                : (lang === sourceLanguage || await ensureSupported(lang));
+            if (supported) {
                 toAdd.push([lang, value]);
             }
         }
