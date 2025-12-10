@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.4.0
+
+### Minor Changes
+
+- Rename the `list` command to `strings`
+
 ## 2.3.0
 
 ### Minor Changes
