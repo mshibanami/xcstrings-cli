@@ -59,7 +59,7 @@ xcs add \
     --strings-format yaml \
     --strings < translations.yaml
 
-# Add multiple strings via heredoc (per-language objects support `state`; translated` by default)
+# Add multiple strings via heredoc
 xcs add --strings << EOF
 greeting:
     translations:
