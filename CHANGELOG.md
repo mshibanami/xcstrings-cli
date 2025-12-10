@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.2.0
+
+### Minor Changes
+
+- 117a85c: Support multiple keys for `add --strings`
+
 ## 2.1.0
 
 ### Minor Changes
