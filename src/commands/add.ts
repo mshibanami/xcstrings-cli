@@ -6,6 +6,14 @@ import { runAddCommand, StringsFormat } from '../utils/cli.js';
 import logger from '../utils/logger.js';
 import chalk from 'chalk';
 
+type LocalizationMap = NonNullable<XCStringUnit['localizations']>;
+
+const sortLocalizations = (localizations: LocalizationMap): LocalizationMap => {
+    const sorted = Object.entries(localizations)
+        .sort(([langA], [langB]) => langA.localeCompare(langB, 'en', { sensitivity: 'case' }));
+    return Object.fromEntries(sorted) as LocalizationMap;
+};
+
 export function createAddCommand(): CommandModule {
     return {
         command: 'add',
@@ -172,5 +180,9 @@ export async function add(
     }
 
     data.strings[key] = unit;
+
+    if (unit.localizations) {
+        unit.localizations = sortLocalizations(unit.localizations);
+    }
     await writeXCStrings(path, data);
 }

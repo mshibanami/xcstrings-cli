@@ -47,6 +47,27 @@ describe('cli add: state (single)', () => {
         expect(content.strings['greeting-review'].localizations.ja.stringUnit.state).toBe('needs_review');
     });
 
+    it('sorts localizations alphabetically when adding default text with translations', async () => {
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+
+        await runAddCommand({
+            path: tempFile,
+            key: 'greeting-order',
+            comment: undefined,
+            stringsArg: '{"ja":{"value":"こんにちは"},"de":{"value":"Hallo"}}',
+            stringsFormat: 'json',
+            defaultString: 'Hello',
+            stdinReader: async () => Promise.resolve(''),
+            configPath: tempConfigPath,
+        });
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        const localizations = content.strings['greeting-order'].localizations;
+        expect(Object.keys(localizations)).toEqual(['de', 'en', 'ja']);
+    });
+
     it('rejects invalid state values with a clear message', async () => {
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const tempConfigPath = resolve(tempFile + '.config.json');
