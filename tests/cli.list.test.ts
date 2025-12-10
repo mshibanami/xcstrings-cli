@@ -141,4 +141,87 @@ jaOnly:
             '[ja] goodMorning => おはようございます。',
         ].join('\n'));
     });
+
+    describe('--missing-languages option', () => {
+        it('lists only keys missing the specified language', async () => {
+            const { stdout, stderr, code } = await runList(['--missing-languages', 'zh-Hans']);
+            expect(code).toBe(0);
+            expect(stderr).toBe('');
+            expect(stdout.trim()).toBe(`goodbyeWorld:
+  en: "Goodbye, World."
+  ja: "さようなら、世界。"
+goodMorning:
+  en: "Good morning."
+  ja: "おはようございます。"
+noteWithColon:
+  en: "Note: check settings"
+emptyValue:
+  en: ""
+jaOnly:
+  ja: "日本語のみ"`);
+        });
+
+        it('intersects with languages filter but keeps keys missing the language', async () => {
+            const { stdout, code } = await runList([
+                '--missing-languages', 'zh-Hans',
+                '--languages', 'ja'
+            ]);
+            expect(code).toBe(0);
+            expect(stdout.trim()).toBe(`goodbyeWorld:
+  ja: "さようなら、世界。"
+goodMorning:
+  ja: "おはようございます。"
+jaOnly:
+  ja: "日本語のみ"`);
+        });
+
+        it('respects key/text filters while enforcing missing-languages', async () => {
+            const { stdout, code } = await runList([
+                '--missing-languages', 'zh-Hans',
+                '--key', 'good*'
+            ]);
+            expect(code).toBe(0);
+            expect(stdout.trim()).toBe(`goodbyeWorld:
+  en: "Goodbye, World."
+  ja: "さようなら、世界。"
+goodMorning:
+  en: "Good morning."
+  ja: "おはようございます。"`);
+
+            const filteredByText = await runList([
+                '--missing-languages', 'zh-Hans',
+                '--text-substring', 'Hello'
+            ]);
+            expect(filteredByText.code).toBe(0);
+            expect(filteredByText.stdout.trim()).toBe('');
+        });
+
+        it('treats empty strings as present, not missing', async () => {
+            const { stdout, code } = await runList([
+                '--missing-languages', 'en'
+            ]);
+            expect(code).toBe(0);
+            expect(stdout.trim()).toBe(`jaOnly:
+  ja: "日本語のみ"`);
+        });
+
+        it('allows multiple missing languages and matches keys missing any of them', async () => {
+            const { stdout, code } = await runList([
+                '--missing-languages', 'ja', 'zh-Hans'
+            ]);
+            expect(code).toBe(0);
+            expect(stdout.trim()).toBe(`goodbyeWorld:
+  en: "Goodbye, World."
+  ja: "さようなら、世界。"
+goodMorning:
+  en: "Good morning."
+  ja: "おはようございます。"
+noteWithColon:
+  en: "Note: check settings"
+emptyValue:
+  en: ""
+jaOnly:
+  ja: "日本語のみ"`);
+        });
+    });
 });
