@@ -69,8 +69,9 @@ greeting:
     comment: A greeting message.
 farewell:
     en: Goodbye, World.
-    ja: さようなら、世界。
-    zh-Hans: 再见，世界。
+    ja:
+        state: needs_review
+        value: さよなら、世界。
     comment: A farewell message.
 EOF
 
@@ -166,6 +167,12 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
     * Validation follows `missingLanguagePolicy`: `skip` requires the language to be supported; `include` allows any language.
 * `--text`: `string` (Optional)
     * The string value for the language. If omitted, the key is created without a localization for the default language.
+* `--state`: `string` (Optional, default: `translated`)
+    * The state of the string to add. Options are:
+        * `translated`: The string is translated and ready to use.
+        * `needs_review`: The string needs review by a translator.
+        * `new`: The string is newly added and not yet translated.
+        * `stale`: The string is outdated and may need re-translation.
 * `--strings`: `string` (Optional)
     * Translation-including JSON or YAML for the key. Pass inline JSON, or provide the flag without a value to read it from stdin (heredoc/pipe).
     * The format is determined by `--strings-format`.

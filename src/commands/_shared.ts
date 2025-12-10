@@ -15,7 +15,7 @@ export interface XCStringUnit {
 
 export interface XCStringLocalization {
     stringUnit: {
-        state: 'translated' | 'needs_review' | 'new';
+        state: 'translated' | 'needs_review' | 'new' | 'stale';
         value: string;
     };
 }
