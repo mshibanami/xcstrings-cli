@@ -157,7 +157,7 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
 
 ### `add` command options
 
-* `--key, -k`: `string` (Required)
+* `--key, -k`: `string` (Required unless `--strings` contains one or more keys)
     * The key of the string to add.
 * `--language, -l`: `string` (Optional)
     * The language of the string provided with `--text`.
