@@ -59,19 +59,25 @@ xcs add \
     --strings-format yaml \
     --strings < translations.yaml
 
-# Add multiple strings via heredoc
+# Add multiple strings via heredoc (per-language objects support `state`; translated` by default)
 xcs add --strings << EOF
 greeting:
     translations:
         en: Hello, World.
-        ja: こんにちは、世界。
+        ja:
+            state: needs_review
+            value: こんにちは、世界。
         zh-Hans: 你好，世界。
     comment: A greeting message.
 farewell:
-    en: Goodbye, World.
-    ja:
-        state: needs_review
-        value: さよなら、世界。
+    translations:
+        en: Goodbye, World.
+        ja:
+            state: needs_review
+            value: さよなら、世界。
+        zh-Hans:
+            state: stale
+            value: さようなら、世界。
     comment: A farewell message.
 EOF
 
@@ -168,7 +174,9 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
 * `--text`: `string` (Optional)
     * The string value for the language. If omitted, the key is created without a localization for the default language.
 * `--state`: `string` (Optional, default: `translated`)
-    * The state of the string to add. Options are:
+    * Values applied to single-key and multi-key adds: `translated`, `needs_review`, `new`, `stale`. If omitted, strings default to `translated`.
+    * Multi-key payloads can also set per-language states with `{ state, value }`; string shorthand is treated as `translated`.
+    * State meanings:
         * `translated`: The string is translated and ready to use.
         * `needs_review`: The string needs review by a translator.
         * `new`: The string is newly added and not yet translated.
