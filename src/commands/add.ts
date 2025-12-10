@@ -1,4 +1,4 @@
-import { readXCStrings, writeXCStrings, XCStringUnit } from './_shared';
+import { LOCALIZATION_STATES, LocalizationState, readXCStrings, writeXCStrings, XCStringUnit } from './_shared';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';
 import { languages } from './languages';
 import { CommandModule } from 'yargs';
@@ -25,6 +25,11 @@ export function createAddCommand(): CommandModule {
                 alias: 'l',
                 describe: 'The language of the string provided with --text',
             })
+            .option('state', {
+                type: 'string',
+                choices: LOCALIZATION_STATES,
+                describe: 'State to apply to added strings (translated | needs_review | new | stale)',
+            })
             .option('text', {
                 type: 'string',
                 describe: 'The string value for the default language',
@@ -48,6 +53,7 @@ export function createAddCommand(): CommandModule {
                 stringsFormat: argv['strings-format'] as StringsFormat,
                 defaultString: argv.text as string | undefined,
                 language: argv.language as string | undefined,
+                state: argv.state as string | undefined,
                 stdinReader: undefined,
                 configPath: argv.config as string | undefined
             });
@@ -63,7 +69,8 @@ export async function add(
     strings: Record<string, string> | undefined,
     configPath?: string,
     defaultString?: string,
-    language?: string
+    language?: string,
+    state?: LocalizationState,
 ): Promise<void> {
     const data = await readXCStrings(path);
 
@@ -104,6 +111,8 @@ export async function add(
         unit.comment = comment;
     }
 
+    const resolvedState: LocalizationState = state ?? 'translated';
+
     if (defaultString !== undefined) {
         const targetLanguage = language ?? sourceLanguage;
         if (!(await ensureSupported(targetLanguage))) {
@@ -112,7 +121,7 @@ export async function add(
             unit.localizations = unit.localizations || {};
             unit.localizations[targetLanguage] = {
                 stringUnit: {
-                    state: 'translated',
+                    state: resolvedState,
                     value: defaultString,
                 },
             };
@@ -142,7 +151,7 @@ export async function add(
             for (const [lang, value] of toAdd) {
                 unit.localizations[lang] = {
                     stringUnit: {
-                        state: 'translated',
+                        state: resolvedState,
                         value: value,
                     },
                 };

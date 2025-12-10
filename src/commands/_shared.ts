@@ -1,5 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
+export const LOCALIZATION_STATES = ['translated', 'needs_review', 'new', 'stale'] as const;
+export type LocalizationState = typeof LOCALIZATION_STATES[number];
+
 export interface XCStrings {
     sourceLanguage: string;
     strings: Record<string, XCStringUnit>;
@@ -15,7 +18,7 @@ export interface XCStringUnit {
 
 export interface XCStringLocalization {
     stringUnit: {
-        state: 'translated' | 'needs_review' | 'new' | 'stale';
+        state: LocalizationState;
         value: string;
     };
 }

@@ -1,6 +1,7 @@
 import JSON5 from 'json5';
 import yaml from 'js-yaml';
 import { add } from '../commands/add';
+import { LOCALIZATION_STATES, LocalizationState } from '../commands/_shared';
 
 export type StringsFormat = 'auto' | 'yaml' | 'json';
 
@@ -218,7 +219,8 @@ export async function runAddCommand({
     defaultString,
     language,
     stdinReader = readStdinToString,
-    configPath
+    configPath,
+    state,
 }: {
     path: string;
     key?: string;
@@ -229,12 +231,21 @@ export async function runAddCommand({
     language?: string;
     stdinReader?: () => Promise<string>;
     configPath?: string;
+    state?: string;
 }): Promise<AddResult> {
     const parsedStrings = await parseStringsArg(stringsArg, stdinReader, stringsFormat);
 
+    const resolveState = (value: string | undefined): LocalizationState => {
+        if (value === undefined) return 'translated';
+        if ((LOCALIZATION_STATES as readonly string[]).includes(value)) {
+            return value as LocalizationState;
+        }
+        throw new Error(`Invalid state "${value}". Allowed values: ${LOCALIZATION_STATES.join(', ')}.`);
+    };
+
     if (parsedStrings?.kind === 'multi') {
-        if (key || comment || defaultString !== undefined || language) {
-            throw new Error('When adding multiple strings via --strings payload, omit --key, --comment, --text, and --language.');
+        if (key || comment || defaultString !== undefined || language || state !== undefined) {
+            throw new Error('When adding multiple strings via --strings payload, omit --key, --comment, --text, --language, and --state.');
         }
         const addedKeys: string[] = [];
         for (const [entryKey, entry] of Object.entries(parsedStrings.entries)) {
@@ -251,6 +262,7 @@ export async function runAddCommand({
 
     const strings = parsedStrings?.kind === 'single' ? parsedStrings.translations : undefined;
     const commentFromPayload = parsedStrings?.kind === 'single' ? parsedStrings.comment : undefined;
-    await add(path, keyToUse, comment ?? commentFromPayload, strings, configPath, defaultString, language);
+    const resolvedState = resolveState(state);
+    await add(path, keyToUse, comment ?? commentFromPayload, strings, configPath, defaultString, language, resolvedState);
     return { kind: 'single', keys: [keyToUse] };
 }
