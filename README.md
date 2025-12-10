@@ -150,7 +150,10 @@ xcs strings --format "[{{language}}] {{key}} => {{text}}"
 ```
 
 You can use `xcs --help` or `xcs <sub-command> --help` to see the list of commands and options.
-## Command options
+
+## Commands
+
+### Global options
 
 * `--help, -h`: `boolean` (Optional)
     * Show help.
@@ -162,7 +165,9 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
     * The xcstrings file path. Defaults to `Localizable.xcstrings` in the current directory, or to the first `xcstringsPaths` entry in the config when present.
     * You can also specify the alias you set in the config file. (`xcstringsPaths` entry with `alias` field)
 
-### `add` command options
+### `add` command
+
+Adds/updates one or more strings to the xcstrings file.
 
 * `--key, -k`: `string` (Required unless `--strings` contains one or more keys)
     * The key of the string to add.
@@ -192,7 +197,9 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
 * `--comment`: `string` (Optional)
     * The comment for the string to add, intended for translators.
 
-### `remove` command options
+### `remove` command
+
+Removes strings from the xcstrings file based on the specified filter options.
 
 * `--key, -k`: `string` (Optional if `languages` is specified)
     * The key of the string to remove. If not specified, xcstrings-cli will remove all strings for the specified languages.
@@ -201,7 +208,9 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
 * `--dry-run, -n`: `boolean` (Optional, default: `false`)
     * If set to `true`, `xcs` will only show what would be removed without actually removing anything.
 
-### `strings` command options
+### `strings` command
+
+Lists strings in the xcstrings file, with optional filtering and formatting.
 
 * `--languages, -l`: `string[]` (Optional)
     * Include only the specified languages.
@@ -223,7 +232,10 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
 ## Config file
 
 Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, and xcs will use it as the config file.
-```json5
+
+Here is an example config file in JSON format:
+
+```json
 {
     "xcstringsPaths": [
         "Shared/L10n/Localizable.xcstrings",
@@ -234,19 +246,21 @@ Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, a
     ],
     "xcodeprojPaths": [
         "path/to/your/Project.xcodeproj"
-    ]
+    ],
+    "missingLanguagePolicy": "include"
 }
 ```
 
-These are the options for the config file:
+These are the settings you can specify in the config file:
 
 * **xcstringsPaths**: `string[] | { alias: string, path: string }[]` (Optional)
     * Paths to xcstrings files used by `xcs`.
     * If only one path is provided, `xcs` will use it as the default xcstrings file.
-    * If multiple paths are provided, `xcs` will ask you to select an xcstrings file.a
+    * If multiple paths are provided, `xcs` will ask you to select an xcstrings file.
+    * You can also specify an alias, and use it with the `--path` option.
 * **xcodeprojPaths**: `string[]` (Optional)
-    * Paths to Xcode project files used to detect supported languages.
-    * If not specified, `xcs` will not check the supported languages in your Xcode project.
+    * Paths to Xcode project files (`.xcodeproj`) used to detect supported languages.
+    * If not specified, `xcs` will only check the xcstrings file to detect supported languages.
 * **missingLanguagePolicy**: `string` (Optional, default: `skip`)
     * How to handle translations for languages that are not included in the `xcs languages` output when adding strings. Options are:
     * `skip`: Only add translations for languages included in the `xcs languages` output. (Default)
