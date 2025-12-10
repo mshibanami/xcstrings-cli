@@ -98,7 +98,7 @@ export function createStringsCommand(): CommandModule {
                 substring: argv['text-substring'] as string | undefined,
             });
 
-            const output = await list({
+            const output = await strings({
                 path: argv.path as string,
                 languages: argv.languages as string[] | undefined,
                 keyFilter,
@@ -143,7 +143,7 @@ function renderTemplate(template: string, context: { language: string; key: stri
     }
 }
 
-export async function list(options: ListOptions): Promise<string> {
+export async function strings(options: ListOptions): Promise<string> {
     const data = await readXCStrings(options.path);
     const strings = data.strings ?? {};
 

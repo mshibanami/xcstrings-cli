@@ -3,14 +3,14 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { resolve } from 'node:path';
-import { loadConfig } from './utils/config.js';
-import { resolveXCStringsPath } from './utils/path.js';
+import { loadConfig } from './utils/config';
+import { resolveXCStringsPath } from './utils/path';
 import chalk from 'chalk';
 import { createAddCommand } from './commands/add';
 import { createRemoveCommand } from './commands/remove';
 import { createInitCommand } from './commands/init';
 import { createLanguagesCommand } from './commands/languages';
-import { createStringsCommand } from './commands/list';
+import { createStringsCommand } from './commands/strings';
 
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
 
