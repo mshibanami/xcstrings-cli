@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.5.1
+
+### Patch Changes
+
+- Sort the strings by languages
+
 ## 2.5.0
 
 ### Minor Changes
