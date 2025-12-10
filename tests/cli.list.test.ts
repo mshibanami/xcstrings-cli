@@ -8,7 +8,7 @@ const cliPath = resolve(process.cwd(), 'dist', 'index.js');
 const fixturePath = resolve(FIXTURES_DIR, 'list-sample.xcstrings');
 
 async function runList(extraArgs: string[]) {
-    const args = ['--enable-source-maps', cliPath, 'list', '--path', fixturePath, ...extraArgs];
+    const args = ['--enable-source-maps', cliPath, 'strings', '--path', fixturePath, ...extraArgs];
     const child = spawn(node, args, { stdio: ['ignore', 'pipe', 'pipe'] });
 
     const stdoutChunks: Buffer[] = [];
@@ -28,7 +28,7 @@ async function runList(extraArgs: string[]) {
     });
 }
 
-describe('cli: list command', () => {
+describe('cli: strings command', () => {
     it('lists all strings in default format', async () => {
         const { stdout, stderr, code } = await runList([]);
         expect(code).toBe(0);

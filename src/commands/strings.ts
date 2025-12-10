@@ -18,9 +18,9 @@ export interface ListOptions {
     format?: string;
 }
 
-export function createListCommand(): CommandModule {
+export function createStringsCommand(): CommandModule {
     return {
-        command: 'list',
+        command: 'strings',
         describe: 'List strings in the xcstrings file',
         builder: (yargs) => yargs
             .option('key', {

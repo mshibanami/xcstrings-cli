@@ -110,7 +110,7 @@ xcs languages
 
 ```bash
 # List all strings
-xcs list
+xcs strings
 # helloWorld:
 #   en: "Hello, World."
 #   ja: "こんにちは、世界。"
@@ -124,14 +124,14 @@ xcs list
 # ... etc.
 
 # List strings filtered by key
-xcs list --key good*
+xcs strings --key good*
 # goodbyeWorld:
 #   ...
 # goodMorning:
 #   ...
 
 # List strings filtered by language
-xcs list --languages en
+xcs strings --languages en
 # helloWorld:
 #   en: "Hello, World."
 # goodbyeWorld:
@@ -141,7 +141,7 @@ xcs list --languages en
 # ... etc.
 
 # List strings with custom format
-xcs list --format "[{{language}}] {{key}} => {{text}}"
+xcs strings --format "[{{language}}] {{key}} => {{text}}"
 # [en] helloWorld => "Hello, World."
 # [ja] helloWorld => "こんにちは、世界。"
 # [en] goodbyeWorld => "Goodbye, World."
@@ -201,7 +201,7 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
 * `--dry-run, -n`: `boolean` (Optional, default: `false`)
     * If set to `true`, `xcs` will only show what would be removed without actually removing anything.
 
-### `list` command options
+### `strings` command options
 
 * `--languages, -l`: `string[]` (Optional)
     * Include only the specified languages.
