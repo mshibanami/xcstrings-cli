@@ -237,6 +237,14 @@ These are the options for the config file:
     * `skip`: Only add translations for languages included in the `xcs languages` output. (Default)
     * `include`: Add translations even when they are not recognized by the Xcode project or xcs language list.
 
+## Q&A
+
+**Q: Strings are not being added for some languages. Why?**
+
+A: By default, `xcs` only adds translations for languages that are recognized in your Xcode project (knownRegions) or the xcstrings file. You can check which languages are recognized by running `xcs languages`.
+
+If you want to add translations for languages not included in your Xcode project, you can change the `missingLanguagePolicy` in your config file to `include`.
+
 ## LICENSE
 
 MIT
