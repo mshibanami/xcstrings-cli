@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.3.0
+
+### Minor Changes
+
+- Add `--state` option for `add`
+
 ## 2.2.0
 
 ### Minor Changes
