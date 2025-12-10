@@ -18,9 +18,9 @@ describe('cli: stdin strings', () => {
         const result = await parseStringsArg(true, async () => Promise.resolve(stdin));
         expect(result?.kind).toBe('single');
         const translations = result && result.kind === 'single' ? result.translations : {};
-        expect(translations.en).toBe('Hello');
-        expect(translations.ja).toBe('こんにちは');
-        expect(translations['zh-Hans']).toBe('你好，世界.');
+        expect(translations.en?.value).toBe('Hello');
+        expect(translations.ja?.value).toBe('こんにちは');
+        expect(translations['zh-Hans']?.value).toBe('你好，世界.');
     });
 
     it('parseStringsArg: should read JSON from stdin when strings option provided as empty string ("")', async () => {
@@ -29,9 +29,9 @@ describe('cli: stdin strings', () => {
         const result = await parseStringsArg('', async () => Promise.resolve(stdin));
         expect(result?.kind).toBe('single');
         const translations = result && result.kind === 'single' ? result.translations : {};
-        expect(translations.en).toBe('Hello');
-        expect(translations.ja).toBe('こんにちは');
-        expect(translations['zh-Hans']).toBe('你好，世界.');
+        expect(translations.en?.value).toBe('Hello');
+        expect(translations.ja?.value).toBe('こんにちは');
+        expect(translations['zh-Hans']?.value).toBe('你好，世界.');
     });
 
     it('add: should add strings read from stdin', async () => {
@@ -60,8 +60,8 @@ describe('cli: stdin strings', () => {
         const result = await parseStringsArg(str, async () => Promise.resolve(''));
         expect(result?.kind).toBe('single');
         const translations = result && result.kind === 'single' ? result.translations : {};
-        expect(translations.en).toBe('Hello');
-        expect(translations.ja).toBe('こんにちは');
+        expect(translations.en?.value).toBe('Hello');
+        expect(translations.ja?.value).toBe('こんにちは');
     });
 
     it('parseStringsArg: should merge arrays passed for --strings multiple times', async () => {
@@ -69,8 +69,8 @@ describe('cli: stdin strings', () => {
         const result = await parseStringsArg(items as unknown as string[], async () => Promise.resolve(''));
         expect(result?.kind).toBe('single');
         const translations = result && result.kind === 'single' ? result.translations : {};
-        expect(translations.en).toBe('Hello');
-        expect(translations.ja).toBe('こんにちは');
+        expect(translations.en?.value).toBe('Hello');
+        expect(translations.ja?.value).toBe('こんにちは');
     });
 
     it('runAddCommand: should add default-language string when provided via --string', async () => {

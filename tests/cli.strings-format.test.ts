@@ -6,7 +6,11 @@ describe('cli: strings-format parsing', () => {
         const yaml = 'en: Hello\nja: こんにちは\nzh-Hans: 你好，世界.';
         const result = await parseStringsArg(yaml, async () => Promise.resolve(''), 'yaml');
         expect(result?.kind).toBe('single');
-        expect(result && result.kind === 'single' ? result.translations : {}).toEqual({ en: 'Hello', ja: 'こんにちは', 'zh-Hans': '你好，世界.' });
+        expect(result && result.kind === 'single' ? result.translations : {}).toEqual({
+            en: { value: 'Hello', state: undefined },
+            ja: { value: 'こんにちは', state: undefined },
+            'zh-Hans': { value: '你好，世界.', state: undefined },
+        });
     });
 
     it('parses YAML from stdin when flag passed without value and format=yaml', async () => {
@@ -14,9 +18,9 @@ describe('cli: strings-format parsing', () => {
         const result = await parseStringsArg(true, async () => Promise.resolve(yaml), 'yaml');
         expect(result?.kind).toBe('single');
         const translations = result && result.kind === 'single' ? result.translations : {};
-        expect(translations.en).toBe('Hello');
-        expect(translations.ja).toBe('こんにちは');
-        expect(translations['zh-Hans']).toBe('你好，世界.');
+        expect(translations.en?.value).toBe('Hello');
+        expect(translations.ja?.value).toBe('こんにちは');
+        expect(translations['zh-Hans']?.value).toBe('你好，世界.');
     });
 
     it('parses JSON5 inline when format=json', async () => {
@@ -28,23 +32,29 @@ describe('cli: strings-format parsing', () => {
         const result = await parseStringsArg(json5, async () => Promise.resolve(''), 'json');
         expect(result?.kind).toBe('single');
         const translations = result && result.kind === 'single' ? result.translations : {};
-        expect(translations.en).toBe('Hello');
-        expect(translations.ja).toBe('こんにちは');
-        expect(translations['zh-Hans']).toBe('你好，世界.');
+        expect(translations.en?.value).toBe('Hello');
+        expect(translations.ja?.value).toBe('こんにちは');
+        expect(translations['zh-Hans']?.value).toBe('你好，世界.');
     });
 
     it('auto-detects YAML when JSON5 parsing fails', async () => {
         const yaml = 'en: Hello\nja: こんにちは';
         const result = await parseStringsArg(yaml, async () => Promise.resolve(''), 'auto');
         expect(result?.kind).toBe('single');
-        expect(result && result.kind === 'single' ? result.translations : {}).toEqual({ en: 'Hello', ja: 'こんにちは' });
+        expect(result && result.kind === 'single' ? result.translations : {}).toEqual({
+            en: { value: 'Hello', state: undefined },
+            ja: { value: 'こんにちは', state: undefined },
+        });
     });
 
     it('merges multiple inputs with specified format', async () => {
         const items = ['{ en: "Hello" }', '{ ja: "こんにちは" }'];
         const result = await parseStringsArg(items as unknown as string[], async () => Promise.resolve(''), 'json');
         expect(result?.kind).toBe('single');
-        expect(result && result.kind === 'single' ? result.translations : {}).toEqual({ en: 'Hello', ja: 'こんにちは' });
+        expect(result && result.kind === 'single' ? result.translations : {}).toEqual({
+            en: { value: 'Hello', state: undefined },
+            ja: { value: 'こんにちは', state: undefined },
+        });
     });
 
     it('throws friendly error with hint when parsing fails', async () => {
@@ -57,9 +67,9 @@ describe('cli: strings-format parsing', () => {
         const result = await parseStringsArg(yaml, async () => Promise.resolve(''), 'yaml');
         expect(result?.kind).toBe('multi');
         if (result?.kind === 'multi') {
-            expect(result.entries.greeting.translations?.en).toBe('Hello');
+            expect(result.entries.greeting.translations?.en?.value).toBe('Hello');
             expect(result.entries.greeting.comment).toBe('Greeting');
-            expect(result.entries.farewell.translations?.en).toBe('Goodbye');
+            expect(result.entries.farewell.translations?.en?.value).toBe('Goodbye');
             expect(result.entries.farewell.comment).toBe('Bye');
         }
     });
@@ -69,7 +79,7 @@ describe('cli: strings-format parsing', () => {
         const result = await parseStringsArg(yaml, async () => Promise.resolve(''), 'yaml');
         expect(result?.kind).toBe('multi');
         if (result?.kind === 'multi') {
-            expect(result.entries.greeting.translations?.en).toBe('Hello');
+            expect(result.entries.greeting.translations?.en?.value).toBe('Hello');
         }
     });
 });

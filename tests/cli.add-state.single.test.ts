@@ -66,9 +66,11 @@ describe('cli add: state (single)', () => {
 });
 
 describe('cli add: state (multi)', () => {
-    it('allows multi-key payloads when --state is omitted', async () => {
-        const yaml = `greeting:\n  en: Hello\nfarewell:\n  en: Goodbye\n`;
+    it('applies per-language states and falls back to --state for multi payloads', async () => {
+        const yaml = `welcome:\n  translations:\n    en:\n      value: Hello\n      state: stale\n    ja:\n      value: こんにちは\nfarewell:\n  en:\n    value: Goodbye\n`;
         const tempFile = await setupTempFile('no-strings.xcstrings');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
 
         const result = await runAddCommand({
             path: tempFile,
@@ -77,19 +79,23 @@ describe('cli add: state (multi)', () => {
             stringsArg: yaml,
             stringsFormat: 'yaml',
             stdinReader: async () => Promise.resolve(''),
-            configPath: undefined,
+            configPath: tempConfigPath,
+            state: 'needs_review',
         });
 
         expect(result.kind).toBe('multi');
 
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
-        expect(content.strings.greeting.localizations.en.stringUnit.state).toBe('translated');
-        expect(content.strings.farewell.localizations.en.stringUnit.state).toBe('translated');
+        expect(content.strings.welcome.localizations.en.stringUnit.state).toBe('stale');
+        expect(content.strings.welcome.localizations.ja.stringUnit.state).toBe('needs_review');
+        expect(content.strings.farewell.localizations.en.stringUnit.state).toBe('needs_review');
     });
 
-    it('rejects multi-key payloads when --state is provided (until multi-state supported)', async () => {
-        const yaml = `welcome:\n  en: Welcome\n`;
+    it('rejects invalid per-language state values with a clear message', async () => {
+        const yaml = `welcome:\n  en:\n    value: Welcome\n    state: pending\n`;
         const tempFile = await setupTempFile('no-strings.xcstrings');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
 
         await expect(runAddCommand({
             path: tempFile,
@@ -98,9 +104,55 @@ describe('cli add: state (multi)', () => {
             stringsArg: yaml,
             stringsFormat: 'yaml',
             stdinReader: async () => Promise.resolve(''),
-            configPath: undefined,
-            state: 'needs_review',
-        })).rejects.toThrow('When adding multiple strings via --strings payload, omit --key, --comment, --text, --language, and --state.');
+            configPath: tempConfigPath,
+        })).rejects.toThrow('Invalid state "pending". Allowed values: translated, needs_review, new, stale.');
+    });
+
+    it('defaults to translated for string shorthand translations', async () => {
+        const yaml = `greeting:\n  en: Hello\n  ja: こんにちは\n`;
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+
+        const result = await runAddCommand({
+            path: tempFile,
+            key: undefined,
+            comment: undefined,
+            stringsArg: yaml,
+            stringsFormat: 'yaml',
+            stdinReader: async () => Promise.resolve(''),
+            configPath: tempConfigPath,
+        });
+
+        expect(result.kind).toBe('multi');
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings.greeting.localizations.en.stringUnit.state).toBe('translated');
+        expect(content.strings.greeting.localizations.ja.stringUnit.state).toBe('translated');
+    });
+
+    it('respects missingLanguagePolicy when applying per-language states', async () => {
+        const yaml = `welcome:\n  en:\n    value: Welcome\n  ja:\n    value: ようこそ\n`;
+        const tempFile = await setupTempFile('no-strings.xcstrings');
+        const tempConfigPath = resolve(tempFile + '.config.json');
+        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'skip' }), 'utf-8');
+
+        const result = await runAddCommand({
+            path: tempFile,
+            key: undefined,
+            comment: undefined,
+            stringsArg: yaml,
+            stringsFormat: 'yaml',
+            stdinReader: async () => Promise.resolve(''),
+            configPath: tempConfigPath,
+            state: 'new',
+        });
+
+        expect(result.kind).toBe('multi');
+
+        const content = JSON.parse(await readFile(tempFile, 'utf-8'));
+        expect(content.strings.welcome.localizations.en.stringUnit.state).toBe('new');
+        expect(content.strings.welcome.localizations.ja).toBeUndefined();
     });
 });
 

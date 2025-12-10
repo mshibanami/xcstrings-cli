@@ -1,17 +1,17 @@
 import JSON5 from 'json5';
 import yaml from 'js-yaml';
 import { add } from '../commands/add';
-import { LOCALIZATION_STATES, LocalizationState } from '../commands/_shared';
+import { LOCALIZATION_STATES, LocalizationPayload, LocalizationState } from '../commands/_shared';
 
 export type StringsFormat = 'auto' | 'yaml' | 'json';
 
 type MultiAddEntry = {
-    translations?: Record<string, string>;
+    translations?: Record<string, LocalizationPayload>;
     comment?: string;
 };
 
 export type ParsedStringsArg =
-    | { kind: 'single'; translations: Record<string, string>; comment?: string }
+    | { kind: 'single'; translations: Record<string, LocalizationPayload>; comment?: string }
     | { kind: 'multi'; entries: Record<string, MultiAddEntry> };
 
 const errorMessage = (err: unknown): string => err instanceof Error ? err.message : String(err);
@@ -72,17 +72,40 @@ export async function readStdinToString(): Promise<string> {
     });
 }
 
-const normalizeTranslations = (value: unknown, context: string): Record<string, string> | undefined => {
+const resolveState = (value: string | undefined): LocalizationState => {
+    if (value === undefined) return 'translated';
+    if ((LOCALIZATION_STATES as readonly string[]).includes(value)) {
+        return value as LocalizationState;
+    }
+    throw new Error(`Invalid state "${value}". Allowed values: ${LOCALIZATION_STATES.join(', ')}.`);
+};
+
+const normalizeTranslationValue = (value: unknown, context: string): LocalizationPayload => {
+    if (typeof value === 'string') {
+        return { value, state: undefined };
+    }
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, unknown>;
+        if (typeof obj.value !== 'string') {
+            throw new Error(`${context} must include a string "value".`);
+        }
+        let state: LocalizationState | undefined;
+        if (obj.state !== undefined) {
+            state = resolveState(String(obj.state));
+        }
+        return { value: obj.value, state };
+    }
+    throw new Error(`${context} must be a string or an object with "value" (and optional "state").`);
+};
+
+const normalizeTranslations = (value: unknown, context: string): Record<string, LocalizationPayload> | undefined => {
     if (value === undefined) return undefined;
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
         throw new Error(`${context} must be an object of language -> text.`);
     }
-    const translations: Record<string, string> = {};
+    const translations: Record<string, LocalizationPayload> = {};
     for (const [lang, text] of Object.entries(value)) {
-        if (typeof text !== 'string') {
-            throw new Error(`${context} for "${lang}" must be a string.`);
-        }
-        translations[lang] = text;
+        translations[lang] = normalizeTranslationValue(text, `${context} for "${lang}"`);
     }
     return translations;
 };
@@ -105,12 +128,10 @@ const normalizeMultiEntry = (value: unknown, key: string): MultiAddEntry => {
     }
 
     const explicitTranslations = normalizeTranslations(obj.translations, `translations for "${key}"`) || {};
-    const inlineTranslations: Record<string, string> = {};
+    const inlineTranslations: Record<string, LocalizationPayload> = {};
     for (const [k, v] of Object.entries(obj)) {
         if (k === 'comment' || k === 'translations') continue;
-        if (typeof v === 'string') {
-            inlineTranslations[k] = v;
-        }
+        inlineTranslations[k] = normalizeTranslationValue(v, `Translation for "${k}" in "${key}"`);
     }
 
     const mergedTranslations = { ...explicitTranslations, ...inlineTranslations };
@@ -121,13 +142,23 @@ const normalizeMultiEntry = (value: unknown, key: string): MultiAddEntry => {
     return entry;
 };
 
-const isAllStringValues = (obj: Record<string, unknown>): obj is Record<string, string> => {
-    return Object.values(obj).every((v) => typeof v === 'string');
+const isTranslationValue = (value: unknown): boolean => {
+    if (typeof value === 'string') return true;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, unknown>;
+        return typeof obj.value === 'string' && (obj.state === undefined || typeof obj.state === 'string');
+    }
+    return false;
+};
+
+const isTranslationRecord = (obj: Record<string, unknown>): boolean => {
+    return Object.values(obj).every((v) => isTranslationValue(v));
 };
 
 const toParsedStrings = (obj: Record<string, unknown>): ParsedStringsArg => {
-    if (isAllStringValues(obj)) {
-        return { kind: 'single', translations: obj };
+    if (isTranslationRecord(obj)) {
+        const translations = normalizeTranslations(obj, 'translations') || {};
+        return { kind: 'single', translations };
     }
     const hasOnlyTranslationsAndComment =
         Object.keys(obj).every((k) => k === 'translations' || k === 'comment');
@@ -235,21 +266,15 @@ export async function runAddCommand({
 }): Promise<AddResult> {
     const parsedStrings = await parseStringsArg(stringsArg, stdinReader, stringsFormat);
 
-    const resolveState = (value: string | undefined): LocalizationState => {
-        if (value === undefined) return 'translated';
-        if ((LOCALIZATION_STATES as readonly string[]).includes(value)) {
-            return value as LocalizationState;
-        }
-        throw new Error(`Invalid state "${value}". Allowed values: ${LOCALIZATION_STATES.join(', ')}.`);
-    };
+    const resolvedState = resolveState(state);
 
     if (parsedStrings?.kind === 'multi') {
-        if (key || comment || defaultString !== undefined || language || state !== undefined) {
-            throw new Error('When adding multiple strings via --strings payload, omit --key, --comment, --text, --language, and --state.');
+        if (key || comment || defaultString !== undefined || language) {
+            throw new Error('When adding multiple strings via --strings payload, omit --key, --comment, --text, and --language.');
         }
         const addedKeys: string[] = [];
         for (const [entryKey, entry] of Object.entries(parsedStrings.entries)) {
-            await add(path, entryKey, entry.comment, entry.translations, configPath, undefined, undefined);
+            await add(path, entryKey, entry.comment, entry.translations, configPath, undefined, undefined, resolvedState);
             addedKeys.push(entryKey);
         }
         return { kind: 'multi', keys: addedKeys };
@@ -262,7 +287,6 @@ export async function runAddCommand({
 
     const strings = parsedStrings?.kind === 'single' ? parsedStrings.translations : undefined;
     const commentFromPayload = parsedStrings?.kind === 'single' ? parsedStrings.comment : undefined;
-    const resolvedState = resolveState(state);
     await add(path, keyToUse, comment ?? commentFromPayload, strings, configPath, defaultString, language, resolvedState);
     return { kind: 'single', keys: [keyToUse] };
 }

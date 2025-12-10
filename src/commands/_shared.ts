@@ -23,6 +23,11 @@ export interface XCStringLocalization {
     };
 }
 
+export interface LocalizationPayload {
+    value: string;
+    state?: LocalizationState;
+}
+
 export async function readXCStrings(path: string): Promise<XCStrings> {
     const content = await readFile(path, 'utf-8');
     return JSON.parse(content) as XCStrings;

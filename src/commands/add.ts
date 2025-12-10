@@ -1,4 +1,4 @@
-import { LOCALIZATION_STATES, LocalizationState, readXCStrings, writeXCStrings, XCStringUnit } from './_shared';
+import { LOCALIZATION_STATES, LocalizationPayload, LocalizationState, readXCStrings, writeXCStrings, XCStringUnit } from './_shared';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';
 import { languages } from './languages';
 import { CommandModule } from 'yargs';
@@ -66,7 +66,7 @@ export async function add(
     path: string,
     key: string,
     comment: string | undefined,
-    strings: Record<string, string> | undefined,
+    strings: Record<string, LocalizationPayload | string> | undefined,
     configPath?: string,
     defaultString?: string,
     language?: string,
@@ -113,15 +113,24 @@ export async function add(
 
     const resolvedState: LocalizationState = state ?? 'translated';
 
+    const toPayload = (input?: LocalizationPayload | string): LocalizationPayload | undefined => {
+        if (input === undefined) return undefined;
+        if (typeof input === 'string') {
+            return { value: input };
+        }
+        return input;
+    };
+
     if (defaultString !== undefined) {
         const targetLanguage = language ?? sourceLanguage;
         if (!(await ensureSupported(targetLanguage))) {
             warnUnsupported(targetLanguage);
         } else {
             unit.localizations = unit.localizations || {};
+            const payload = toPayload(strings?.[targetLanguage]);
             unit.localizations[targetLanguage] = {
                 stringUnit: {
-                    state: resolvedState,
+                    state: payload?.state ?? resolvedState,
                     value: defaultString,
                 },
             };
@@ -131,7 +140,7 @@ export async function add(
     const mergedStrings = strings ? { ...strings } : undefined;
 
     if (mergedStrings) {
-        const toAdd: Array<[string, string]> = [];
+        const toAdd: Array<[string, LocalizationPayload]> = [];
         for (const [lang, value] of Object.entries(mergedStrings)) {
             const targetLanguage = language ?? sourceLanguage;
             if (defaultString !== undefined && lang === targetLanguage) {
@@ -141,7 +150,10 @@ export async function add(
                 ? true
                 : (lang === sourceLanguage || await ensureSupported(lang));
             if (supported) {
-                toAdd.push([lang, value]);
+                const payload = toPayload(value);
+                if (payload) {
+                    toAdd.push([lang, payload]);
+                }
             } else {
                 warnUnsupported(lang);
             }
@@ -151,8 +163,8 @@ export async function add(
             for (const [lang, value] of toAdd) {
                 unit.localizations[lang] = {
                     stringUnit: {
-                        state: resolvedState,
-                        value: value,
+                        state: value.state ?? resolvedState,
+                        value: value.value,
                     },
                 };
             }
