@@ -13,6 +13,7 @@ export interface FilterSpec {
 export interface ListOptions {
     path: string;
     languages?: string[];
+    missingLanguages?: string[];
     keyFilter?: FilterSpec;
     textFilter?: FilterSpec;
     format?: string;
@@ -61,6 +62,11 @@ export function createStringsCommand(): CommandModule {
                 alias: 'l',
                 describe: 'Include only these languages',
             })
+            .option('missing-languages', {
+                type: 'string',
+                array: true,
+                describe: 'Include only keys missing any of these languages',
+            })
             .option('format', {
                 type: 'string',
                 describe: 'Mustache template. Available variables: {{language}}, {{key}}, {{text}}',
@@ -101,6 +107,7 @@ export function createStringsCommand(): CommandModule {
             const output = await strings({
                 path: argv.path as string,
                 languages: argv.languages as string[] | undefined,
+                missingLanguages: argv['missing-languages'] as string[] | undefined,
                 keyFilter,
                 textFilter,
                 format: argv.format as string | undefined,
@@ -150,6 +157,7 @@ export async function strings(options: ListOptions): Promise<string> {
     const matchKey = buildMatcher(options.keyFilter);
     const matchText = buildMatcher(options.textFilter);
     const languageSet = options.languages ? new Set(options.languages) : null;
+    const missingLanguageSet = options.missingLanguages ? new Set(options.missingLanguages) : null;
     const useTemplate = Boolean(options.format);
 
     const lines: string[] = [];
@@ -160,6 +168,10 @@ export async function strings(options: ListOptions): Promise<string> {
         const unit = strings[key];
         const localizations = unit?.localizations ?? {};
         const localizationKeys = Object.keys(localizations);
+
+        const isMissingSpecifiedLanguage = missingLanguageSet
+            ? Array.from(missingLanguageSet).some((lang) => !(lang in localizations))
+            : true;
 
         const perKeyLines: string[] = [];
 
@@ -176,6 +188,10 @@ export async function strings(options: ListOptions): Promise<string> {
         }
 
         if (perKeyLines.length === 0) {
+            continue;
+        }
+
+        if (!isMissingSpecifiedLanguage) {
             continue;
         }
 

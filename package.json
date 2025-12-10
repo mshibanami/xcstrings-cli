@@ -1,6 +1,6 @@
 {
     "name": "xcstrings-cli",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "description": "A command line tool for handling xcstrings files.",
     "type": "module",
     "bin": {

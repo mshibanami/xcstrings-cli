@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.5.0
+
+### Minor Changes
+
+- Add --missing-languages option to `strings` command
+
 ## 2.4.0
 
 ### Minor Changes
