@@ -59,6 +59,21 @@ xcs add \
     --strings-format yaml \
     --strings < translations.yaml
 
+# Add multiple strings via heredoc
+xcs add --strings << EOF
+greeting:
+    translations:
+        en: Hello, World.
+        ja: こんにちは、世界。
+        zh-Hans: 你好，世界。
+    comment: A greeting message.
+farewell:
+    en: Goodbye, World.
+    ja: さようなら、世界。
+    zh-Hans: 再见，世界。
+    comment: A farewell message.
+EOF
+
 # Add with only key and comment
 xcs add --key greeting --comment "A greeting message."
 ```

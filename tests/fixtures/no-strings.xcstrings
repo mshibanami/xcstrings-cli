@@ -1,5 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "greeting-fr" : {
+      "extractionState" : "manual",
+      "comment" : "Hello, World"
+    }
   }
 }

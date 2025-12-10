@@ -13,8 +13,8 @@ export function createAddCommand(): CommandModule {
         builder: (yargs) => yargs
             .option('key', {
                 type: 'string',
-                describe: 'The key of the string',
-                demandOption: true,
+                describe: 'The key of the string (omit when adding multiple keys via --strings)',
+                demandOption: false,
             })
             .option('comment', {
                 type: 'string',
@@ -40,7 +40,7 @@ export function createAddCommand(): CommandModule {
                 describe: 'Format for the data provided with --strings'
             }),
         handler: async (argv) => {
-            await runAddCommand({
+            const result = await runAddCommand({
                 path: argv.path as string,
                 key: argv.key as string,
                 comment: argv.comment as string | undefined,
@@ -51,7 +51,7 @@ export function createAddCommand(): CommandModule {
                 stdinReader: undefined,
                 configPath: argv.config as string | undefined
             });
-            logger.info(chalk.green(`✓ Added key "${argv.key}"`));
+            logger.info(chalk.green(`✓ Added keys:\n${result.keys.map((k) => `- ${k}`).join('\n')}`));
         },
     } satisfies CommandModule;
 }
@@ -91,6 +91,10 @@ export async function add(
         return supportedLanguages.includes(lang);
     };
 
+    const warnUnsupported = (lang: string): void => {
+        logger.warn(`Language "${lang}" is not supported. Skipped adding its translation (missingLanguagePolicy=skip).`);
+    };
+
     const unit: XCStringUnit = {
         ...data.strings[key],
         extractionState: 'manual',
@@ -103,15 +107,16 @@ export async function add(
     if (defaultString !== undefined) {
         const targetLanguage = language ?? sourceLanguage;
         if (!(await ensureSupported(targetLanguage))) {
-            throw new Error(`Language "${targetLanguage}" is not supported.`);
+            warnUnsupported(targetLanguage);
+        } else {
+            unit.localizations = unit.localizations || {};
+            unit.localizations[targetLanguage] = {
+                stringUnit: {
+                    state: 'translated',
+                    value: defaultString,
+                },
+            };
         }
-        unit.localizations = unit.localizations || {};
-        unit.localizations[targetLanguage] = {
-            stringUnit: {
-                state: 'translated',
-                value: defaultString,
-            },
-        };
     }
 
     const mergedStrings = strings ? { ...strings } : undefined;
@@ -128,6 +133,8 @@ export async function add(
                 : (lang === sourceLanguage || await ensureSupported(lang));
             if (supported) {
                 toAdd.push([lang, value]);
+            } else {
+                warnUnsupported(lang);
             }
         }
         if (toAdd.length > 0) {

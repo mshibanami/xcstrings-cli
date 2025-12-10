@@ -16,20 +16,22 @@ describe('cli: stdin strings', () => {
         }`;
 
         const result = await parseStringsArg(true, async () => Promise.resolve(stdin));
-        expect(result).toBeDefined();
-        expect(result?.en).toBe('Hello');
-        expect(result?.ja).toBe('こんにちは');
-        expect(result?.['zh-Hans']).toBe('你好，世界.');
+        expect(result?.kind).toBe('single');
+        const translations = result && result.kind === 'single' ? result.translations : {};
+        expect(translations.en).toBe('Hello');
+        expect(translations.ja).toBe('こんにちは');
+        expect(translations['zh-Hans']).toBe('你好，世界.');
     });
 
     it('parseStringsArg: should read JSON from stdin when strings option provided as empty string ("")', async () => {
         const stdin = `{"en":"Hello","ja":"こんにちは","zh-Hans":"你好，世界."}`;
 
         const result = await parseStringsArg('', async () => Promise.resolve(stdin));
-        expect(result).toBeDefined();
-        expect(result?.en).toBe('Hello');
-        expect(result?.ja).toBe('こんにちは');
-        expect(result?.['zh-Hans']).toBe('你好，世界.');
+        expect(result?.kind).toBe('single');
+        const translations = result && result.kind === 'single' ? result.translations : {};
+        expect(translations.en).toBe('Hello');
+        expect(translations.ja).toBe('こんにちは');
+        expect(translations['zh-Hans']).toBe('你好，世界.');
     });
 
     it('add: should add strings read from stdin', async () => {
@@ -56,17 +58,19 @@ describe('cli: stdin strings', () => {
     it('parseStringsArg: should parse strings when provided as an inline JSON string', async () => {
         const str = `{ "en": "Hello", "ja": "こんにちは" }`;
         const result = await parseStringsArg(str, async () => Promise.resolve(''));
-        expect(result).toBeDefined();
-        expect(result?.en).toBe('Hello');
-        expect(result?.ja).toBe('こんにちは');
+        expect(result?.kind).toBe('single');
+        const translations = result && result.kind === 'single' ? result.translations : {};
+        expect(translations.en).toBe('Hello');
+        expect(translations.ja).toBe('こんにちは');
     });
 
     it('parseStringsArg: should merge arrays passed for --strings multiple times', async () => {
         const items = ['{"en":"Hello"}', '{"ja":"こんにちは"}'];
         const result = await parseStringsArg(items as unknown as string[], async () => Promise.resolve(''));
-        expect(result).toBeDefined();
-        expect(result?.en).toBe('Hello');
-        expect(result?.ja).toBe('こんにちは');
+        expect(result?.kind).toBe('single');
+        const translations = result && result.kind === 'single' ? result.translations : {};
+        expect(translations.en).toBe('Hello');
+        expect(translations.ja).toBe('こんにちは');
     });
 
     it('runAddCommand: should add default-language string when provided via --string', async () => {
