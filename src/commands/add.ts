@@ -51,6 +51,11 @@ export function createAddCommand(): CommandModule {
                 choices: ['auto', 'json', 'yaml'] as const,
                 default: 'auto',
                 describe: 'Format for the data provided with --strings'
+            })
+            .option('interactive', {
+                type: 'boolean',
+                alias: 'i',
+                describe: 'Add strings in an interactive flow',
             }),
         handler: async (argv) => {
             const result = await runAddCommand({
@@ -63,7 +68,8 @@ export function createAddCommand(): CommandModule {
                 language: argv.language as string | undefined,
                 state: argv.state as string | undefined,
                 stdinReader: undefined,
-                configPath: argv.config as string | undefined
+                configPath: argv.config as string | undefined,
+                interactive: argv.interactive as boolean | undefined,
             });
             logger.info(chalk.green(`✓ Added keys:\n${result.keys.map((k) => `- ${k}`).join('\n')}`));
         },

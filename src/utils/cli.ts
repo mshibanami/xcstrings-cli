@@ -5,6 +5,21 @@ import { LOCALIZATION_STATES, LocalizationPayload, LocalizationState } from '../
 
 export type StringsFormat = 'auto' | 'yaml' | 'json';
 
+export type InteractiveAddOptions = {
+    path: string;
+    key?: string;
+    comment?: string;
+    defaultString?: string;
+    language?: string;
+    configPath?: string;
+    state: LocalizationState;
+};
+
+export async function runInteractiveAdd(options: InteractiveAddOptions): Promise<AddResult> {
+    void options;
+    throw new Error('Interactive add mode is not implemented yet.');
+}
+
 type MultiAddEntry = {
     translations?: Record<string, LocalizationPayload>;
     comment?: string;
@@ -252,6 +267,7 @@ export async function runAddCommand({
     stdinReader = readStdinToString,
     configPath,
     state,
+    interactive,
 }: {
     path: string;
     key?: string;
@@ -263,10 +279,26 @@ export async function runAddCommand({
     stdinReader?: () => Promise<string>;
     configPath?: string;
     state?: string;
+    interactive?: boolean;
 }): Promise<AddResult> {
-    const parsedStrings = await parseStringsArg(stringsArg, stdinReader, stringsFormat);
-
     const resolvedState = resolveState(state);
+
+    if (interactive) {
+        if (stringsArg !== undefined) {
+            throw new Error('--interactive cannot be combined with --strings input.');
+        }
+        return runInteractiveAdd({
+            path,
+            key,
+            comment,
+            defaultString,
+            language,
+            configPath,
+            state: resolvedState,
+        });
+    }
+
+    const parsedStrings = await parseStringsArg(stringsArg, stdinReader, stringsFormat);
 
     if (parsedStrings?.kind === 'multi') {
         if (key || comment || defaultString !== undefined || language) {
