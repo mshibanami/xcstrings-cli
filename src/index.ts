@@ -24,7 +24,7 @@ yargs(hideBin(process.argv))
     })
     .option('path', {
         type: 'string',
-        describe: 'Path to xcstrings file',
+        describe: 'Path or alias to xcstrings file',
         default: defaultPath
     })
     .middleware(async (argv) => {

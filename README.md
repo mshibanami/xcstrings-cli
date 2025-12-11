@@ -52,8 +52,7 @@ xcs add \
 }
 EOF
 
-# Start interactive mode to add strings.
-# (This is useful when you don't want to record a huge command to your terminal history.)
+# Start interactive mode to add translations using `$EDITOR` environment variable (e.g. `vim`)
 xcs add -i
 
 # Add translations via file
@@ -157,22 +156,26 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
 
 ## Commands
 
-### Global options
+**Global options:**
 
-* `--help, -h`: `boolean` (Optional)
-    * Show help.
-* `--version, -v`: `boolean` (Optional)
-    * Show version.
 * `--config`: `string` (Optional)
     * The custom config file path. If not specified, `xcs` will look for `xcstrings-cli.json` or `xcstrings-cli.json5` in the current folder or its parent folders until the root.
+* `--help, -h`: `boolean` (Optional)
+    * Show help.
 * `--path`: `string` (Optional)
     * The xcstrings file path. Defaults to `Localizable.xcstrings` in the current directory, or to the first `xcstringsPaths` entry in the config when present.
     * You can also specify the alias you set in the config file. (`xcstringsPaths` entry with `alias` field)
+* `--version, -v`: `boolean` (Optional)
+    * Show version.
 
 ### `add` command
 
 Adds/updates one or more strings to the xcstrings file.
 
+**`add` command options:**
+
+* `--comment`: `string` (Optional)
+    * The comment for the string to add, intended for translators.
 * `--interactive, -i`: `boolean` (Optional)
     * Start interactive mode to add strings.
     * This is useful when you don't want to record a huge command to your terminal history.
@@ -183,8 +186,6 @@ Adds/updates one or more strings to the xcstrings file.
     * Ignored if `--text` is not provided.
     * If not specified, it uses the source language defined as `sourceLanguage` in the xcstrings file.
     * Validation follows `missingLanguagePolicy`: `skip` requires the language to be supported; `include` allows any language.
-* `--text`: `string` (Optional)
-    * The string value for the language. If omitted, the key is created without a localization for the default language.
 * `--state`: `string` (Optional, default: `translated`)
     * Values applied to single-key and multi-key adds: `translated`, `needs_review`, `new`, `stale`. If omitted, strings default to `translated`.
     * Multi-key payloads can also set per-language states with `{ state, value }`; string shorthand is treated as `translated`.
@@ -201,40 +202,44 @@ Adds/updates one or more strings to the xcstrings file.
         * `auto`: Auto-detect format based on content.
         * `yaml`: YAML format. (It uses `js-yaml` internally.)
         * `json`: JSON format. (It uses `json5` internally.)
-* `--comment`: `string` (Optional)
-    * The comment for the string to add, intended for translators.
+* `--text`: `string` (Optional)
+    * The string value for the language. If omitted, the key is created without a localization for the default language.
 
 ### `remove` command
 
 Removes strings from the xcstrings file based on the specified filter options.
 
+**`remove` command options:**
+
+* `--dry-run, -n`: `boolean` (Optional, default: `false`)
+    * If set to `true`, `xcs` will only show what would be removed without actually removing anything.
 * `--key, -k`: `string` (Optional if `languages` is specified)
     * The key of the string to remove. If not specified, xcstrings-cli will remove all strings for the specified languages.
 * `--languages, -l`: `string[]` (Optional if `key` is specified)
     * The languages to remove. If not specified, `xcs` will remove the string for all languages.
-* `--dry-run, -n`: `boolean` (Optional, default: `false`)
-    * If set to `true`, `xcs` will only show what would be removed without actually removing anything.
 
 ### `strings` command
 
 Lists strings in the xcstrings file, with optional filtering and formatting.
 
-* `--languages, -l`: `string[]` (Optional)
-    * Include only the specified languages.
+**`strings` commands options:**
+
+* `--format`: `string` (Optional)
+    * Mustache template for per-localization output. Available variables: `{{language}}`, `{{key}}`, `{{text}}`.
 * `--key`, `--key-glob`: `string` (Optional)
     * Filter keys by glob pattern. This is the default key filter mode.
 * `--key-regex`: `string` (Optional)
     * Filter keys by regular expression.
 * `--key-substring`: `string` (Optional)
     * Filter keys by substring match.
+* `--languages, -l`: `string[]` (Optional)
+    * Include only the specified languages.
 * `--text`, `--text-glob`: `string` (Optional)
     * Filter translations by glob pattern. This is the default text filter mode.
 * `--text-regex`: `string` (Optional)
     * Filter translations by regular expression.
 * `--text-substring`: `string` (Optional)
     * Filter translations by substring match.
-* `--format`: `string` (Optional)
-    * Mustache template for per-localization output. Available variables: `{{language}}`, `{{key}}`, `{{text}}`.
 
 ## Config file
 
@@ -244,6 +249,7 @@ Here is an example config file in JSON format:
 
 ```json
 {
+    "missingLanguagePolicy": "include",
     "xcstringsPaths": [
         "Shared/L10n/Localizable.xcstrings",
         {
@@ -253,25 +259,24 @@ Here is an example config file in JSON format:
     ],
     "xcodeprojPaths": [
         "path/to/your/Project.xcodeproj"
-    ],
-    "missingLanguagePolicy": "include"
+    ]
 }
 ```
 
 These are the settings you can specify in the config file:
 
+* **missingLanguagePolicy**: `string` (Optional, default: `skip`)
+    * How to handle translations for languages that are not included in the `xcs languages` output when adding strings. Options are:
+    * `skip`: Only add translations for languages included in the `xcs languages` output. (Default)
+    * `include`: Add translations even when they are not recognized by the Xcode project or xcs language list.
+* **xcodeprojPaths**: `string[]` (Optional)
+    * Paths to Xcode project files (`.xcodeproj`) used to detect supported languages.
+    * If not specified, `xcs` will only check the xcstrings file to detect supported languages.
 * **xcstringsPaths**: `string[] | { alias: string, path: string }[]` (Optional)
     * Paths to xcstrings files used by `xcs`.
     * If only one path is provided, `xcs` will use it as the default xcstrings file.
     * If multiple paths are provided, `xcs` will ask you to select an xcstrings file.
     * You can also specify an alias, and use it with the `--path` option.
-* **xcodeprojPaths**: `string[]` (Optional)
-    * Paths to Xcode project files (`.xcodeproj`) used to detect supported languages.
-    * If not specified, `xcs` will only check the xcstrings file to detect supported languages.
-* **missingLanguagePolicy**: `string` (Optional, default: `skip`)
-    * How to handle translations for languages that are not included in the `xcs languages` output when adding strings. Options are:
-    * `skip`: Only add translations for languages included in the `xcs languages` output. (Default)
-    * `include`: Add translations even when they are not recognized by the Xcode project or xcs language list.
 
 ## Practical use cases
 

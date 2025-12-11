@@ -152,16 +152,18 @@ export async function init(): Promise<void> {
     const xcodeprojArray = selectedXcodeproj.map((p) => `        "${p}"`).join(',\n');
 
     const config = `{
+    // Behavior for handling missing languages when adding strings.
+    missingLanguagePolicy: "skip",
+
     // Paths to .xcstrings files to manage. Specify relative or absolute paths.
     xcstringsPaths: [
 ${xcstringsArray}
     ],
+
     // Paths to .xcodeproj directories. Used for discovering supported languages.
     xcodeprojPaths: [
 ${xcodeprojArray}
-    ],
-    // Behavior for handling missing languages when adding strings.
-    missingLanguagePolicy: "skip",
+    ]
 }
 `;
 
