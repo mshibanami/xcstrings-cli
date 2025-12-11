@@ -1,5 +1,13 @@
 # xcstrings-cli
 
+## 2.6.0
+
+### Minor Changes
+
+- Interactive mode and YAML config support
+    - Added an interactive mode to the `xcs add` command using the `-i` or `--interactive` option.
+    - Changed the default config file format from JSON5 to YAML.
+
 ## 2.5.1
 
 ### Patch Changes
