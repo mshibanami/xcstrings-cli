@@ -52,6 +52,10 @@ xcs add \
 }
 EOF
 
+# Start interactive mode to add strings.
+# (This is useful when you don't want to record a huge command to your terminal history.)
+xcs add -i
+
 # Add translations via file
 xcs add \
     --key greeting \
@@ -169,6 +173,9 @@ You can use `xcs --help` or `xcs <sub-command> --help` to see the list of comman
 
 Adds/updates one or more strings to the xcstrings file.
 
+* `--interactive, -i`: `boolean` (Optional)
+    * Start interactive mode to add strings.
+    * This is useful when you don't want to record a huge command to your terminal history.
 * `--key, -k`: `string` (Required unless `--strings` contains one or more keys)
     * The key of the string to add.
 * `--language, -l`: `string` (Optional)
