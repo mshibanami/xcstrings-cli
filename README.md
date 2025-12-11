@@ -28,7 +28,7 @@ We also provide a Custom GPT that can help you generate translations and output 
 
 ```bash
 # Add with key, comment, and default language string
-xcs add --key greeting --comment "A greeting message." --string "Hello, World."
+xcs add --key greeting --comment "A greeting message." --text "Hello, World."
 
 # Add with key, comment, and translations YAML via heredoc
 xcs add \
