@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { checkbox, confirm } from '@inquirer/prompts';
 import { CommandModule } from 'yargs';
 
-const INIT_FILE_NAME = 'xcstrings-cli.json5';
+const INIT_FILE_NAME = 'xcstrings-cli.yaml';
 
 export function createInitCommand(): CommandModule {
     return {
@@ -148,23 +148,22 @@ export async function init(): Promise<void> {
         return;
     }
 
-    const xcstringsArray = selectedXCStrings.map((p) => `        "${p}"`).join(',\n');
-    const xcodeprojArray = selectedXcodeproj.map((p) => `        "${p}"`).join(',\n');
+    const xcstringsArray = selectedXCStrings.length > 0
+        ? '\n' + selectedXCStrings.map((p) => `  - "${p}"`).join('\n')
+        : ' []';
 
-    const config = `{
-    // Behavior for handling missing languages when adding strings.
-    missingLanguagePolicy: "skip",
+    const xcodeprojArray = selectedXcodeproj.length > 0
+        ? '\n' + selectedXcodeproj.map((p) => `  - "${p}"`).join('\n')
+        : ' []';
 
-    // Paths to .xcstrings files to manage. Specify relative or absolute paths.
-    xcstringsPaths: [
-${xcstringsArray}
-    ],
+    const config = `# Behavior for handling missing languages when adding strings.
+missingLanguagePolicy: "skip"
 
-    // Paths to .xcodeproj directories. Used for discovering supported languages.
-    xcodeprojPaths: [
-${xcodeprojArray}
-    ]
-}
+# Paths to .xcstrings files to manage. Specify relative or absolute paths.
+xcstringsPaths:${xcstringsArray}
+
+# Paths to .xcodeproj directories. Used for discovering supported languages.
+xcodeprojPaths:${xcodeprojArray}
 `;
 
     await writeFile(INIT_FILE_NAME, config, 'utf-8');
