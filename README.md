@@ -15,12 +15,12 @@ We also provide a Custom GPT that can help you generate translations and output 
 
     This will install the `xcs` command globally.
 
-2. Create a configuration file for your project by running:
+2. Create a [configuration file](#configuration-file) for your project by running:
     ```bash
     xcs init
     ```
 
-    This will ask you some questions and create an `xcstrings-cli.json` file in the current directory.
+    This will ask you some questions and create an `xcstrings-cli.yaml` file in the current directory.
 
 ## Usage
 
@@ -241,7 +241,7 @@ Lists strings in the xcstrings file, with optional filtering and formatting.
 * `--text-substring`: `string` (Optional)
     * Filter translations by substring match.
 
-## Config file
+## Configuration file
 
 Put a config file named `xcstrings-cli` in the project root, using one of the following extensions:
 
@@ -310,10 +310,9 @@ Languages: ja, zh-Hans
 No comments needed.
 ```
 
-Then the Custom GPT will generate an `xcs add` command like this:
+Then the Custom GPT will generate YAML like this:
 
-```bash
-xcs add --strings << EOF
+```yaml
 closeAction:
     translations:
         en: Close
@@ -324,10 +323,9 @@ detailsAction:
         en: Details
         ja: 詳細
         zh-Hans: 详情
-EOF
 ```
 
-Finally, copy the generated command and run it in your terminal to add the translations to your xcstrings file.
+Finally, copy the generated YAML and run `xcs add -i` to add the translations to your xcstrings file via interactive mode.
 
 ## Q&A
 
