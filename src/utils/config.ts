@@ -1,5 +1,6 @@
 import { cosmiconfig } from 'cosmiconfig';
 import json5 from 'json5';
+import yaml from 'js-yaml';
 
 const moduleName = 'xcstrings-cli';
 
@@ -7,10 +8,18 @@ const explorer = cosmiconfig(moduleName, {
     searchPlaces: [
         `${moduleName}.json`,
         `${moduleName}.json5`,
+        `${moduleName}.yaml`,
+        `${moduleName}.yml`,
     ],
     loaders: {
-        '.json5': async (filepath: string, content: string) => {
+        '.json5': (filepath: string, content: string) => {
             return json5.parse(content);
+        },
+        '.yaml': (_filepath: string, content: string) => {
+            return yaml.load(content);
+        },
+        '.yml': (_filepath: string, content: string) => {
+            return yaml.load(content);
         },
     },
     cache: false,

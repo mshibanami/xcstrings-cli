@@ -34,6 +34,26 @@ describe('loadConfig', () => {
         expect(result).toEqual({ xcstringsPaths: ['path/to/Localizable.xcstrings'] });
     });
 
+    it('should load config from xcstrings-cli.yaml', async () => {
+        const configContent = "xcstringsPaths:\n  - path/to/Localizable.xcstrings";
+        await fs.writeFile(resolve(cwd, 'xcstrings-cli.yaml'), configContent);
+
+        const result = await loadConfig();
+        expect(result).toEqual({ xcstringsPaths: ['path/to/Localizable.xcstrings'] });
+
+        await fs.unlink(resolve(cwd, 'xcstrings-cli.yaml'));
+    });
+
+    it('should load config from xcstrings-cli.yml', async () => {
+        const configContent = "xcstringsPaths:\n  - path/to/Localizable.xcstrings";
+        await fs.writeFile(resolve(cwd, 'xcstrings-cli.yml'), configContent);
+
+        const result = await loadConfig();
+        expect(result).toEqual({ xcstringsPaths: ['path/to/Localizable.xcstrings'] });
+
+        await fs.unlink(resolve(cwd, 'xcstrings-cli.yml'));
+    });
+
     it('should prefer explicit path', async () => {
         const explicitPath = resolve(cwd, 'custom-config.json');
         const config = { xcstringsPaths: ['custom/path'] };

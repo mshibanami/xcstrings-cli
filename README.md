@@ -243,7 +243,11 @@ Lists strings in the xcstrings file, with optional filtering and formatting.
 
 ## Config file
 
-Put an `xcstrings-cli.json5` or `xcstrings-cli.json` file in the project root, and xcs will use it as the config file.
+Put a config file named `xcstrings-cli` in the project root, using one of the following extensions:
+
+- `.json`: JSON format
+- `.json5`: JSON5 format
+- `.yml` `.yaml`: YAML format
 
 Here is an example config file in JSON format:
 
