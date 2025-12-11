@@ -276,7 +276,7 @@ These are the settings you can specify in the config file:
 * **xcodeprojPaths**: `string[]` (Optional)
     * Paths to Xcode project files (`.xcodeproj`) used to detect supported languages.
     * If not specified, `xcs` will only check the xcstrings file to detect supported languages.
-* **xcstringsPaths**: `string[] | { alias: string, path: string }[]` (Optional)
+* **xcstringsPaths**: `(string | { alias: string; path: string })[]` (Optional)
     * Paths to xcstrings files used by `xcs`.
     * If only one path is provided, `xcs` will use it as the default xcstrings file.
     * If multiple paths are provided, `xcs` will ask you to select an xcstrings file.
