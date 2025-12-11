@@ -11,6 +11,7 @@ import { createRemoveCommand } from './commands/remove';
 import { createInitCommand } from './commands/init';
 import { createLanguagesCommand } from './commands/languages';
 import { createStringsCommand } from './commands/strings';
+import { ArgumentError } from './utils/errors';
 
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
 
@@ -40,22 +41,21 @@ yargs(hideBin(process.argv))
     .demandCommand(1, '')
     .strictCommands()
     .recommendCommands()
-    .showHelpOnFail(true)
     .fail((msg, err, yargsInstance) => {
-        const message = msg || err?.message;
-        if (message) {
-            console.error(chalk.red(message));
+        const isArgumentError = err instanceof ArgumentError;
+
+        if (msg || isArgumentError) {
+            console.error(chalk.red(msg || err?.message || err));
             console.log();
             yargsInstance.showHelp();
             process.exit(1);
         }
 
         if (err) {
-            console.error(err);
+            console.error(chalk.red(err.message || err));
             process.exit(1);
         }
 
-        yargsInstance.showHelp();
         process.exit(1);
     })
     .help()

@@ -7,6 +7,7 @@ import { captureInteractiveStringsInput } from '../utils/interactive.js';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';
 import { languages } from './languages';
 import logger from '../utils/logger.js';
+import { ArgumentError } from '../utils/errors';
 
 type LocalizationMap = NonNullable<XCStringUnit['localizations']>;
 
@@ -279,7 +280,7 @@ export async function runInteractiveAdd(options: InteractiveAddOptions): Promise
 
     if (parsed.kind === 'multi') {
         if (options.key || options.comment || options.defaultString !== undefined || options.language) {
-            throw new Error('When adding multiple strings via interactive payload, omit --key, --comment, --text, and --language.');
+            throw new ArgumentError('When adding multiple strings via interactive payload, omit --key, --comment, --text, and --language.');
         }
         const addedKeys: string[] = [];
         for (const [entryKey, entry] of Object.entries(parsed.entries)) {
@@ -291,7 +292,7 @@ export async function runInteractiveAdd(options: InteractiveAddOptions): Promise
 
     const keyToUse = options.key;
     if (!keyToUse) {
-        throw new Error('--key is required unless the interactive payload contains multiple keys.');
+        throw new ArgumentError('--key is required unless the interactive payload contains multiple keys.');
     }
 
     const commentFromPayload = parsed.kind === 'single' ? parsed.comment : undefined;
@@ -338,7 +339,7 @@ export async function runAddCommand({
 
     if (interactive) {
         if (stringsArg !== undefined) {
-            throw new Error('--interactive cannot be combined with --strings input.');
+            throw new ArgumentError('--interactive cannot be combined with --strings input.');
         }
         return runInteractiveAdd({
             path,
@@ -355,7 +356,7 @@ export async function runAddCommand({
 
     if (parsedStrings?.kind === 'multi') {
         if (key || comment || defaultString !== undefined || language) {
-            throw new Error('When adding multiple strings via --strings payload, omit --key, --comment, --text, and --language.');
+            throw new ArgumentError('When adding multiple strings via --strings payload, omit --key, --comment, --text, and --language.');
         }
         const addedKeys: string[] = [];
         for (const [entryKey, entry] of Object.entries(parsedStrings.entries)) {
@@ -367,7 +368,7 @@ export async function runAddCommand({
 
     const keyToUse = key;
     if (!keyToUse) {
-        throw new Error('--key is required unless the --strings payload contains multiple keys.');
+        throw new ArgumentError('--key is required unless the --strings payload contains multiple keys.');
     }
 
     const strings = parsedStrings?.kind === 'single' ? parsedStrings.translations : undefined;
