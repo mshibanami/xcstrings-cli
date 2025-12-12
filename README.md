@@ -102,7 +102,7 @@ xcs remove --languages ja zh-Hans
 
 **List supported languages:**
 
-If `xcodeprojPaths` is configured, this command lists languages from your Xcode project (knownRegions) and excludes `Base`. If `xcodeprojPaths` is not configured, it lists languages observed in the xcstrings file.
+If `xcodeprojPaths` is configured, this command lists languages from your Xcode project (knownRegions) and excludes `Base`. Otherwise, it lists languages appeared in the xcstrings file.
 
 ```bash
 xcs languages
@@ -189,19 +189,15 @@ Adds/updates one or more strings to the xcstrings file.
 * `--state`: `string` (Optional, default: `translated`)
     * Values applied to single-key and multi-key adds: `translated`, `needs_review`, `new`, `stale`. If omitted, strings default to `translated`.
     * Multi-key payloads can also set per-language states with `{ state, value }`; string shorthand is treated as `translated`.
-    * State meanings:
-        * `translated`: The string is translated and ready to use.
-        * `needs_review`: The string needs review by a translator.
-        * `new`: The string is newly added and not yet translated.
-        * `stale`: The string is outdated and may need re-translation.
+    * Available states: `translated`, `needs_review`, `new`, `stale`
 * `--strings`: `string` (Optional)
     * Translation-including JSON or YAML for the key. Pass inline JSON, or provide the flag without a value to read it from stdin (heredoc/pipe).
     * The format is determined by `--strings-format`.
 * `--strings-format`: `string` (Optional, default: `auto`)
     * The format of the data provided with `--strings`. Options are:
         * `auto`: Auto-detect format based on content.
-        * `yaml`: YAML format. (It uses `js-yaml` internally.)
-        * `json`: JSON format. (It uses `json5` internally.)
+        * `yaml`: YAML format.
+        * `json`: JSON format. JSON5 is also supported.
 * `--text`: `string` (Optional)
     * The string value for the language. If omitted, the key is created without a localization for the default language.
 
