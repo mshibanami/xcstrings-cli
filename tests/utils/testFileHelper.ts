@@ -1,14 +1,11 @@
 import { resolve, basename, extname } from 'node:path';
 import { copyFile, mkdir, unlink } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
 import { FIXTURES_DIR, TEMP_DIR } from './resources';
 
 export const createdFiles: string[] = [];
 
 export async function setupTempFile(fileName: string): Promise<string> {
-    if (!existsSync(TEMP_DIR)) {
-        await mkdir(TEMP_DIR);
-    }
+    await mkdir(TEMP_DIR, { recursive: true });
     const source = resolve(FIXTURES_DIR, fileName);
     const base = basename(fileName, extname(fileName));
     const unique = `${base}-${Date.now()}-${Math.random().toString(36).slice(2)}${extname(fileName)}`;
@@ -16,6 +13,10 @@ export async function setupTempFile(fileName: string): Promise<string> {
     await copyFile(source, dest);
     createdFiles.push(dest);
     return dest;
+}
+
+export async function ensureTempDir(): Promise<void> {
+    await mkdir(TEMP_DIR, { recursive: true });
 }
 
 export async function cleanupTempFiles(): Promise<void> {

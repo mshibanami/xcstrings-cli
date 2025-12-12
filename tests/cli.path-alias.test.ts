@@ -1,9 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { resolve } from 'node:path';
 import { spawn } from 'node:child_process';
-import { mkdir, unlink, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { setupTempFile, cleanupTempFiles } from './utils/testFileHelper';
+import { unlink, writeFile } from 'node:fs/promises';
+import { setupTempFile, cleanupTempFiles, ensureTempDir } from './utils/testFileHelper';
 import { TEMP_DIR } from './utils/resources';
 import { readFile } from 'node:fs/promises';
 
@@ -13,9 +12,7 @@ const cliPath = resolve(process.cwd(), 'dist', 'index.js');
 const createdConfigs: string[] = [];
 
 async function createTempConfig(content: unknown): Promise<string> {
-    if (!existsSync(TEMP_DIR)) {
-        await mkdir(TEMP_DIR, { recursive: true });
-    }
+    await ensureTempDir();
     const configPath = resolve(TEMP_DIR, `config-${Date.now()}-${Math.random().toString(36).slice(2)}.json`);
     await writeFile(configPath, JSON.stringify(content), 'utf-8');
     createdConfigs.push(configPath);
