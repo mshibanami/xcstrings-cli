@@ -262,7 +262,7 @@ export async function doExport(opts: {
             await removeStringsOutputs(outDir, outFile);
         }
 
-        const stringsPerLang = new Map<string, Map<string, string>>();
+        const stringsPerLang = new Map<string, Map<string, { value: string; comment?: string }>>();
 
         for (const [key, unit] of Object.entries(data.strings ?? {})) {
             if (!matchKey(key)) continue;
@@ -277,7 +277,7 @@ export async function doExport(opts: {
                 if (!stringsPerLang.has(lang)) {
                     stringsPerLang.set(lang, new Map());
                 }
-                stringsPerLang.get(lang)!.set(key, val);
+                stringsPerLang.get(lang)!.set(key, { value: val, comment: unit.comment });
             }
         }
 
@@ -297,7 +297,7 @@ export async function doExport(opts: {
             const langFile = join(langDir, outFile);
 
             const exists = await fileExists(langFile);
-            const mergedMap = new Map<string, string>();
+            const mergedMap = new Map<string, { value: string; comment?: string }>();
 
             if (
                 exists &&
@@ -312,24 +312,31 @@ export async function doExport(opts: {
                     while ((match = regex.exec(content)) !== null) {
                         const k = match[1].replace(/\\"/g, '"');
                         const v = match[2].replace(/\\"/g, '"');
-                        mergedMap.set(k, v);
+                        mergedMap.set(k, { value: v });
                     }
                 } catch {
                     // ignore
                 }
             }
 
-            for (const [k, v] of mapOfStrings.entries()) {
+            for (const [k, obj] of mapOfStrings.entries()) {
                 if (mergedMap.has(k) && opts.mergePolicy === 'existing-first') {
+                    const existing = mergedMap.get(k)!;
+                    mergedMap.set(k, { value: existing.value, comment: obj.comment });
                     continue;
                 }
-                mergedMap.set(k, v);
+                mergedMap.set(k, obj);
             }
 
             let newContent = '';
-            for (const [k, v] of mergedMap.entries()) {
+            for (const [k, obj] of mergedMap.entries()) {
+                if (newContent.length > 0) {
+                    newContent += '\n';
+                }
+                const commentText = obj.comment ? ` ${obj.comment} ` : ' No comment provided by engineer. ';
+                newContent += `/*${commentText}*/\n`;
                 const escapedKey = k.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-                const escapedVal = v.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+                const escapedVal = obj.value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
                 newContent += `"${escapedKey}" = "${escapedVal}";\n`;
             }
 

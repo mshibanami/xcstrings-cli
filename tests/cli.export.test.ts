@@ -176,8 +176,7 @@ describe('cli: export command', () => {
             const jaPath = resolve(tempDir, 'ja.lproj', 'Output.strings');
 
             const enContent = await readFile(enPath, 'utf-8');
-            expect(enContent).toContain('"helloWorld" = "Hello, World.";');
-            expect(enContent).toContain('"goodbyeWorld" = "Goodbye, World.";');
+            expect(enContent).toContain('/* No comment provided by engineer. */\n"helloWorld" = "Hello, World.";\n\n/* No comment provided by engineer. */\n"goodbyeWorld" = "Goodbye, World.";');
 
             const jaContent = await readFile(jaPath, 'utf-8');
             expect(jaContent).toContain('"helloWorld" = "こんにちは、世界。";');
