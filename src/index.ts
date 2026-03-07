@@ -17,7 +17,7 @@ import { ArgumentError } from './utils/errors';
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
 
 yargs(hideBin(process.argv))
-    .scriptName('xcstrings')
+    .scriptName('xcs')
     .usage('$0 <cmd> [args]')
     .option('config', {
         type: 'string',
@@ -44,7 +44,7 @@ yargs(hideBin(process.argv))
         createStringsCommand(),
         createExportCommand(),
     ])
-    .demandCommand(1, '')
+    .demandCommand(1, 'Please specify a command')
     .strictCommands()
     .recommendCommands()
     .fail((msg, err, yargsInstance) => {
