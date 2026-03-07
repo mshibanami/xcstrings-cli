@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.7.1
+
+### Patch Changes
+
+- Improve --help
+
 ## 2.7.0
 
 ### Minor Changes
