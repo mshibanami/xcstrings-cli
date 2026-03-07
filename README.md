@@ -154,7 +154,7 @@ xcs strings --format "[{{language}}] {{key}} => {{text}}"
 # ... etc.
 ```
 
-**Export strings to xcstrings or traditional strings files:**
+**Export strings to _xcstrings_ or traditional _strings_ files:**
 
 ```bash
 # Export all strings to Test.xcstrings
