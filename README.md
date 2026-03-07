@@ -154,6 +154,16 @@ xcs strings --format "[{{language}}] {{key}} => {{text}}"
 # ... etc.
 ```
 
+**Export strings to xcstrings or traditional strings files:**
+
+```bash
+# Export all strings to Test.xcstrings
+xcs export Test.xcstrings
+
+# Export keys starting with 'good' to Output.strings in language specific lproj folders
+xcs export --key good* --output strings Output
+```
+
 You can use `xcs --help` or `xcs <sub-command> --help` to see the list of commands and options.
 
 ## Commands
@@ -238,6 +248,28 @@ Lists strings in the xcstrings file, with optional filtering and formatting.
     - Filter translations by regular expression.
 - `--text-substring`: `string` (Optional)
     - Filter translations by substring match.
+
+### `export` command
+
+Exports xcstrings to either filtered xcstrings or traditional `.strings` format.
+
+**`export` command options:**
+
+- `--output, -o`: `string` (Optional, default: `auto`)
+    - The output format. Options are:
+        - `auto`: Inferred from the output path extension if possible.
+        - `xcstrings`: Export to a `.xcstrings` catalog format.
+        - `strings`: Export to Apple's traditional `.strings` format generated in `<language>.lproj` directories.
+- `--merge-policy, -m`: `string` (Optional, default: `error`)
+    - How to handle existing translation files:
+        - `error`: Stop safely if an output file exists.
+        - `force`: Clobber and overwrite existing files.
+        - `output-first`: Augment existing files, preferring new translations over old ones.
+        - `existing-first`: Keep existing translations intact, appending only non-overlapping strings.
+- Filtering options from the `strings` command are also supported:
+    - `--key`, `--key-glob`, `--key-regex`, `--key-substring`
+    - `--text`, `--text-glob`, `--text-regex`, `--text-substring`
+    - `--languages, -l`
 
 ## Configuration file
 
