@@ -2,7 +2,11 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { unlink, writeFile } from 'node:fs/promises';
-import { setupTempFile, cleanupTempFiles, ensureTempDir } from './utils/testFileHelper';
+import {
+    setupTempFile,
+    cleanupTempFiles,
+    ensureTempDir,
+} from './utils/testFileHelper';
 import { TEMP_DIR } from './utils/resources';
 import { readFile } from 'node:fs/promises';
 
@@ -13,7 +17,10 @@ const createdConfigs: string[] = [];
 
 async function createTempConfig(content: unknown): Promise<string> {
     await ensureTempDir();
-    const configPath = resolve(TEMP_DIR, `config-${Date.now()}-${Math.random().toString(36).slice(2)}.json`);
+    const configPath = resolve(
+        TEMP_DIR,
+        `config-${Date.now()}-${Math.random().toString(36).slice(2)}.json`,
+    );
     await writeFile(configPath, JSON.stringify(content), 'utf-8');
     createdConfigs.push(configPath);
     return configPath;
@@ -30,13 +37,17 @@ async function cleanupConfigs(): Promise<void> {
     createdConfigs.length = 0;
 }
 
-async function runCli(args: string[]): Promise<{ code: number | null; stdout: string; stderr: string }> {
+async function runCli(
+    args: string[],
+): Promise<{ code: number | null; stdout: string; stderr: string }> {
     return await new Promise((resolvePromise) => {
-        const child = spawn(node, ['--enable-source-maps', cliPath, ...args], { stdio: ['ignore', 'pipe', 'pipe'] });
+        const child = spawn(node, ['--enable-source-maps', cliPath, ...args], {
+            stdio: ['ignore', 'pipe', 'pipe'],
+        });
         let stdout = '';
         let stderr = '';
-        child.stdout.on('data', (chunk) => stdout += chunk);
-        child.stderr.on('data', (chunk) => stderr += chunk);
+        child.stdout.on('data', (chunk) => (stdout += chunk));
+        child.stderr.on('data', (chunk) => (stderr += chunk));
         child.on('exit', (code) => resolvePromise({ code, stdout, stderr }));
     });
 }
@@ -50,18 +61,21 @@ describe('cli: --path alias resolution', () => {
     it('accepts bare alias from config', async () => {
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const configPath = await createTempConfig({
-            xcstringsPaths: [
-                { alias: 'utils', path: tempFile }
-            ]
+            xcstringsPaths: [{ alias: 'utils', path: tempFile }],
         });
 
         const { code, stderr } = await runCli([
             'add',
-            '--key', 'alias-bare',
-            '--comment', 'hello',
-            '--text', 'Hello',
-            '--path', 'utils',
-            '--config', configPath,
+            '--key',
+            'alias-bare',
+            '--comment',
+            'hello',
+            '--text',
+            'Hello',
+            '--path',
+            'utils',
+            '--config',
+            configPath,
         ]);
 
         expect(code).toBe(0);
@@ -74,18 +88,21 @@ describe('cli: --path alias resolution', () => {
     it('accepts alias:foo format', async () => {
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const configPath = await createTempConfig({
-            xcstringsPaths: [
-                { alias: 'core', path: tempFile }
-            ]
+            xcstringsPaths: [{ alias: 'core', path: tempFile }],
         });
 
         const { code, stderr } = await runCli([
             'add',
-            '--key', 'alias-format',
-            '--comment', 'hello',
-            '--text', 'Hello',
-            '--path', 'alias:core',
-            '--config', configPath,
+            '--key',
+            'alias-format',
+            '--comment',
+            'hello',
+            '--text',
+            'Hello',
+            '--path',
+            'alias:core',
+            '--config',
+            configPath,
         ]);
 
         expect(code).toBe(0);
@@ -98,18 +115,21 @@ describe('cli: --path alias resolution', () => {
     it('errors for unknown alias before checking file existence', async () => {
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const configPath = await createTempConfig({
-            xcstringsPaths: [
-                { alias: 'core', path: tempFile }
-            ]
+            xcstringsPaths: [{ alias: 'core', path: tempFile }],
         });
 
         const { code, stderr } = await runCli([
             'add',
-            '--key', 'alias-missing',
-            '--comment', 'hello',
-            '--text', 'Hello',
-            '--path', 'missing',
-            '--config', configPath,
+            '--key',
+            'alias-missing',
+            '--comment',
+            'hello',
+            '--text',
+            'Hello',
+            '--path',
+            'missing',
+            '--config',
+            configPath,
         ]);
 
         expect(code).not.toBe(0);

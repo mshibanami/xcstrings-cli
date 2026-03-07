@@ -7,30 +7,38 @@ export function createRemoveCommand(): CommandModule {
     return {
         command: 'remove',
         describe: 'Remove a string',
-        builder: (yargs) => yargs
-            .option('key', {
-                type: 'string',
-                describe: 'The key to remove',
-                alias: 'k',
-            })
-            .option('languages', {
-                type: 'string',
-                array: true,
-                describe: 'Languages to remove',
-                alias: 'l',
-            })
-            .option('dry-run', {
-                type: 'boolean',
-                default: false,
-                describe: 'Show what would be removed without writing changes',
-                alias: 'n',
-            })
-            .check((argv) => {
-                if (argv.key || (argv.languages && (argv.languages as string[]).length > 0)) {
-                    return true;
-                }
-                throw new Error('Either --key or --languages must be provided');
-            }),
+        builder: (yargs) =>
+            yargs
+                .option('key', {
+                    type: 'string',
+                    describe: 'The key to remove',
+                    alias: 'k',
+                })
+                .option('languages', {
+                    type: 'string',
+                    array: true,
+                    describe: 'Languages to remove',
+                    alias: 'l',
+                })
+                .option('dry-run', {
+                    type: 'boolean',
+                    default: false,
+                    describe:
+                        'Show what would be removed without writing changes',
+                    alias: 'n',
+                })
+                .check((argv) => {
+                    if (
+                        argv.key ||
+                        (argv.languages &&
+                            (argv.languages as string[]).length > 0)
+                    ) {
+                        return true;
+                    }
+                    throw new Error(
+                        'Either --key or --languages must be provided',
+                    );
+                }),
         handler: async (argv) => {
             const result = await remove(
                 argv.path as string,
@@ -79,7 +87,11 @@ function removeLanguagesFromUnit(
             }
         }
     }
-    if (!dryRun && unit.localizations && Object.keys(unit.localizations).length === 0) {
+    if (
+        !dryRun &&
+        unit.localizations &&
+        Object.keys(unit.localizations).length === 0
+    ) {
         delete unit.localizations;
     }
 }
@@ -116,7 +128,8 @@ export async function remove(
         removeLanguagesFromUnit(unit, languages, dryRun, targetKey, result);
 
         const removedCount = result[targetKey]?.length ?? 0;
-        const hasLocalizations = unit.localizations && Object.keys(unit.localizations).length > 0;
+        const hasLocalizations =
+            unit.localizations && Object.keys(unit.localizations).length > 0;
 
         if (!hasLocalizations && removedCount > 0) {
             if (!dryRun) {

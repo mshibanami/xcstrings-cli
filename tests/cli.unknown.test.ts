@@ -19,7 +19,7 @@ describe('cli: unknown command', () => {
 
         await new Promise<void>((resolvePromise) => {
             let stderr = '';
-            child.stderr.on('data', (chunk) => stderr += chunk);
+            child.stderr.on('data', (chunk) => (stderr += chunk));
             child.on('exit', (code) => {
                 expect(code).not.toBe(0);
                 expect(stderr).toMatch(/Unknown/i);
@@ -44,10 +44,14 @@ describe('cli: unknown command', () => {
             configPath: undefined,
         });
 
-        const { strings } = JSON.parse(await readFile(tempFile, 'utf-8')) as { strings: Record<string, unknown> };
+        const { strings } = JSON.parse(await readFile(tempFile, 'utf-8')) as {
+            strings: Record<string, unknown>;
+        };
         expect(strings['greeting-fr']).toBeDefined();
         // fr should be skipped because it's unsupported in fixture (sourceLanguage=en only)
-        expect((strings['greeting-fr'] as any).localizations?.fr).toBeUndefined();
+        expect(
+            (strings['greeting-fr'] as any).localizations?.fr,
+        ).toBeUndefined();
         expect(warnSpy).toHaveBeenCalled();
         warnSpy.mockRestore();
     });

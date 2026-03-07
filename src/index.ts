@@ -25,11 +25,15 @@ yargs(hideBin(process.argv))
     .option('path', {
         type: 'string',
         describe: 'Path or alias to xcstrings file',
-        default: defaultPath
+        default: defaultPath,
     })
     .middleware(async (argv) => {
         const config = await loadConfig(argv.config as string | undefined);
-        argv.path = await resolveXCStringsPath(argv.path as string, config, defaultPath);
+        argv.path = await resolveXCStringsPath(
+            argv.path as string,
+            config,
+            defaultPath,
+        );
     })
     .command([
         createAddCommand(),
@@ -58,5 +62,4 @@ yargs(hideBin(process.argv))
 
         process.exit(1);
     })
-    .help()
-    .argv;
+    .help().argv;

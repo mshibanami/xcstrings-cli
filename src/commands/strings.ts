@@ -23,74 +23,92 @@ export function createStringsCommand(): CommandModule {
     return {
         command: 'strings',
         describe: 'List strings in the xcstrings file',
-        builder: (yargs) => yargs
-            .option('key', {
-                type: 'string',
-                describe: 'Filter keys by glob (default)',
-            })
-            .option('key-glob', {
-                type: 'string',
-                describe: 'Filter keys by glob (explicit)',
-            })
-            .option('key-regex', {
-                type: 'string',
-                describe: 'Filter keys by regex',
-            })
-            .option('key-substring', {
-                type: 'string',
-                describe: 'Filter keys by substring match',
-            })
-            .option('text', {
-                type: 'string',
-                describe: 'Filter translations by glob (default)',
-            })
-            .option('text-glob', {
-                type: 'string',
-                describe: 'Filter translations by glob (explicit)',
-            })
-            .option('text-regex', {
-                type: 'string',
-                describe: 'Filter translations by regex',
-            })
-            .option('text-substring', {
-                type: 'string',
-                describe: 'Filter translations by substring match',
-            })
-            .option('languages', {
-                type: 'string',
-                array: true,
-                alias: 'l',
-                describe: 'Include only these languages',
-            })
-            .option('missing-languages', {
-                type: 'string',
-                array: true,
-                describe: 'Include only keys missing any of these languages',
-            })
-            .option('format', {
-                type: 'string',
-                describe: 'Mustache template. Available variables: {{language}}, {{key}}, {{text}}',
-            })
-            .check((argv) => {
-                const keyGlobCount = [argv.key, argv['key-glob']].filter((v) => v !== undefined).length;
-                const keyRegexCount = argv['key-regex'] ? 1 : 0;
-                const keySubstringCount = argv['key-substring'] ? 1 : 0;
-                if (keyGlobCount + keyRegexCount + keySubstringCount > 1) {
-                    throw new Error('Specify only one of --key/--key-glob, --key-regex, or --key-substring');
-                }
+        builder: (yargs) =>
+            yargs
+                .option('key', {
+                    type: 'string',
+                    describe: 'Filter keys by glob (default)',
+                })
+                .option('key-glob', {
+                    type: 'string',
+                    describe: 'Filter keys by glob (explicit)',
+                })
+                .option('key-regex', {
+                    type: 'string',
+                    describe: 'Filter keys by regex',
+                })
+                .option('key-substring', {
+                    type: 'string',
+                    describe: 'Filter keys by substring match',
+                })
+                .option('text', {
+                    type: 'string',
+                    describe: 'Filter translations by glob (default)',
+                })
+                .option('text-glob', {
+                    type: 'string',
+                    describe: 'Filter translations by glob (explicit)',
+                })
+                .option('text-regex', {
+                    type: 'string',
+                    describe: 'Filter translations by regex',
+                })
+                .option('text-substring', {
+                    type: 'string',
+                    describe: 'Filter translations by substring match',
+                })
+                .option('languages', {
+                    type: 'string',
+                    array: true,
+                    alias: 'l',
+                    describe: 'Include only these languages',
+                })
+                .option('missing-languages', {
+                    type: 'string',
+                    array: true,
+                    describe:
+                        'Include only keys missing any of these languages',
+                })
+                .option('format', {
+                    type: 'string',
+                    describe:
+                        'Mustache template. Available variables: {{language}}, {{key}}, {{text}}',
+                })
+                .check((argv) => {
+                    const keyGlobCount = [argv.key, argv['key-glob']].filter(
+                        (v) => v !== undefined,
+                    ).length;
+                    const keyRegexCount = argv['key-regex'] ? 1 : 0;
+                    const keySubstringCount = argv['key-substring'] ? 1 : 0;
+                    if (keyGlobCount + keyRegexCount + keySubstringCount > 1) {
+                        throw new Error(
+                            'Specify only one of --key/--key-glob, --key-regex, or --key-substring',
+                        );
+                    }
 
-                const textGlobCount = [argv.text, argv['text-glob']].filter((v) => v !== undefined).length;
-                const textRegexCount = argv['text-regex'] ? 1 : 0;
-                const textSubstringCount = argv['text-substring'] ? 1 : 0;
-                if (textGlobCount + textRegexCount + textSubstringCount > 1) {
-                    throw new Error('Specify only one of --text/--text-glob, --text-regex, or --text-substring');
-                }
+                    const textGlobCount = [argv.text, argv['text-glob']].filter(
+                        (v) => v !== undefined,
+                    ).length;
+                    const textRegexCount = argv['text-regex'] ? 1 : 0;
+                    const textSubstringCount = argv['text-substring'] ? 1 : 0;
+                    if (
+                        textGlobCount + textRegexCount + textSubstringCount >
+                        1
+                    ) {
+                        throw new Error(
+                            'Specify only one of --text/--text-glob, --text-regex, or --text-substring',
+                        );
+                    }
 
-                return true;
-            }),
+                    return true;
+                }),
         handler: async (argv) => {
-            const keyGlobValues = [argv.key, argv['key-glob']].filter((v) => v !== undefined) as string[];
-            const textGlobValues = [argv.text, argv['text-glob']].filter((v) => v !== undefined) as string[];
+            const keyGlobValues = [argv.key, argv['key-glob']].filter(
+                (v) => v !== undefined,
+            ) as string[];
+            const textGlobValues = [argv.text, argv['text-glob']].filter(
+                (v) => v !== undefined,
+            ) as string[];
 
             const keyFilter = resolveFilter('key', {
                 glob: keyGlobValues[0],
@@ -107,7 +125,9 @@ export function createStringsCommand(): CommandModule {
             const output = await strings({
                 path: argv.path as string,
                 languages: argv.languages as string[] | undefined,
-                missingLanguages: argv['missing-languages'] as string[] | undefined,
+                missingLanguages: argv['missing-languages'] as
+                    | string[]
+                    | undefined,
                 keyFilter,
                 textFilter,
                 format: argv.format as string | undefined,
@@ -121,7 +141,10 @@ export function createStringsCommand(): CommandModule {
 }
 
 function globToRegExp(glob: string): RegExp {
-    const escaped = glob.replace(/[.+^${}()|\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.');
+    const escaped = glob
+        .replace(/[.+^${}()|\\]/g, '\\$&')
+        .replace(/\*/g, '.*')
+        .replace(/\?/g, '.');
     return new RegExp(`^${escaped}$`);
 }
 
@@ -140,7 +163,10 @@ function buildMatcher(filter?: FilterSpec): (value: string) => boolean {
     return (value: string) => regex.test(value);
 }
 
-function renderTemplate(template: string, context: { language: string; key: string; text: string }): string {
+function renderTemplate(
+    template: string,
+    context: { language: string; key: string; text: string },
+): string {
     const originalEscape = Mustache.escape;
     Mustache.escape = (text) => text;
     try {
@@ -157,7 +183,9 @@ export async function strings(options: ListOptions): Promise<string> {
     const matchKey = buildMatcher(options.keyFilter);
     const matchText = buildMatcher(options.textFilter);
     const languageSet = options.languages ? new Set(options.languages) : null;
-    const missingLanguageSet = options.missingLanguages ? new Set(options.missingLanguages) : null;
+    const missingLanguageSet = options.missingLanguages
+        ? new Set(options.missingLanguages)
+        : null;
     const useTemplate = Boolean(options.format);
 
     const lines: string[] = [];
@@ -170,7 +198,9 @@ export async function strings(options: ListOptions): Promise<string> {
         const localizationKeys = Object.keys(localizations);
 
         const isMissingSpecifiedLanguage = missingLanguageSet
-            ? Array.from(missingLanguageSet).some((lang) => !(lang in localizations))
+            ? Array.from(missingLanguageSet).some(
+                  (lang) => !(lang in localizations),
+              )
             : true;
 
         const perKeyLines: string[] = [];
@@ -181,7 +211,13 @@ export async function strings(options: ListOptions): Promise<string> {
             if (!matchText(text)) continue;
 
             if (useTemplate && options.format) {
-                perKeyLines.push(renderTemplate(options.format, { language: lang, key, text }));
+                perKeyLines.push(
+                    renderTemplate(options.format, {
+                        language: lang,
+                        key,
+                        text,
+                    }),
+                );
             } else {
                 perKeyLines.push(`  ${lang}: ${JSON.stringify(text)}`);
             }

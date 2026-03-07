@@ -8,24 +8,33 @@ const cliPath = resolve(process.cwd(), 'dist', 'index.js');
 const fixturePath = resolve(FIXTURES_DIR, 'list-sample.xcstrings');
 
 async function runList(extraArgs: string[]) {
-    const args = ['--enable-source-maps', cliPath, 'strings', '--path', fixturePath, ...extraArgs];
+    const args = [
+        '--enable-source-maps',
+        cliPath,
+        'strings',
+        '--path',
+        fixturePath,
+        ...extraArgs,
+    ];
     const child = spawn(node, args, { stdio: ['ignore', 'pipe', 'pipe'] });
 
     const stdoutChunks: Buffer[] = [];
     const stderrChunks: Buffer[] = [];
 
-    return await new Promise<{ stdout: string; stderr: string; code: number }>((resolvePromise, reject) => {
-        child.stdout.on('data', (chunk) => stdoutChunks.push(chunk));
-        child.stderr.on('data', (chunk) => stderrChunks.push(chunk));
-        child.on('error', reject);
-        child.on('exit', (code) => {
-            resolvePromise({
-                code: code ?? -1,
-                stdout: Buffer.concat(stdoutChunks).toString('utf8'),
-                stderr: Buffer.concat(stderrChunks).toString('utf8'),
+    return await new Promise<{ stdout: string; stderr: string; code: number }>(
+        (resolvePromise, reject) => {
+            child.stdout.on('data', (chunk) => stdoutChunks.push(chunk));
+            child.stderr.on('data', (chunk) => stderrChunks.push(chunk));
+            child.on('error', reject);
+            child.on('exit', (code) => {
+                resolvePromise({
+                    code: code ?? -1,
+                    stdout: Buffer.concat(stdoutChunks).toString('utf8'),
+                    stderr: Buffer.concat(stderrChunks).toString('utf8'),
+                });
             });
-        });
-    });
+        },
+    );
 }
 
 describe('cli: strings command', () => {
@@ -129,22 +138,31 @@ jaOnly:
 
     it('supports mustache format per localization', async () => {
         const { stdout, code } = await runList([
-            '--languages', 'en', 'ja',
-            '--format', '[{{language}}] {{key}} => {{text}}',
-            '--key', 'good*'
+            '--languages',
+            'en',
+            'ja',
+            '--format',
+            '[{{language}}] {{key}} => {{text}}',
+            '--key',
+            'good*',
         ]);
         expect(code).toBe(0);
-        expect(stdout.trim()).toBe([
-            '[en] goodbyeWorld => Goodbye, World.',
-            '[ja] goodbyeWorld => さようなら、世界。',
-            '[en] goodMorning => Good morning.',
-            '[ja] goodMorning => おはようございます。',
-        ].join('\n'));
+        expect(stdout.trim()).toBe(
+            [
+                '[en] goodbyeWorld => Goodbye, World.',
+                '[ja] goodbyeWorld => さようなら、世界。',
+                '[en] goodMorning => Good morning.',
+                '[ja] goodMorning => おはようございます。',
+            ].join('\n'),
+        );
     });
 
     describe('--missing-languages option', () => {
         it('lists only keys missing the specified language', async () => {
-            const { stdout, stderr, code } = await runList(['--missing-languages', 'zh-Hans']);
+            const { stdout, stderr, code } = await runList([
+                '--missing-languages',
+                'zh-Hans',
+            ]);
             expect(code).toBe(0);
             expect(stderr).toBe('');
             expect(stdout.trim()).toBe(`goodbyeWorld:
@@ -163,8 +181,10 @@ jaOnly:
 
         it('intersects with languages filter but keeps keys missing the language', async () => {
             const { stdout, code } = await runList([
-                '--missing-languages', 'zh-Hans',
-                '--languages', 'ja'
+                '--missing-languages',
+                'zh-Hans',
+                '--languages',
+                'ja',
             ]);
             expect(code).toBe(0);
             expect(stdout.trim()).toBe(`goodbyeWorld:
@@ -177,8 +197,10 @@ jaOnly:
 
         it('respects key/text filters while enforcing missing-languages', async () => {
             const { stdout, code } = await runList([
-                '--missing-languages', 'zh-Hans',
-                '--key', 'good*'
+                '--missing-languages',
+                'zh-Hans',
+                '--key',
+                'good*',
             ]);
             expect(code).toBe(0);
             expect(stdout.trim()).toBe(`goodbyeWorld:
@@ -189,8 +211,10 @@ goodMorning:
   ja: "おはようございます。"`);
 
             const filteredByText = await runList([
-                '--missing-languages', 'zh-Hans',
-                '--text-substring', 'Hello'
+                '--missing-languages',
+                'zh-Hans',
+                '--text-substring',
+                'Hello',
             ]);
             expect(filteredByText.code).toBe(0);
             expect(filteredByText.stdout.trim()).toBe('');
@@ -198,7 +222,8 @@ goodMorning:
 
         it('treats empty strings as present, not missing', async () => {
             const { stdout, code } = await runList([
-                '--missing-languages', 'en'
+                '--missing-languages',
+                'en',
             ]);
             expect(code).toBe(0);
             expect(stdout.trim()).toBe(`jaOnly:
@@ -207,7 +232,9 @@ goodMorning:
 
         it('allows multiple missing languages and matches keys missing any of them', async () => {
             const { stdout, code } = await runList([
-                '--missing-languages', 'ja', 'zh-Hans'
+                '--missing-languages',
+                'ja',
+                'zh-Hans',
             ]);
             expect(code).toBe(0);
             expect(stdout.trim()).toBe(`goodbyeWorld:

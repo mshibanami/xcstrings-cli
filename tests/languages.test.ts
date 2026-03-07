@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { getLanguagesFromXcodeproj, getLanguagesFromXCStrings, languages } from '../src/commands/languages';
+import {
+    getLanguagesFromXcodeproj,
+    getLanguagesFromXCStrings,
+    languages,
+} from '../src/commands/languages';
 import { resolve } from 'node:path';
 import { FIXTURES_DIR } from './utils/resources';
 
@@ -12,7 +16,10 @@ describe('languages', () => {
     });
 
     it('should extract languages from xcstrings file', async () => {
-        const xcstringsPath = resolve(FIXTURES_DIR, 'manual-comment-3langs.xcstrings');
+        const xcstringsPath = resolve(
+            FIXTURES_DIR,
+            'manual-comment-3langs.xcstrings',
+        );
         const languages = await getLanguagesFromXCStrings(xcstringsPath);
         expect(languages).toContain('ja');
         expect(languages).toContain('en');

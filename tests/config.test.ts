@@ -9,13 +9,21 @@ describe('loadConfig', () => {
     const configJson5Path = resolve(cwd, 'xcstrings-cli.json5');
 
     beforeEach(async () => {
-        try { await fs.unlink(configJsonPath); } catch { }
-        try { await fs.unlink(configJson5Path); } catch { }
+        try {
+            await fs.unlink(configJsonPath);
+        } catch {}
+        try {
+            await fs.unlink(configJson5Path);
+        } catch {}
     });
 
     afterEach(async () => {
-        try { await fs.unlink(configJsonPath); } catch { }
-        try { await fs.unlink(configJson5Path); } catch { }
+        try {
+            await fs.unlink(configJsonPath);
+        } catch {}
+        try {
+            await fs.unlink(configJson5Path);
+        } catch {}
     });
 
     it('should load config from xcstrings-cli.json', async () => {
@@ -27,29 +35,38 @@ describe('loadConfig', () => {
     });
 
     it('should load config from xcstrings-cli.json5', async () => {
-        const configContent = "{ xcstringsPaths: ['path/to/Localizable.xcstrings'] }";
+        const configContent =
+            "{ xcstringsPaths: ['path/to/Localizable.xcstrings'] }";
         await fs.writeFile(configJson5Path, configContent);
 
         const result = await loadConfig();
-        expect(result).toEqual({ xcstringsPaths: ['path/to/Localizable.xcstrings'] });
+        expect(result).toEqual({
+            xcstringsPaths: ['path/to/Localizable.xcstrings'],
+        });
     });
 
     it('should load config from xcstrings-cli.yaml', async () => {
-        const configContent = "xcstringsPaths:\n  - path/to/Localizable.xcstrings";
+        const configContent =
+            'xcstringsPaths:\n  - path/to/Localizable.xcstrings';
         await fs.writeFile(resolve(cwd, 'xcstrings-cli.yaml'), configContent);
 
         const result = await loadConfig();
-        expect(result).toEqual({ xcstringsPaths: ['path/to/Localizable.xcstrings'] });
+        expect(result).toEqual({
+            xcstringsPaths: ['path/to/Localizable.xcstrings'],
+        });
 
         await fs.unlink(resolve(cwd, 'xcstrings-cli.yaml'));
     });
 
     it('should load config from xcstrings-cli.yml', async () => {
-        const configContent = "xcstringsPaths:\n  - path/to/Localizable.xcstrings";
+        const configContent =
+            'xcstringsPaths:\n  - path/to/Localizable.xcstrings';
         await fs.writeFile(resolve(cwd, 'xcstrings-cli.yml'), configContent);
 
         const result = await loadConfig();
-        expect(result).toEqual({ xcstringsPaths: ['path/to/Localizable.xcstrings'] });
+        expect(result).toEqual({
+            xcstringsPaths: ['path/to/Localizable.xcstrings'],
+        });
 
         await fs.unlink(resolve(cwd, 'xcstrings-cli.yml'));
     });

@@ -26,7 +26,10 @@ async function findXCStringsFiles(dir: string): Promise<string[]> {
                 const fullPath = resolve(currentDir, entry.name);
                 if (entry.isDirectory()) {
                     // Skip node_modules, .git, etc.
-                    if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
+                    if (
+                        !entry.name.startsWith('.') &&
+                        entry.name !== 'node_modules'
+                    ) {
                         await walk(fullPath);
                     }
                 } else if (entry.name.endsWith('.xcstrings')) {
@@ -76,7 +79,9 @@ export async function init(): Promise<void> {
 
     let selectedXCStrings: string[] = [];
     if (xcstringsFiles.length > 0) {
-        console.log(chalk.green(`✓ Found ${xcstringsFiles.length} .xcstrings file(s)`));
+        console.log(
+            chalk.green(`✓ Found ${xcstringsFiles.length} .xcstrings file(s)`),
+        );
         console.log();
 
         const choices = xcstringsFiles.map((file) => ({
@@ -90,24 +95,33 @@ export async function init(): Promise<void> {
             choices,
         });
     } else {
-        console.log(chalk.dim('  No .xcstrings files found in current directory'));
+        console.log(
+            chalk.dim('  No .xcstrings files found in current directory'),
+        );
     }
 
     console.log();
 
     let selectedXcodeproj: string[] = [];
     if (xcodeprojDirs.length > 0) {
-        console.log(chalk.green(`✓ Found ${xcodeprojDirs.length} .xcodeproj director${xcodeprojDirs.length === 1 ? 'y' : 'ies'}`));
+        console.log(
+            chalk.green(
+                `✓ Found ${xcodeprojDirs.length} .xcodeproj director${xcodeprojDirs.length === 1 ? 'y' : 'ies'}`,
+            ),
+        );
         console.log();
 
         const choices = xcodeprojDirs.map((dir) => ({
-            name: chalk.white(relative(cwd, dir) || dir) + chalk.dim(` (${dir})`),
+            name:
+                chalk.white(relative(cwd, dir) || dir) + chalk.dim(` (${dir})`),
             value: relative(cwd, dir) || dir,
             checked: true,
         }));
 
         selectedXcodeproj = await checkbox({
-            message: chalk.bold('Select .xcodeproj directories for language detection:'),
+            message: chalk.bold(
+                'Select .xcodeproj directories for language detection:',
+            ),
             choices,
         });
     } else {
@@ -123,7 +137,9 @@ export async function init(): Promise<void> {
 
     console.log(chalk.cyan('  xcstringsPaths:'));
     if (selectedXCStrings.length > 0) {
-        selectedXCStrings.forEach((p) => console.log(chalk.white(`    • ${p}`)));
+        selectedXCStrings.forEach((p) =>
+            console.log(chalk.white(`    • ${p}`)),
+        );
     } else {
         console.log(chalk.dim('    (none)'));
     }
@@ -131,7 +147,9 @@ export async function init(): Promise<void> {
     console.log();
     console.log(chalk.cyan('  xcodeprojPaths:'));
     if (selectedXcodeproj.length > 0) {
-        selectedXcodeproj.forEach((p) => console.log(chalk.white(`    • ${p}`)));
+        selectedXcodeproj.forEach((p) =>
+            console.log(chalk.white(`    • ${p}`)),
+        );
     } else {
         console.log(chalk.dim('    (none)'));
     }
@@ -148,13 +166,15 @@ export async function init(): Promise<void> {
         return;
     }
 
-    const xcstringsArray = selectedXCStrings.length > 0
-        ? '\n' + selectedXCStrings.map((p) => `  - "${p}"`).join('\n')
-        : ' []';
+    const xcstringsArray =
+        selectedXCStrings.length > 0
+            ? '\n' + selectedXCStrings.map((p) => `  - "${p}"`).join('\n')
+            : ' []';
 
-    const xcodeprojArray = selectedXcodeproj.length > 0
-        ? '\n' + selectedXcodeproj.map((p) => `  - "${p}"`).join('\n')
-        : ' []';
+    const xcodeprojArray =
+        selectedXcodeproj.length > 0
+            ? '\n' + selectedXcodeproj.map((p) => `  - "${p}"`).join('\n')
+            : ' []';
 
     const config = `# Behavior for handling missing languages when adding strings.
 missingLanguagePolicy: "skip"
@@ -170,6 +190,10 @@ xcodeprojPaths:${xcodeprojArray}
 
     console.log();
     console.log(chalk.bold.green(`✓ Created ${INIT_FILE_NAME}`));
-    console.log(chalk.dim(`   Run ${chalk.cyan('xcstrings --help')} to see available commands.`));
+    console.log(
+        chalk.dim(
+            `   Run ${chalk.cyan('xcstrings --help')} to see available commands.`,
+        ),
+    );
     console.log();
 }

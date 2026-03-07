@@ -11,23 +11,37 @@ afterEach(async () => await cleanupTempFiles());
 
 describe('cli: heredoc stdin', () => {
     it('should accept JSON from stdin when --strings flag passed without value (heredoc)', async () => {
-        const stdin = JSON.stringify({ en: 'Hello', ja: 'こんにちは', 'zh-Hans': '你好，世界.' });
+        const stdin = JSON.stringify({
+            en: 'Hello',
+            ja: 'こんにちは',
+            'zh-Hans': '你好，世界.',
+        });
 
         const tempFile = await setupTempFile('no-strings.xcstrings');
 
         const node = process.execPath;
         const cliPath = resolve(process.cwd(), 'dist', 'index.js');
         const tempConfigPath = resolve(tempFile + '.config.json');
-        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+        await writeFile(
+            tempConfigPath,
+            JSON.stringify({ missingLanguagePolicy: 'include' }),
+            'utf-8',
+        );
         const args = [
-            '--enable-source-maps', cliPath,
+            '--enable-source-maps',
+            cliPath,
             'add',
-            '--key', 'greeting',
-            '--comment', 'Hello, World',
+            '--key',
+            'greeting',
+            '--comment',
+            'Hello, World',
             '--strings',
-            '--strings-format', 'json',
-            '--path', tempFile,
-            '--config', tempConfigPath
+            '--strings-format',
+            'json',
+            '--path',
+            tempFile,
+            '--config',
+            tempConfigPath,
         ];
         const child = spawn(node, args, { stdio: ['pipe', 'pipe', 'pipe'] });
         child.stdin.write(stdin);
@@ -35,11 +49,15 @@ describe('cli: heredoc stdin', () => {
         await new Promise<void>((resolvePromise, reject) => {
             let stdout = '';
             let stderr = '';
-            child.stdout.on('data', (chunk) => stdout += chunk);
-            child.stderr.on('data', (chunk) => stderr += chunk);
+            child.stdout.on('data', (chunk) => (stdout += chunk));
+            child.stderr.on('data', (chunk) => (stderr += chunk));
             child.on('exit', (code) => {
                 if (code !== 0) {
-                    reject(new Error(`Process exited with non-zero code ${code}. Stderr: ${stderr}`));
+                    reject(
+                        new Error(
+                            `Process exited with non-zero code ${code}. Stderr: ${stderr}`,
+                        ),
+                    );
                 } else {
                     resolvePromise();
                 }
@@ -48,9 +66,15 @@ describe('cli: heredoc stdin', () => {
 
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
         expect(content.strings).toHaveProperty('greeting');
-        expect(content.strings.greeting.localizations.en.stringUnit.value).toBe('Hello');
-        expect(content.strings.greeting.localizations.ja.stringUnit.value).toBe('こんにちは');
-        expect(content.strings.greeting.localizations['zh-Hans'].stringUnit.value).toBe('你好，世界.');
+        expect(content.strings.greeting.localizations.en.stringUnit.value).toBe(
+            'Hello',
+        );
+        expect(content.strings.greeting.localizations.ja.stringUnit.value).toBe(
+            'こんにちは',
+        );
+        expect(
+            content.strings.greeting.localizations['zh-Hans'].stringUnit.value,
+        ).toBe('你好，世界.');
     });
 
     it('should add text to specified language when --language is provided', async () => {
@@ -59,24 +83,39 @@ describe('cli: heredoc stdin', () => {
         const node = process.execPath;
         const cliPath = resolve(process.cwd(), 'dist', 'index.js');
         const tempConfigPath = resolve(tempFile + '.config.json');
-        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+        await writeFile(
+            tempConfigPath,
+            JSON.stringify({ missingLanguagePolicy: 'include' }),
+            'utf-8',
+        );
         const args = [
-            '--enable-source-maps', cliPath,
+            '--enable-source-maps',
+            cliPath,
             'add',
-            '--key', 'greeting-ja-only',
-            '--comment', 'Hello, World',
-            '--text', 'こんにちは',
-            '--language', 'ja',
-            '--path', tempFile,
-            '--config', tempConfigPath
+            '--key',
+            'greeting-ja-only',
+            '--comment',
+            'Hello, World',
+            '--text',
+            'こんにちは',
+            '--language',
+            'ja',
+            '--path',
+            tempFile,
+            '--config',
+            tempConfigPath,
         ];
         const child = spawn(node, args, { stdio: ['ignore', 'pipe', 'pipe'] });
         await new Promise<void>((resolvePromise, reject) => {
             let stderr = '';
-            child.stderr.on('data', (chunk) => stderr += chunk);
+            child.stderr.on('data', (chunk) => (stderr += chunk));
             child.on('exit', (code) => {
                 if (code !== 0) {
-                    reject(new Error(`Process exited with non-zero code ${code}. Stderr: ${stderr}`));
+                    reject(
+                        new Error(
+                            `Process exited with non-zero code ${code}. Stderr: ${stderr}`,
+                        ),
+                    );
                 } else {
                     resolvePromise();
                 }
@@ -85,15 +124,24 @@ describe('cli: heredoc stdin', () => {
 
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
         expect(content.strings).toHaveProperty('greeting-ja-only');
-        expect(content.strings['greeting-ja-only'].localizations.ja.stringUnit.value).toBe('こんにちは');
-        expect(content.strings['greeting-ja-only'].localizations.en).toBeUndefined();
+        expect(
+            content.strings['greeting-ja-only'].localizations.ja.stringUnit
+                .value,
+        ).toBe('こんにちは');
+        expect(
+            content.strings['greeting-ja-only'].localizations.en,
+        ).toBeUndefined();
     });
 
     it('adds multiple strings from heredoc-style payload without --key/--comment', async () => {
         const yaml = `greeting:\n  translations:\n    en: Hello\n    ja: こんにちは\n  comment: Greeting message\nfarewell:\n  en: Goodbye\n  comment: Farewell message\n`;
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const tempConfigPath = resolve(tempFile + '.config.json');
-        await writeFile(tempConfigPath, JSON.stringify({ missingLanguagePolicy: 'include' }), 'utf-8');
+        await writeFile(
+            tempConfigPath,
+            JSON.stringify({ missingLanguagePolicy: 'include' }),
+            'utf-8',
+        );
 
         await runAddCommand({
             path: tempFile,
@@ -107,10 +155,16 @@ describe('cli: heredoc stdin', () => {
 
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
         expect(content.strings.greeting.comment).toBe('Greeting message');
-        expect(content.strings.greeting.localizations.en.stringUnit.value).toBe('Hello');
-        expect(content.strings.greeting.localizations.ja.stringUnit.value).toBe('こんにちは');
+        expect(content.strings.greeting.localizations.en.stringUnit.value).toBe(
+            'Hello',
+        );
+        expect(content.strings.greeting.localizations.ja.stringUnit.value).toBe(
+            'こんにちは',
+        );
         expect(content.strings.farewell.comment).toBe('Farewell message');
-        expect(content.strings.farewell.localizations.en.stringUnit.value).toBe('Goodbye');
+        expect(content.strings.farewell.localizations.en.stringUnit.value).toBe(
+            'Goodbye',
+        );
     });
 
     it('warns and skips unsupported languages when missingLanguagePolicy=skip', async () => {
@@ -129,7 +183,9 @@ describe('cli: heredoc stdin', () => {
         });
 
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
-        expect(content.strings.greeting.localizations.en.stringUnit.value).toBe('Hello');
+        expect(content.strings.greeting.localizations.en.stringUnit.value).toBe(
+            'Hello',
+        );
         expect(content.strings.greeting.localizations.xx).toBeUndefined();
         expect(warnSpy).toHaveBeenCalled();
         warnSpy.mockRestore();

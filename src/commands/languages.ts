@@ -10,7 +10,10 @@ export function createLanguagesCommand(): CommandModule {
         command: 'languages',
         describe: 'List supported languages from xcodeproj or xcstrings',
         handler: async (argv) => {
-            const result = await languages(argv.path as string, argv.config as string | undefined);
+            const result = await languages(
+                argv.path as string,
+                argv.config as string | undefined,
+            );
             logger.info(result.join(' '));
         },
     } satisfies CommandModule;
@@ -24,7 +27,9 @@ export function getLanguagesFromXcodeproj(xcodeprojPath: string): string[] {
     return knownRegions.filter((lang: string) => lang !== 'Base').sort();
 }
 
-export async function getLanguagesFromXCStrings(xcstringsPath: string): Promise<string[]> {
+export async function getLanguagesFromXCStrings(
+    xcstringsPath: string,
+): Promise<string[]> {
     const xcstrings = await readXCStrings(xcstringsPath);
     const languages = new Set<string>();
 
@@ -48,7 +53,7 @@ export async function getLanguagesFromXCStrings(xcstringsPath: string): Promise<
 
 export async function languages(
     xcstringsPath: string,
-    configPath?: string
+    configPath?: string,
 ): Promise<string[]> {
     const { sourceLanguage } = await readXCStrings(xcstringsPath);
 

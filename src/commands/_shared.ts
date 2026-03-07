@@ -1,7 +1,12 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-export const LOCALIZATION_STATES = ['translated', 'needs_review', 'new', 'stale'] as const;
-export type LocalizationState = typeof LOCALIZATION_STATES[number];
+export const LOCALIZATION_STATES = [
+    'translated',
+    'needs_review',
+    'new',
+    'stale',
+] as const;
+export type LocalizationState = (typeof LOCALIZATION_STATES)[number];
 
 export interface XCStrings {
     sourceLanguage: string;
@@ -33,7 +38,10 @@ export async function readXCStrings(path: string): Promise<XCStrings> {
     return JSON.parse(content) as XCStrings;
 }
 
-export async function writeXCStrings(path: string, data: XCStrings): Promise<void> {
+export async function writeXCStrings(
+    path: string,
+    data: XCStrings,
+): Promise<void> {
     const json = JSON.stringify(data, null, 2);
     const formatted = formatXCStrings(json);
     await writeFile(path, formatted + '\n', 'utf-8');

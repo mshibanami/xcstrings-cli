@@ -1,7 +1,10 @@
 import { select } from '@inquirer/prompts';
 import { Config } from './config.js';
 
-export function findAliasPath(entries: (string | { alias: string; path: string })[] | undefined, alias: string): string | null {
+export function findAliasPath(
+    entries: (string | { alias: string; path: string })[] | undefined,
+    alias: string,
+): string | null {
     if (!entries || entries.length === 0) return null;
     for (const entry of entries) {
         if (typeof entry !== 'string' && entry.alias === alias) {
@@ -18,7 +21,8 @@ export async function resolveXCStringsPath(
 ): Promise<string> {
     const entries = config?.xcstringsPaths;
 
-    const hasAliasEntries = entries?.some((entry) => typeof entry !== 'string') ?? false;
+    const hasAliasEntries =
+        entries?.some((entry) => typeof entry !== 'string') ?? false;
 
     const aliasFromPrefix = requestedPath.startsWith('alias:')
         ? requestedPath.slice('alias:'.length)
@@ -37,7 +41,8 @@ export async function resolveXCStringsPath(
         return resolvedFromBareAlias;
     }
 
-    const looksLikeAlias = !requestedPath.includes('/') && !requestedPath.endsWith('.xcstrings');
+    const looksLikeAlias =
+        !requestedPath.includes('/') && !requestedPath.endsWith('.xcstrings');
     if (hasAliasEntries && looksLikeAlias) {
         throw new Error(`Unknown alias: ${requestedPath}`);
     }
@@ -52,7 +57,10 @@ export async function resolveXCStringsPath(
             if (typeof entry === 'string') {
                 return { name: entry, value: entry };
             } else {
-                return { name: `${entry.alias} (${entry.path})`, value: entry.path };
+                return {
+                    name: `${entry.alias} (${entry.path})`,
+                    value: entry.path,
+                };
             }
         });
 

@@ -33,7 +33,9 @@ export interface Config {
     missingLanguagePolicy?: MissingLanguagePolicy;
 }
 
-export async function loadConfig(explicitPath?: string): Promise<Config | null> {
+export async function loadConfig(
+    explicitPath?: string,
+): Promise<Config | null> {
     if (explicitPath) {
         const result = await explorer.load(explicitPath);
         return result ? (result.config as Config) : null;
