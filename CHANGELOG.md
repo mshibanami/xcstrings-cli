@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.7.0
+
+### Minor Changes
+
+- Added `export` subcommand
+
 ## 2.6.0
 
 ### Minor Changes
