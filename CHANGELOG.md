@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.7.2
+
+### Patch Changes
+
+- Improved the exported file format of strings
+
 ## 2.7.1
 
 ### Patch Changes
