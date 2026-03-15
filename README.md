@@ -126,7 +126,7 @@ xcs strings
 # goodMorning:
 #   en: "Good morning."
 #   ja: "おはようございます。"
-# ... etc.
+# ...
 
 # List strings filtered by key
 xcs strings --key good*
@@ -143,7 +143,7 @@ xcs strings --languages en
 #   en: "Goodbye, World."
 # goodMorning:
 #   en: "Good morning."
-# ... etc.
+# ...
 
 # List strings with custom format
 xcs strings --format "[{{language}}] {{key}} => {{text}}"
@@ -151,7 +151,7 @@ xcs strings --format "[{{language}}] {{key}} => {{text}}"
 # [ja] helloWorld => "こんにちは、世界。"
 # [en] goodbyeWorld => "Goodbye, World."
 # [ja] goodbyeWorld => "さようなら、世界。"
-# ... etc.
+# ...
 ```
 
 **Export strings to _xcstrings_ or traditional _strings_ files:**
