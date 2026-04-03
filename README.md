@@ -126,7 +126,7 @@ xcs strings
 # goodMorning:
 #   en: "Good morning."
 #   ja: "おはようございます。"
-# ... etc.
+# ...
 
 # List strings filtered by key
 xcs strings --key good*
@@ -143,7 +143,7 @@ xcs strings --languages en
 #   en: "Goodbye, World."
 # goodMorning:
 #   en: "Good morning."
-# ... etc.
+# ...
 
 # List strings with custom format
 xcs strings --format "[{{language}}] {{key}} => {{text}}"
@@ -151,7 +151,7 @@ xcs strings --format "[{{language}}] {{key}} => {{text}}"
 # [ja] helloWorld => "こんにちは、世界。"
 # [en] goodbyeWorld => "Goodbye, World."
 # [ja] goodbyeWorld => "さようなら、世界。"
-# ... etc.
+# ...
 ```
 
 **Export strings to _xcstrings_ or traditional _strings_ files:**
@@ -299,8 +299,8 @@ These are the settings you can specify in the config file:
 
 - **missingLanguagePolicy**: `string` (Optional, default: `skip`)
     - How to handle translations for languages that are not included in the `xcs languages` output when adding strings. Options are:
-    - `skip`: Only add translations for languages included in the `xcs languages` output. (Default)
-    - `include`: Add translations even when they are not recognized by the Xcode project or xcs language list.
+        - `skip`: Only add translations for languages included in the `xcs languages` output. (Default)
+        - `include`: Add translations even when they are not recognized by the Xcode project or xcs language list.
 - **xcodeprojPaths**: `string[]` (Optional)
     - Paths to Xcode project files (`.xcodeproj`) used to detect supported languages.
     - If not specified, `xcs` will only check the xcstrings file to detect supported languages.
