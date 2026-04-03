@@ -300,7 +300,7 @@ Imports strings from `.xcstrings` or `.strings` files into a target `.xcstrings`
     - Source files to import. Supports glob patterns.
 - `--target, -t`: `string` (Optional)
     - The target xcstrings file path or alias.
-- `--language, -l`: `string` (Optional)
+- `--language`: `string` (Optional)
     - Explicit language for `.strings` files if it cannot be detected from the parent directory (e.g. `en.lproj`).
 - `--source-language`: `string` (Optional)
     - The source language for the new xcstrings file if the target file does not exist.
@@ -309,6 +309,10 @@ Imports strings from `.xcstrings` or `.strings` files into a target `.xcstrings`
         - `source-first`: (Default) Overwrite existing keys with source values.
         - `destination-first`: Keep existing keys and skip source values.
         - `error`: Stop with an error if a key collision occurs.
+- Filtering options from the `strings` command are also supported:
+    - `--key`, `--key-glob`, `--key-regex`, `--key-substring`
+    - `--text`, `--text-glob`, `--text-regex`, `--text-substring`
+    - `--languages, -l`
 
 ## Configuration file
 

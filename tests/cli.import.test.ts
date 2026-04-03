@@ -535,4 +535,116 @@ describe('cli: import command', () => {
         const result = JSON.parse(await readFile(targetFile, 'utf-8'));
         expect(result.strings.hello.extractionState).toBe('migrated');
     });
+
+    describe('filtering options', () => {
+        it('filters strings by --key', async () => {
+            const tempDir = getTempPath('import-key-filter');
+            await mkdir(tempDir, { recursive: true });
+
+            const sourceFile = join(tempDir, 'en.lproj', 'Localizable.strings');
+            await mkdir(dirname(sourceFile), { recursive: true });
+            await writeFile(
+                sourceFile,
+                '"goodMorning" = "Good Morning";\n"goodNight" = "Good Night";\n"hello" = "Hello";',
+                'utf8',
+            );
+
+            const targetFile = join(tempDir, 'Localizable.xcstrings');
+            const { code } = await runImport([sourceFile], targetFile, [
+                '--source-language',
+                'en',
+                '--key',
+                'good*',
+            ]);
+
+            expect(code).toBe(0);
+            const content = JSON.parse(await readFile(targetFile, 'utf-8'));
+            expect(content.strings).toHaveProperty('goodMorning');
+            expect(content.strings).toHaveProperty('goodNight');
+            expect(content.strings).not.toHaveProperty('hello');
+        });
+
+        it('filters strings by --text', async () => {
+            const tempDir = getTempPath('import-text-filter');
+            await mkdir(tempDir, { recursive: true });
+
+            const sourceFile = join(tempDir, 'ja.lproj', 'Localizable.strings');
+            await mkdir(dirname(sourceFile), { recursive: true });
+            await writeFile(
+                sourceFile,
+                '"a" = "こんにちは世界";\n"b" = "さようなら世界";\n"c" = "こんばんは";',
+                'utf8',
+            );
+
+            const targetFile = join(tempDir, 'Localizable.xcstrings');
+            const { code } = await runImport([sourceFile], targetFile, [
+                '--source-language',
+                'en',
+                '--text-substring',
+                '世界',
+            ]);
+
+            expect(code).toBe(0);
+            const content = JSON.parse(await readFile(targetFile, 'utf-8'));
+            expect(content.strings).toHaveProperty('a');
+            expect(content.strings).toHaveProperty('b');
+            expect(content.strings).not.toHaveProperty('c');
+        });
+
+        it('filters target languages by --languages', async () => {
+            const tempDir = getTempPath('import-languages-filter');
+            await mkdir(tempDir, { recursive: true });
+
+            const sourceFile = join(tempDir, 'Source.xcstrings');
+            await writeFile(
+                sourceFile,
+                JSON.stringify({
+                    sourceLanguage: 'en',
+                    version: '1.0',
+                    strings: {
+                        hello: {
+                            localizations: {
+                                en: {
+                                    stringUnit: {
+                                        value: 'Hello',
+                                        state: 'translated',
+                                    },
+                                },
+                                ja: {
+                                    stringUnit: {
+                                        value: 'こんにちは',
+                                        state: 'translated',
+                                    },
+                                },
+                                fr: {
+                                    stringUnit: {
+                                        value: 'Bonjour',
+                                        state: 'translated',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }),
+            );
+
+            const targetFile = join(tempDir, 'Localizable.xcstrings');
+            const { code, stderr } = await runImport([sourceFile], targetFile, [
+                '--source-language',
+                'en',
+                '--languages',
+                'en',
+                'ja',
+            ]);
+
+            if (code !== 0) console.error(stderr);
+            expect(code).toBe(0);
+            const content = JSON.parse(await readFile(targetFile, 'utf-8'));
+            expect(content.strings.hello.localizations).toHaveProperty('en');
+            expect(content.strings.hello.localizations).toHaveProperty('ja');
+            expect(content.strings.hello.localizations).not.toHaveProperty(
+                'fr',
+            );
+        });
+    });
 });

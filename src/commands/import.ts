@@ -5,6 +5,12 @@ import { input } from '@inquirer/prompts';
 import fg from 'fast-glob';
 import { parseStrings } from '../utils/strings-parser.js';
 import { mergeTranslationUnit } from '../utils/unit-merger.js';
+import {
+    addFilterOptions,
+    checkFilterOptions,
+    extractFilterOptions,
+    buildMatcher,
+} from '../utils/filters.js';
 import chalk from 'chalk';
 import {
     readXCStrings,
@@ -43,7 +49,7 @@ export function createImportCommand(): CommandModule {
         describe:
             'Import keys from .xcstrings or .strings files into a target .xcstrings file',
         builder: (yargs) =>
-            yargs
+            addFilterOptions(yargs)
                 .positional('sources', {
                     describe: 'Source files to import (supports globs)',
                     type: 'string',
@@ -61,14 +67,22 @@ export function createImportCommand(): CommandModule {
                     describe: 'Source language for the new xcstrings file',
                 })
                 .option('language', {
-                    alias: 'l',
                     type: 'string',
                     describe: 'Explicit language for .strings files',
+                })
+                .option('languages', {
+                    type: 'string',
+                    array: true,
+                    alias: 'l',
+                    describe: 'Include only these languages',
                 })
                 .option('merge-policy', {
                     type: 'string',
                     choices: ['source-first', 'destination-first', 'error'],
                     describe: 'How to handle existing keys in the target file',
+                })
+                .check((argv: any) => {
+                    return checkFilterOptions(argv);
                 }),
         handler: async (argv) => {
             const sources = argv.sources as string[];
@@ -89,6 +103,9 @@ export function createImportCommand(): CommandModule {
                 (argv['merge-policy'] as ImportMergePolicy) ||
                 (config?.importMergePolicy as ImportMergePolicy) ||
                 'source-first';
+
+            const { keyFilter, textFilter } = extractFilterOptions(argv);
+            const languages = argv.languages as string[] | undefined;
 
             const resolvedSources = await fg(sources, { absolute: true });
             if (resolvedSources.length === 0) {
@@ -123,7 +140,14 @@ export function createImportCommand(): CommandModule {
             for (const sourcePath of resolvedSources) {
                 const extension = extname(sourcePath).toLowerCase();
                 if (extension === '.xcstrings') {
-                    await importXCStrings(sourcePath, targetData, mergePolicy);
+                    await importXCStrings(
+                        sourcePath,
+                        targetData,
+                        mergePolicy,
+                        keyFilter,
+                        textFilter,
+                        languages,
+                    );
                 } else if (extension === '.strings') {
                     const language =
                         explicitLanguage || getLanguageFromPath(sourcePath);
@@ -138,6 +162,9 @@ export function createImportCommand(): CommandModule {
                         targetData,
                         language,
                         mergePolicy,
+                        keyFilter,
+                        textFilter,
+                        languages,
                     );
                 } else {
                     logger.warn(
@@ -163,9 +190,41 @@ async function importXCStrings(
     sourcePath: string,
     targetData: XCStrings,
     mergePolicy: ImportMergePolicy,
+    keyFilter?: any,
+    textFilter?: any,
+    languages?: string[],
 ) {
     const sourceData = await readXCStrings(sourcePath);
+    const matchKey = buildMatcher(keyFilter);
+    const matchText = buildMatcher(textFilter);
+    const languageSet = languages ? new Set(languages) : null;
+
     for (const [key, sourceUnit] of Object.entries(sourceData.strings ?? {})) {
+        if (!matchKey(key)) continue;
+
+        const newUnit = JSON.parse(JSON.stringify(sourceUnit)) as XCStringUnit;
+
+        if (newUnit.localizations) {
+            for (const lang of Object.keys(newUnit.localizations)) {
+                if (languageSet && !languageSet.has(lang)) {
+                    delete newUnit.localizations[lang];
+                    continue;
+                }
+                const val =
+                    newUnit.localizations[lang]?.stringUnit?.value ?? '';
+                if (!matchText(val)) {
+                    delete newUnit.localizations[lang];
+                }
+            }
+        }
+
+        if (
+            newUnit.localizations &&
+            Object.keys(newUnit.localizations).length === 0
+        ) {
+            continue;
+        }
+
         if (targetData.strings[key]) {
             if (mergePolicy === 'error') {
                 throw new Error(`Key already exists in target: ${key}`);
@@ -176,7 +235,7 @@ async function importXCStrings(
         }
 
         const targetUnit = targetData.strings[key];
-        targetData.strings[key] = mergeTranslationUnit(targetUnit, sourceUnit, {
+        targetData.strings[key] = mergeTranslationUnit(targetUnit, newUnit, {
             mergePolicy,
             keyName: key,
             sortLocalizations: 'auto',
@@ -189,12 +248,27 @@ async function importStrings(
     targetData: XCStrings,
     language: string,
     mergePolicy: ImportMergePolicy,
+    keyFilter?: any,
+    textFilter?: any,
+    languages?: string[],
 ) {
+    const languageSet = languages ? new Set(languages) : null;
+    if (languageSet && !languageSet.has(language)) {
+        return;
+    }
+
+    const matchKey = buildMatcher(keyFilter);
+    const matchText = buildMatcher(textFilter);
+
     const content = await readFile(sourcePath);
     const parsed = parseStrings(content);
 
     for (const [key, entry] of Object.entries(parsed)) {
+        if (!matchKey(key)) continue;
+
         let stringValue = entry.text;
+        if (!matchText(stringValue)) continue;
+
         let comment = entry.comment;
 
         if (
