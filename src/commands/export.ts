@@ -18,7 +18,11 @@ import {
 } from 'node:fs/promises';
 
 export type OutputFormat = 'auto' | 'xcstrings' | 'strings';
-export type MergePolicy = 'error' | 'force' | 'output-first' | 'existing-first';
+export type ExportMergePolicy =
+    | 'error'
+    | 'force'
+    | 'output-first'
+    | 'existing-first';
 
 async function fileExists(path: string): Promise<boolean> {
     try {
@@ -126,7 +130,7 @@ export function createExportCommand(): CommandModule {
             const { keyFilter, textFilter } = extractFilterOptions(argv);
 
             const mergePolicy =
-                (argv['merge-policy'] as MergePolicy) || 'error';
+                (argv['merge-policy'] as ExportMergePolicy) || 'error';
 
             await doExport({
                 sourcePath: argv.path as string,
@@ -145,7 +149,7 @@ export async function doExport(opts: {
     sourcePath: string;
     outpath: string;
     outputFormat: 'xcstrings' | 'strings';
-    mergePolicy: MergePolicy;
+    mergePolicy: ExportMergePolicy;
     keyFilter?: any;
     textFilter?: any;
     languages?: string[];

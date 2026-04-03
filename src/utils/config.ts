@@ -26,16 +26,19 @@ const explorer = cosmiconfig(moduleName, {
     cache: false,
 });
 
+import type { ExportMergePolicy } from '../commands/export.js';
+import type { ImportMergePolicy } from '../commands/import.js';
+
 export type MissingLanguagePolicy = 'skip' | 'include';
 
 export interface Config {
     xcstringsPaths?: (string | { alias: string; path: string })[];
     xcodeprojPaths?: string[];
     missingLanguagePolicy?: MissingLanguagePolicy;
-    exportMergePolicy?: string;
-    importMergePolicy?: string;
+    exportMergePolicy?: ExportMergePolicy;
+    importMergePolicy?: ImportMergePolicy;
     /** @deprecated Use exportMergePolicy instead */
-    mergePolicy?: string;
+    mergePolicy?: ExportMergePolicy;
 }
 
 export async function loadConfig(
