@@ -481,11 +481,16 @@ describe('cli: import command', () => {
                     hello: {
                         extractionState: 'manual',
                         localizations: {
-                            en: { stringUnit: { value: 'Hello', state: 'translated' } }
-                        }
-                    }
-                }
-            })
+                            en: {
+                                stringUnit: {
+                                    value: 'Hello',
+                                    state: 'translated',
+                                },
+                            },
+                        },
+                    },
+                },
+            }),
         );
 
         const sourceFile = join(tempDir, 'ja.lproj', 'Localizable.strings');

@@ -11,12 +11,7 @@ export function parseStrings(
 ): Record<string, StringsEntry> {
     let rawContent: string;
     if (Buffer.isBuffer(content)) {
-        // Detect encoding
-        if (
-            content.length >= 2 &&
-            content[0] === 0xff &&
-            content[1] === 0xfe
-        ) {
+        if (content.length >= 2 && content[0] === 0xff && content[1] === 0xfe) {
             rawContent = iconv.decode(content, 'utf16-le');
         } else if (
             content.length >= 2 &&
