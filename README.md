@@ -344,9 +344,9 @@ These are the settings you can specify in the config file:
         - `skip`: Only add translations for languages included in the `xcs languages` output. (Default)
         - `include`: Add translations even when they are not recognized by the Xcode project or xcs language list.
 - **exportMergePolicy**: `string` (Optional)
-    - Defines the handling strategy for merging keys or translations when exporting strings. (e.g. `keep-existing`, `replace`, etc., depending on tool implementation)
+    - Defines the handling strategy for merging keys or translations when exporting strings. See the `--merge-policy` option of the [export command](#export-command) for available values.
 - **importMergePolicy**: `string` (Optional)
-    - Defines the handling strategy for merging keys or translations when importing strings.
+    - Defines the handling strategy for merging keys or translations when importing strings. See the `--merge-policy` option of the [import command](#import-command) for available values.
 - **xcodeprojPaths**: `string[]` (Optional)
     - Paths to Xcode project files (`.xcodeproj`) used to detect supported languages.
     - If not specified, `xcs` will only check the xcstrings file to detect supported languages.
