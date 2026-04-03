@@ -29,9 +29,9 @@ async function fileExists(path: string): Promise<boolean> {
 
 function getLanguageFromPath(path: string): string | null {
     const parts = path.split('/');
-    const lproj = parts.find((p) => p.endsWith('.lproj'));
-    if (lproj) {
-        return lproj.replace('.lproj', '');
+    const lprojIndex = parts.findLastIndex((p) => p.endsWith('.lproj'));
+    if (lprojIndex !== -1) {
+        return parts[lprojIndex].replace('.lproj', '');
     }
     return null;
 }
@@ -107,7 +107,7 @@ export function createImportCommand(): CommandModule {
                     sourceLanguage = await input({
                         message:
                             'Enter the source language for the new xcstrings file:',
-                        default: 'en',
+                        default: 'en-US',
                     });
                 }
                 targetData = {
@@ -224,9 +224,8 @@ async function importStrings(
             }
         }
 
-        const unit: XCStringUnit = targetData.strings[key] || {
-            extractionState: 'migrated',
-        };
+        const unit: XCStringUnit = targetData.strings[key] || {};
+        unit.extractionState = 'migrated';
 
         if (comment) {
             unit.comment = comment;

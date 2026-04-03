@@ -1,20 +1,18 @@
 declare module 'i18n-strings-files' {
     export interface ParseOptions {
-        wantComments?: boolean;
+        wantsComments?: boolean;
     }
 
-    export interface StringEntry {
-        text: string;
-        comment?: string;
+    export interface StringsDict {
+        [key: string]: string | { text: string; comment?: string };
     }
 
     export function parse(
         input: string | Buffer,
         options?: ParseOptions,
-    ): Record<string, string | StringEntry>;
-
-    export function compile(
-        input: Record<string, string | StringEntry>,
-        options?: { wantComments?: boolean },
-    ): string;
+    ): StringsDict;
+    export function readFileSync(
+        filename: string,
+        options?: string | (ParseOptions & { encoding?: string }),
+    ): StringsDict;
 }

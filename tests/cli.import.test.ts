@@ -386,4 +386,115 @@ describe('cli: import command', () => {
             'Line 1\nLine 2\tTabbed "Quote" Done.',
         );
     });
+
+    it('handles source language matching the imported language', async () => {
+        const tempDir = getTempPath('import-source-lang-match');
+        await mkdir(tempDir, { recursive: true });
+        const sourceFile = join(tempDir, 'en.lproj', 'Localizable.strings');
+        await mkdir(dirname(sourceFile), { recursive: true });
+        await writeFile(sourceFile, '"hello" = "Hello Value";', 'utf8');
+
+        const targetFile = join(tempDir, 'Localizable.xcstrings');
+        // Create target with sourceLanguage: en
+        await writeFile(
+            targetFile,
+            JSON.stringify({
+                sourceLanguage: 'en',
+                strings: {},
+            }),
+        );
+
+        const { code } = await runImport([sourceFile], targetFile);
+
+        expect(code).toBe(0);
+        const content = JSON.parse(await readFile(targetFile, 'utf-8'));
+        // Even if it's the source language, it should have the specified states
+        expect(content.strings.hello.extractionState).toBe('migrated');
+        expect(content.strings.hello.localizations.en.stringUnit.state).toBe(
+            'translated',
+        );
+        expect(content.strings.hello.localizations.en.stringUnit.value).toBe(
+            'Hello Value',
+        );
+    });
+
+    it('resolves target alias from config', async () => {
+        const tempDir = getTempPath('import-alias');
+        await mkdir(tempDir, { recursive: true });
+
+        const configFile = join(tempDir, 'xcstrings-cli.json');
+        const targetFile = join(tempDir, 'Localizable.xcstrings');
+        await writeFile(
+            configFile,
+            JSON.stringify({
+                xcstringsPaths: [{ alias: 'main', path: targetFile }],
+            }),
+        );
+
+        const sourceFile = join(tempDir, 'ja.lproj', 'Localizable.strings');
+        await mkdir(dirname(sourceFile), { recursive: true });
+        await writeFile(sourceFile, '"test" = "value";', 'utf8');
+
+        const { code } = await runImport([sourceFile], 'main', [
+            '--config',
+            configFile,
+            '--source-language',
+            'en',
+        ]);
+
+        expect(code).toBe(0);
+        expect(await pathExists(targetFile)).toBe(true);
+    });
+
+    it('handles UTF-16 encoded .strings files', async () => {
+        const tempDir = getTempPath('import-utf16');
+        await mkdir(tempDir, { recursive: true });
+        const sourceFile = join(tempDir, 'ja.lproj', 'Localizable.strings');
+        await mkdir(dirname(sourceFile), { recursive: true });
+
+        // Create UTF-16 LE with BOM
+        const content = Buffer.concat([
+            Buffer.from([0xff, 0xfe]),
+            Buffer.from('"utf16" = "value";', 'utf16le'),
+        ]);
+        await writeFile(sourceFile, content);
+
+        const targetFile = join(tempDir, 'Localizable.xcstrings');
+        await runImport([sourceFile], targetFile, ['--source-language', 'en']);
+
+        const result = JSON.parse(await readFile(targetFile, 'utf-8'));
+        expect(result.strings.utf16.localizations.ja.stringUnit.value).toBe(
+            'value',
+        );
+    });
+
+    it('sets extractionState to migrated even for existing keys', async () => {
+        const tempDir = getTempPath('import-extraction-state-override');
+        await mkdir(tempDir, { recursive: true });
+
+        const targetFile = join(tempDir, 'Localizable.xcstrings');
+        await writeFile(
+            targetFile,
+            JSON.stringify({
+                sourceLanguage: 'en',
+                strings: {
+                    hello: {
+                        extractionState: 'manual',
+                        localizations: {
+                            en: { stringUnit: { value: 'Hello', state: 'translated' } }
+                        }
+                    }
+                }
+            })
+        );
+
+        const sourceFile = join(tempDir, 'ja.lproj', 'Localizable.strings');
+        await mkdir(dirname(sourceFile), { recursive: true });
+        await writeFile(sourceFile, '"hello" = "こんにちは";', 'utf8');
+
+        await runImport([sourceFile], targetFile);
+
+        const result = JSON.parse(await readFile(targetFile, 'utf-8'));
+        expect(result.strings.hello.extractionState).toBe('migrated');
+    });
 });
