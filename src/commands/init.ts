@@ -9,6 +9,7 @@ import {
 } from '../utils/swift-package.js';
 import { mkdir } from 'node:fs/promises';
 import { isMatch } from 'micromatch';
+import { writeXCStrings } from './_shared.js';
 
 const INIT_FILE_NAME = 'xcstrings-cli.yaml';
 
@@ -194,19 +195,12 @@ export async function init(): Promise<void> {
                     default: swiftPackageInfo.defaultLocalization || 'en',
                 });
 
-                const dir = dirname(fullManualPath);
-                await mkdir(dir, { recursive: true });
-
                 const initialContent = {
                     sourceLanguage: defaultLang || 'en',
                     strings: {},
                     version: '1.0',
                 };
-                await writeFile(
-                    fullManualPath,
-                    JSON.stringify(initialContent, null, 2),
-                    'utf-8',
-                );
+                await writeXCStrings(fullManualPath, initialContent);
                 console.log(
                     chalk.green(
                         `✓ Created new .xcstrings file at ${manualPath}`,

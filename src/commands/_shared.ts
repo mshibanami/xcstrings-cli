@@ -1,4 +1,5 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
 
 export const LOCALIZATION_STATES = [
     'translated',
@@ -58,6 +59,8 @@ export async function writeXCStrings(
     path: string,
     data: XCStrings,
 ): Promise<void> {
+    const dir = dirname(path);
+    await mkdir(dir, { recursive: true });
     const json = JSON.stringify(data, null, 2);
     const formatted = formatXCStrings(json);
     await writeFile(path, formatted + '\n', 'utf-8');

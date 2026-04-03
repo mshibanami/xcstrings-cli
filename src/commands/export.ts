@@ -252,7 +252,6 @@ export async function doExport(opts: {
             }
         }
 
-        await mkdir(dirname(resolvedPath), { recursive: true });
         await writeXCStrings(resolvedPath, outData);
     } else {
         const data = await readXCStrings(opts.sourcePath);
