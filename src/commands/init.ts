@@ -251,7 +251,9 @@ export async function init(): Promise<void> {
         ];
 
         const xcodeprojSelection = await select({
-            message: chalk.bold('Select how to add another .xcodeproj directory:'),
+            message: chalk.bold(
+                'Select how to add another .xcodeproj directory:',
+            ),
             choices: xcodeprojChoices,
         });
 
