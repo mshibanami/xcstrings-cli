@@ -1,7 +1,7 @@
 import { CommandModule } from 'yargs';
-import { resolve, dirname, basename, extname } from 'node:path';
-import { readFile, writeFile, stat, mkdir } from 'node:fs/promises';
-import { select, input } from '@inquirer/prompts';
+import { resolve, dirname, extname } from 'node:path';
+import { readFile, stat, mkdir } from 'node:fs/promises';
+import { input } from '@inquirer/prompts';
 import fg from 'fast-glob';
 import { parseStrings } from '../utils/strings-parser.js';
 import { mergeTranslationUnit } from '../utils/unit-merger.js';
@@ -11,7 +11,6 @@ import {
     writeXCStrings,
     XCStrings,
     XCStringUnit,
-    LocalizationState,
     sortXCStringsKeys,
 } from './_shared.js';
 import { loadConfig } from '../utils/config.js';

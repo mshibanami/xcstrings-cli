@@ -125,7 +125,8 @@ export function createExportCommand(): CommandModule {
 
             const { keyFilter, textFilter } = extractFilterOptions(argv);
 
-            const mergePolicy = (argv['merge-policy'] as MergePolicy) || 'error';
+            const mergePolicy =
+                (argv['merge-policy'] as MergePolicy) || 'error';
 
             await doExport({
                 sourcePath: argv.path as string,
