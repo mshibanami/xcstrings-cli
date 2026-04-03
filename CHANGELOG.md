@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.8.2
+
+### Patch Changes
+
+- 54ce402: Update dependencies
+
 ## 2.8.1
 
 ### Patch Changes
