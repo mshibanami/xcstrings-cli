@@ -183,11 +183,7 @@ export async function doExport(opts: {
                 opts.mergePolicy === 'output-first'
             ) {
                 try {
-                    const existingContent = await readFile(
-                        resolvedPath,
-                        'utf8',
-                    );
-                    outData = JSON.parse(existingContent);
+                    outData = await readXCStrings(resolvedPath);
                     outData.strings = outData.strings ?? {};
                 } catch {
                     // Ignore parsing errors, assume empty or unreadable

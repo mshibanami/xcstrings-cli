@@ -108,7 +108,5 @@ function extractPackageName(content: string): string | undefined {
 }
 
 function stripComments(content: string): string {
-    return content
-        .replace(/\/\*[\s\S]*?\*\//g, '')
-        .replace(/\/\/.*/g, '');
+    return content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
 }

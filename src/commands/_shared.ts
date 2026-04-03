@@ -13,6 +13,7 @@ export interface XCStrings {
     sourceLanguage: string;
     strings: Record<string, XCStringUnit>;
     version?: string;
+    _hasTrailingNewline?: boolean;
 }
 
 export interface XCStringUnit {
@@ -36,7 +37,9 @@ export interface LocalizationPayload {
 
 export async function readXCStrings(path: string): Promise<XCStrings> {
     const content = await readFile(path, 'utf-8');
-    return JSON.parse(content) as XCStrings;
+    const data = JSON.parse(content) as XCStrings;
+    data._hasTrailingNewline = content.endsWith('\n');
+    return data;
 }
 
 export function sortXCStringsKeys(
@@ -61,9 +64,17 @@ export async function writeXCStrings(
 ): Promise<void> {
     const dir = dirname(path);
     await mkdir(dir, { recursive: true });
-    const json = JSON.stringify(data, null, 2);
+    const json = JSON.stringify(
+        data,
+        (key, value) => {
+            if (key === '_hasTrailingNewline') return undefined;
+            return value;
+        },
+        2,
+    );
     const formatted = formatXCStrings(json);
-    await writeFile(path, formatted + '\n', 'utf-8');
+    const newline = data._hasTrailingNewline ?? false;
+    await writeFile(path, formatted + (newline ? '\n' : ''), 'utf-8');
 }
 
 export function formatXCStrings(json: string): string {
