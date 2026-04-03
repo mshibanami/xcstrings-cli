@@ -19,7 +19,7 @@ afterEach(async () => await cleanupTempFiles());
 
 async function runImport(
     sources: string[],
-    target: string,
+    target?: string,
     extraArgs: string[] = [],
 ) {
     const args = [
@@ -27,8 +27,7 @@ async function runImport(
         cliPath,
         'import',
         ...sources,
-        '--target',
-        target,
+        ...(target ? ['--target', target] : []),
         ...extraArgs,
     ];
     const child = spawn(node, args, { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -242,6 +241,40 @@ describe('cli: import command', () => {
 
         expect(code).not.toBe(0);
         expect(stderr).toMatch(/already has localization/);
+    });
+
+    it('uses first path from config as default target when --target is missing', async () => {
+        const tempDir = getTempPath('import-default-target');
+        await mkdir(tempDir, { recursive: true });
+
+        const targetFile = join(tempDir, 'DefaultTarget.xcstrings');
+        const configPath = join(tempDir, 'config.json');
+
+        await writeFile(
+            configPath,
+            JSON.stringify({
+                xcstringsPaths: [targetFile],
+            }),
+        );
+
+        const sourceFile = join(tempDir, 'ja.lproj', 'Localizable.strings');
+        await mkdir(dirname(sourceFile), { recursive: true });
+        await writeFile(sourceFile, '"hello" = "こんにちは";', 'utf8');
+
+        const { code } = await runImport([sourceFile], undefined, [
+            '--config',
+            configPath,
+            '--source-language',
+            'en',
+        ]);
+
+        expect(code).toBe(0);
+        expect(await pathExists(targetFile)).toBe(true);
+
+        const content = JSON.parse(await readFile(targetFile, 'utf-8'));
+        expect(content.strings.hello.localizations.ja.stringUnit.value).toBe(
+            'こんにちは',
+        );
     });
 
     it('imports from another .xcstrings file', async () => {

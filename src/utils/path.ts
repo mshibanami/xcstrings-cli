@@ -15,11 +15,19 @@ export function findAliasPath(
 }
 
 export async function resolveXCStringsPath(
-    requestedPath: string,
+    requestedPath: string | undefined,
     config: Config | null,
     defaultPath: string,
 ): Promise<string> {
     const entries = config?.xcstringsPaths;
+
+    if (!requestedPath) {
+        if (entries && entries.length > 0) {
+            const entry = entries[0];
+            return typeof entry === 'string' ? entry : entry.path;
+        }
+        return defaultPath;
+    }
 
     const hasAliasEntries =
         entries?.some((entry) => typeof entry !== 'string') ?? false;

@@ -53,7 +53,7 @@ export function createImportCommand(): CommandModule {
                     alias: 't',
                     type: 'string',
                     describe: 'Target xcstrings file (path or alias)',
-                    demandOption: true,
+                    demandOption: false,
                 })
                 .option('source-language', {
                     type: 'string',
@@ -71,7 +71,7 @@ export function createImportCommand(): CommandModule {
                 }),
         handler: async (argv) => {
             const sources = argv.sources as string[];
-            const targetAttr = argv.target as string;
+            const targetAttr = argv.target as string | undefined;
             const sourceLanguageOpt = argv['source-language'] as
                 | string
                 | undefined;
