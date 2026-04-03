@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  i18n-strings-files:
+    hash: 43dad6cc7b6c6233b33dc248ecc77a15194164ae8285dd441571fc5104c7789c
+    path: patches/i18n-strings-files.patch
+
 importers:
 
   .:
@@ -25,7 +30,7 @@ importers:
         version: 3.3.3
       i18n-strings-files:
         specifier: ^2.0.0
-        version: 2.0.0
+        version: 2.0.0(patch_hash=43dad6cc7b6c6233b33dc248ecc77a15194164ae8285dd441571fc5104c7789c)
       iconv:
         specifier: ^3.0.1
         version: 3.0.1
@@ -2195,7 +2200,7 @@ snapshots:
 
   human-id@4.1.3: {}
 
-  i18n-strings-files@2.0.0:
+  i18n-strings-files@2.0.0(patch_hash=43dad6cc7b6c6233b33dc248ecc77a15194164ae8285dd441571fc5104c7789c):
     dependencies:
       iconv: 3.0.1
 

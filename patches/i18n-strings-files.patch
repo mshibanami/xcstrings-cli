@@ -1,0 +1,46 @@
+diff --git a/index.js b/index.js
+index 7bc83426872d315206237988267b2958cdeac7c9..78d9b778729aed4db6074cd1781a75304ae07f1e 100644
+--- a/index.js
++++ b/index.js
+@@ -4,7 +4,7 @@
+ 
+   fs = require('fs');
+ 
+-  Iconv = require('iconv').Iconv;
++  Iconv = require('iconv-lite');
+ 
+   i18nStringsFiles = function() {};
+ 
+@@ -99,8 +99,7 @@
+       encoding = 'UTF-16';
+     }
+     // convert buffer to utf-8 string and return
+-    iconv = new Iconv(encoding, 'UTF-8');
+-    return iconv.convert(buffer).toString('utf8');
++    return Iconv.decode(buffer, encoding);
+   };
+ 
+   i18nStringsFiles.prototype.convertStringToBuffer = function(str, encoding) {
+@@ -109,8 +108,7 @@
+       encoding = 'UTF-16';
+     }
+     // convert string from utf-8 to buffer in output encoding
+-    iconv = new Iconv('UTF-8', encoding);
+-    return iconv.convert(str);
++    return Iconv.encode(str, encoding);
+   };
+ 
+   i18nStringsFiles.prototype.parse = function(input, wantsComments) {
+diff --git a/package.json b/package.json
+index 9a00ca022368c5ff228cdea1bfc3cec241cd25d0..497e582865b1997c818df3544bb47ed834ccc792 100755
+--- a/package.json
++++ b/package.json
+@@ -16,7 +16,7 @@
+     "url": "git://github.com/justinklemm/i18n-strings-files.git"
+   },
+   "dependencies": {
+-    "iconv": "^3.0.1"
++    "iconv-lite": "^0.7.2"
+   },
+   "devDependencies": {
+     "mocha": "^10.0.0",

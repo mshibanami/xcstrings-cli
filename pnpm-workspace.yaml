@@ -1,0 +1,2 @@
+patchedDependencies:
+  i18n-strings-files: patches/i18n-strings-files.patch

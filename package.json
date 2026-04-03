@@ -56,7 +56,6 @@
         "cosmiconfig": "^9.0.0",
         "fast-glob": "^3.3.3",
         "i18n-strings-files": "^2.0.0",
-        "iconv": "^3.0.1",
         "iconv-lite": "^0.7.2",
         "js-yaml": "^4.1.0",
         "json5": "^2.2.3",
