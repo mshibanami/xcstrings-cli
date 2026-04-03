@@ -81,7 +81,7 @@ export function createExportCommand(): CommandModule {
                     describe:
                         'Output format. If auto, inferred from outpath extension if possible.',
                 })
-                .option('export-merge-policy', {
+                .option('merge-policy', {
                     alias: 'm',
                     type: 'string',
                     choices: [
@@ -90,17 +90,8 @@ export function createExportCommand(): CommandModule {
                         'output-first',
                         'existing-first',
                     ],
+                    default: 'error',
                     describe: 'How to handle existing translation files',
-                })
-                .option('merge-policy', {
-                    type: 'string',
-                    choices: [
-                        'error',
-                        'force',
-                        'output-first',
-                        'existing-first',
-                    ],
-                    describe: 'Deprecated. Use export-merge-policy instead.',
                 })
                 .option('languages', {
                     type: 'string',
@@ -134,16 +125,7 @@ export function createExportCommand(): CommandModule {
 
             const { keyFilter, textFilter } = extractFilterOptions(argv);
 
-            let mergePolicy =
-                (argv['export-merge-policy'] as MergePolicy) ||
-                (argv.m as MergePolicy);
-            if (!mergePolicy && argv['merge-policy']) {
-                logger.warn(
-                    'WARNING: "--merge-policy" is deprecated. Please use "--export-merge-policy" instead.',
-                );
-                mergePolicy = argv['merge-policy'] as MergePolicy;
-            }
-            mergePolicy = mergePolicy || 'error';
+            const mergePolicy = (argv['merge-policy'] as MergePolicy) || 'error';
 
             await doExport({
                 sourcePath: argv.path as string,

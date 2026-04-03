@@ -66,7 +66,7 @@ export function createImportCommand(): CommandModule {
                     type: 'string',
                     describe: 'Explicit language for .strings files',
                 })
-                .option('import-merge-policy', {
+                .option('merge-policy', {
                     type: 'string',
                     choices: ['source-first', 'destination-first', 'error'],
                     describe: 'How to handle existing keys in the target file',
@@ -87,7 +87,7 @@ export function createImportCommand(): CommandModule {
             );
 
             const mergePolicy =
-                (argv['import-merge-policy'] as ImportMergePolicy) ||
+                (argv['merge-policy'] as ImportMergePolicy) ||
                 (config?.importMergePolicy as ImportMergePolicy) ||
                 'source-first';
 

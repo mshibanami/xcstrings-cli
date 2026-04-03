@@ -195,7 +195,7 @@ describe('cli: import command', () => {
         await writeFile(sourceFile, '"hello" = "New Hello";', 'utf8');
 
         const { code } = await runImport([sourceFile], targetFile, [
-            '--import-merge-policy',
+            '--merge-policy',
             'destination-first',
         ]);
 
@@ -235,7 +235,7 @@ describe('cli: import command', () => {
         await writeFile(sourceFile, '"hello" = "New Hello";', 'utf8');
 
         const { code, stderr } = await runImport([sourceFile], targetFile, [
-            '--import-merge-policy',
+            '--merge-policy',
             'error',
         ]);
 
