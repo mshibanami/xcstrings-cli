@@ -164,6 +164,25 @@ xcs export Test.xcstrings
 xcs export --key good* --output strings Output
 ```
 
+**Import strings from _xcstrings_ or _strings_ files:**
+
+```bash
+# Import OtherStrings.xcstrings into the default xcstrings file
+xcs import OtherStrings.xcstrings
+
+# Import strings from .strings files (automatically detects language from folder name)
+xcs import en.lproj/Localizable.strings ja.lproj/Localizable.strings
+
+# Import with explicit language for .strings files
+xcs import some/path/to/English.strings --language en
+
+# Import into a specific target xcstrings file
+xcs import OtherStrings.xcstrings --target Shared/L10n/Localizable.xcstrings
+
+# Import using globs
+xcs import "external/**/*.strings" --target Localizable.xcstrings
+```
+
 You can use `xcs --help` or `xcs <sub-command> --help` to see the list of commands and options.
 
 ## Commands
@@ -270,6 +289,26 @@ Exports xcstrings to either filtered xcstrings or traditional `.strings` format.
     - `--key`, `--key-glob`, `--key-regex`, `--key-substring`
     - `--text`, `--text-glob`, `--text-regex`, `--text-substring`
     - `--languages, -l`
+
+### `import` command
+
+Imports strings from `.xcstrings` or `.strings` files into a target `.xcstrings` file.
+
+**`import` command options:**
+
+- `sources...`: `string[]` (Required)
+    - Source files to import. Supports glob patterns.
+- `--target, -t`: `string` (Optional)
+    - The target xcstrings file path or alias.
+- `--language, -l`: `string` (Optional)
+    - Explicit language for `.strings` files if it cannot be detected from the parent directory (e.g. `en.lproj`).
+- `--source-language`: `string` (Optional)
+    - The source language for the new xcstrings file if the target file does not exist.
+- `--merge-policy`: `string` (Optional)
+    - How to handle existing keys in the target file. Options are:
+        - `source-first`: (Default) Overwrite existing keys with source values.
+        - `destination-first`: Keep existing keys and skip source values.
+        - `error`: Stop with an error if a key collision occurs.
 
 ## Configuration file
 
