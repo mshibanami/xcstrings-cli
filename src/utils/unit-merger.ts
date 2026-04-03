@@ -6,7 +6,7 @@ type LocalizationMap = NonNullable<XCStringUnit['localizations']>;
 export interface MergeTranslationOptions {
     mergePolicy?: ImportMergePolicy;
     extractionState?: XCStringUnit['extractionState'];
-    sortLocalizations?: boolean;
+    sortLocalizations?: boolean | 'auto';
     keyName?: string;
 }
 
@@ -26,6 +26,7 @@ export function mergeTranslationUnit(
 ): XCStringUnit {
     const policy = options?.mergePolicy || 'source-first';
     const mergedUnit: XCStringUnit = targetUnit ? { ...targetUnit } : {};
+    let isNewLanguageAdded = false;
 
     for (const [key, value] of Object.entries(sourceUnit)) {
         if (key === 'localizations') continue;
@@ -56,6 +57,10 @@ export function mergeTranslationUnit(
         )) {
             const hasExistingLoc = targetUnit?.localizations?.[lang];
 
+            if (!hasExistingLoc) {
+                isNewLanguageAdded = true;
+            }
+
             if (hasExistingLoc) {
                 if (policy === 'error') {
                     throw new Error(
@@ -76,7 +81,11 @@ export function mergeTranslationUnit(
         mergedUnit.extractionState = options.extractionState;
     }
 
-    if (options?.sortLocalizations && mergedUnit.localizations) {
+    const shouldSort =
+        options?.sortLocalizations === true ||
+        (options?.sortLocalizations === 'auto' && isNewLanguageAdded);
+
+    if (shouldSort && mergedUnit.localizations) {
         mergedUnit.localizations = sortLocalizations(mergedUnit.localizations);
     }
 

@@ -691,7 +691,7 @@ export async function add(
 
     data.strings[key] = mergeTranslationUnit(data.strings[key], sourceUnit, {
         mergePolicy: 'source-first',
-        sortLocalizations: true,
+        sortLocalizations: 'auto',
     });
 
     if (isNewKey) {

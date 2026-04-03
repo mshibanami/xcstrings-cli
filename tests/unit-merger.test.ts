@@ -84,6 +84,98 @@ describe('mergeTranslationUnit', () => {
         expect(merged.localizations?.['en'].stringUnit.value).toBe('Hello');
     });
 
+    describe('localization sorting', () => {
+        it('should sort localizations when a new language is added', () => {
+            const target: XCStringUnit = {
+                localizations: {
+                    ja: {
+                        stringUnit: {
+                            state: 'translated',
+                            value: 'こんにちは',
+                        },
+                    },
+                    en: { stringUnit: { state: 'translated', value: 'Hello' } },
+                },
+            };
+            const source: XCStringUnit = {
+                localizations: {
+                    fr: {
+                        stringUnit: { state: 'translated', value: 'Bonjour' },
+                    },
+                },
+            };
+
+            const merged = mergeTranslationUnit(target, source, {
+                sortLocalizations: 'auto',
+            });
+
+            const keys = Object.keys(merged.localizations || {});
+            expect(keys).toEqual(['en', 'fr', 'ja']);
+        });
+
+        it('should NOT sort localizations when no new language is added', () => {
+            const target: XCStringUnit = {
+                localizations: {
+                    ja: {
+                        stringUnit: {
+                            state: 'translated',
+                            value: 'こんにちは',
+                        },
+                    },
+                    en: { stringUnit: { state: 'translated', value: 'Hello' } },
+                },
+            };
+            const source: XCStringUnit = {
+                localizations: {
+                    en: {
+                        stringUnit: {
+                            state: 'translated',
+                            value: 'Hello Updated',
+                        },
+                    },
+                },
+            };
+
+            const merged = mergeTranslationUnit(target, source, {
+                sortLocalizations: 'auto',
+            });
+
+            const keys = Object.keys(merged.localizations || {});
+            expect(keys).toEqual(['ja', 'en']);
+        });
+
+        it('should still sort if sortLocalizations is true (backward compatibility/manual override)', () => {
+            const target: XCStringUnit = {
+                localizations: {
+                    ja: {
+                        stringUnit: {
+                            state: 'translated',
+                            value: 'こんにちは',
+                        },
+                    },
+                    en: { stringUnit: { state: 'translated', value: 'Hello' } },
+                },
+            };
+            const source: XCStringUnit = {
+                localizations: {
+                    en: {
+                        stringUnit: {
+                            state: 'translated',
+                            value: 'Hello Updated',
+                        },
+                    },
+                },
+            };
+
+            const merged = mergeTranslationUnit(target, source, {
+                sortLocalizations: true,
+            });
+
+            const keys = Object.keys(merged.localizations || {});
+            expect(keys).toEqual(['en', 'ja']);
+        });
+    });
+
     it('should apply source base properties under error policy when there is no conflict', () => {
         const target: XCStringUnit = {
             comment: 'Target comment',

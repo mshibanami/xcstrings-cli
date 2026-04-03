@@ -180,6 +180,7 @@ async function importXCStrings(
         targetData.strings[key] = mergeTranslationUnit(targetUnit, sourceUnit, {
             mergePolicy,
             keyName: key,
+            sortLocalizations: 'auto',
         });
     }
 }
@@ -221,7 +222,11 @@ async function importStrings(
         targetData.strings[key] = mergeTranslationUnit(
             existingUnit,
             sourceUnit,
-            { mergePolicy, keyName: key },
+            {
+                mergePolicy,
+                keyName: key,
+                sortLocalizations: 'auto',
+            },
         );
     }
 }
