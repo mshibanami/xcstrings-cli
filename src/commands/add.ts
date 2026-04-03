@@ -10,6 +10,7 @@ import {
     writeXCStrings,
     XCStringUnit,
 } from './_shared';
+import { mergeTranslationUnit } from '../utils/unit-merger.js';
 import { captureInteractiveStringsInput } from '../utils/interactive.js';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';
 import { languages } from './languages';
@@ -503,13 +504,6 @@ export async function runAddCommand({
     return { kind: 'single', keys: [keyToUse] };
 }
 
-const sortLocalizations = (localizations: LocalizationMap): LocalizationMap => {
-    const sorted = Object.entries(localizations).sort(([langA], [langB]) =>
-        langA.localeCompare(langB, 'en', { sensitivity: 'case' }),
-    );
-    return Object.fromEntries(sorted) as LocalizationMap;
-};
-
 export function createAddCommand(): CommandModule {
     return {
         command: 'add',
@@ -622,15 +616,6 @@ export async function add(
         );
     };
 
-    const unit: XCStringUnit = {
-        ...data.strings[key],
-        extractionState: 'manual',
-    };
-
-    if (comment) {
-        unit.comment = comment;
-    }
-
     const resolvedState: LocalizationState = state ?? 'translated';
 
     const toPayload = (
@@ -643,14 +628,21 @@ export async function add(
         return input;
     };
 
+    const sourceUnit: XCStringUnit = {
+        extractionState: 'manual',
+    };
+    if (comment) {
+        sourceUnit.comment = comment;
+    }
+
     if (defaultString !== undefined) {
         const targetLanguage = language ?? sourceLanguage;
         if (!(await ensureSupported(targetLanguage))) {
             warnUnsupported(targetLanguage);
         } else {
-            unit.localizations = unit.localizations || {};
+            sourceUnit.localizations = sourceUnit.localizations || {};
             const payload = toPayload(strings?.[targetLanguage]);
-            unit.localizations[targetLanguage] = {
+            sourceUnit.localizations[targetLanguage] = {
                 stringUnit: {
                     state: payload?.state ?? resolvedState,
                     value: defaultString,
@@ -682,9 +674,9 @@ export async function add(
             }
         }
         if (toAdd.length > 0) {
-            unit.localizations = unit.localizations || {};
+            sourceUnit.localizations = sourceUnit.localizations || {};
             for (const [lang, value] of toAdd) {
-                unit.localizations[lang] = {
+                sourceUnit.localizations[lang] = {
                     stringUnit: {
                         state: value.state ?? resolvedState,
                         value: value.value,
@@ -694,10 +686,10 @@ export async function add(
         }
     }
 
-    data.strings[key] = unit;
+    data.strings[key] = mergeTranslationUnit(data.strings[key], sourceUnit, {
+        mergePolicy: 'source-first',
+        sortLocalizations: true,
+    });
 
-    if (unit.localizations) {
-        unit.localizations = sortLocalizations(unit.localizations);
-    }
     await writeXCStrings(path, data);
 }

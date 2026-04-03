@@ -4,6 +4,7 @@ import { readFile, writeFile, stat, mkdir } from 'node:fs/promises';
 import { select, input } from '@inquirer/prompts';
 import fg from 'fast-glob';
 import { parseStrings } from '../utils/strings-parser.js';
+import { mergeTranslationUnit } from '../utils/unit-merger.js';
 import chalk from 'chalk';
 import {
     readXCStrings,
@@ -168,25 +169,11 @@ async function importXCStrings(
             }
         }
 
-        const targetUnit = targetData.strings[key] || {};
-
-        const mergedUnit: XCStringUnit = {
-            ...targetUnit,
-            ...sourceUnit,
-        };
-
-        if (
-            sourceUnit.localizations &&
-            targetUnit.localizations &&
-            mergePolicy === 'source-first'
-        ) {
-            mergedUnit.localizations = {
-                ...targetUnit.localizations,
-                ...sourceUnit.localizations,
-            };
-        }
-
-        targetData.strings[key] = mergedUnit;
+        const targetUnit = targetData.strings[key];
+        targetData.strings[key] = mergeTranslationUnit(targetUnit, sourceUnit, {
+            mergePolicy,
+            keyName: key,
+        });
     }
 }
 
@@ -211,37 +198,23 @@ async function importStrings(
         }
 
         const existingUnit = targetData.strings[key];
-        if (existingUnit) {
-            if (existingUnit.localizations?.[language]) {
-                if (mergePolicy === 'error') {
-                    throw new Error(
-                        `Key "${key}" already has localization for "${language}" in target.`,
-                    );
-                }
-                if (mergePolicy === 'destination-first') {
-                    continue;
-                }
-            }
-        }
-
-        const unit: XCStringUnit = targetData.strings[key] || {};
-        unit.extractionState = 'migrated';
-
-        if (comment) {
-            unit.comment = comment;
-        }
-
-        if (!unit.localizations) {
-            unit.localizations = {};
-        }
-
-        unit.localizations[language] = {
-            stringUnit: {
-                state: 'translated',
-                value: stringValue,
+        const sourceUnit: XCStringUnit = {
+            extractionState: 'migrated',
+            comment,
+            localizations: {
+                [language]: {
+                    stringUnit: {
+                        state: 'translated',
+                        value: stringValue,
+                    },
+                },
             },
         };
 
-        targetData.strings[key] = unit;
+        targetData.strings[key] = mergeTranslationUnit(
+            existingUnit,
+            sourceUnit,
+            { mergePolicy, keyName: key },
+        );
     }
 }
