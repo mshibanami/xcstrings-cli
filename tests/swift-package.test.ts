@@ -41,6 +41,35 @@ let package = Package(
         expect(info.state).toBe(SwiftPackageState.UnknownStructure);
     });
 
+    it('should handle spaces before colon and ignore comments', async () => {
+        const content = `
+// let package = Package(name: "OldName")
+// defaultLocalization: "ja"
+let package = Package(
+    name : "NewName",
+    defaultLocalization : "en"
+)
+`;
+        await writeFile(join(TEST_DIR, 'Package.swift'), content);
+        const info = await detectSwiftPackage(TEST_DIR);
+
+        expect(info.packageName).toBe('NewName');
+        expect(info.defaultLocalization).toBe('en');
+    });
+
+    it('should handle multiline comments', async () => {
+        const content = `
+/*
+let package = Package(name: "OldName")
+*/
+let package = Package(name: "NewName")
+`;
+        await writeFile(join(TEST_DIR, 'Package.swift'), content);
+        const info = await detectSwiftPackage(TEST_DIR);
+
+        expect(info.packageName).toBe('NewName');
+    });
+
     it('should identify structure when Sources directory and target directory exist', async () => {
         const content = 'let package = Package(name: "MyPackage")';
         await writeFile(join(TEST_DIR, 'Package.swift'), content);

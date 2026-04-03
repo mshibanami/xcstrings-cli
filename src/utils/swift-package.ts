@@ -87,18 +87,28 @@ export async function detectSwiftPackage(
 export function extractDefaultLocalization(
     content: string,
 ): string | undefined {
-    const match = content.match(/defaultLocalization:\s*["']([^"']+)["']/);
+    const cleanContent = stripComments(content);
+    const match = cleanContent.match(
+        /defaultLocalization\s*:\s*["']([^"']+)["']/,
+    );
     return match ? match[1] : undefined;
 }
 
 function extractPackageName(content: string): string | undefined {
-    const packageMatch = content.match(
-        /Package\s*\(\s*name:\s*["']([^"']+)["']/,
+    const cleanContent = stripComments(content);
+    const packageMatch = cleanContent.match(
+        /Package\s*\(\s*name\s*:\s*["']([^"']+)["']/,
     );
     if (packageMatch) {
         return packageMatch[1];
     }
     // Fallback best effort
-    const match = content.match(/name:\s*["']([^"']+)["']/);
+    const match = cleanContent.match(/name\s*:\s*["']([^"']+)["']/);
     return match ? match[1] : undefined;
+}
+
+function stripComments(content: string): string {
+    return content
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\/\/.*/g, '');
 }
