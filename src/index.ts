@@ -12,6 +12,7 @@ import { createInitCommand } from './commands/init';
 import { createLanguagesCommand } from './commands/languages';
 import { createStringsCommand } from './commands/strings';
 import { createExportCommand } from './commands/export';
+import { createImportCommand } from './commands/import';
 import { ArgumentError } from './utils/errors';
 
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
@@ -43,6 +44,7 @@ yargs(hideBin(process.argv))
         createLanguagesCommand(),
         createStringsCommand(),
         createExportCommand(),
+        createImportCommand(),
     ])
     .demandCommand(1, 'Please specify a command')
     .strictCommands()

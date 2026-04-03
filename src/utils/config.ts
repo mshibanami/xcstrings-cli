@@ -1,6 +1,7 @@
 import { cosmiconfig } from 'cosmiconfig';
 import json5 from 'json5';
 import yaml from 'js-yaml';
+import logger from './logger.js';
 
 const moduleName = 'xcstrings-cli';
 
@@ -31,6 +32,10 @@ export interface Config {
     xcstringsPaths?: (string | { alias: string; path: string })[];
     xcodeprojPaths?: string[];
     missingLanguagePolicy?: MissingLanguagePolicy;
+    exportMergePolicy?: string;
+    importMergePolicy?: string;
+    /** @deprecated Use exportMergePolicy instead */
+    mergePolicy?: string;
 }
 
 export async function loadConfig(
@@ -42,5 +47,16 @@ export async function loadConfig(
     }
 
     const result = await explorer.search();
-    return result ? (result.config as Config) : null;
+    const config = result ? (result.config as Config) : null;
+
+    if (config?.mergePolicy) {
+        logger.warn(
+            'WARNING: "mergePolicy" is deprecated. Please use "exportMergePolicy" instead.',
+        );
+        if (!config.exportMergePolicy) {
+            config.exportMergePolicy = config.mergePolicy;
+        }
+    }
+
+    return config;
 }

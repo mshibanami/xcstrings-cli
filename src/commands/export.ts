@@ -7,6 +7,7 @@ import {
 } from '../utils/filters.js';
 import { readXCStrings, writeXCStrings, XCStrings } from './_shared.js';
 import { extname, dirname, basename, join } from 'node:path';
+import logger from '../utils/logger.js';
 import {
     mkdir,
     writeFile,
@@ -80,7 +81,7 @@ export function createExportCommand(): CommandModule {
                     describe:
                         'Output format. If auto, inferred from outpath extension if possible.',
                 })
-                .option('merge-policy', {
+                .option('export-merge-policy', {
                     alias: 'm',
                     type: 'string',
                     choices: [
@@ -89,8 +90,17 @@ export function createExportCommand(): CommandModule {
                         'output-first',
                         'existing-first',
                     ],
-                    default: 'error',
                     describe: 'How to handle existing translation files',
+                })
+                .option('merge-policy', {
+                    type: 'string',
+                    choices: [
+                        'error',
+                        'force',
+                        'output-first',
+                        'existing-first',
+                    ],
+                    describe: 'Deprecated. Use export-merge-policy instead.',
                 })
                 .option('languages', {
                     type: 'string',
@@ -124,13 +134,22 @@ export function createExportCommand(): CommandModule {
 
             const { keyFilter, textFilter } = extractFilterOptions(argv);
 
+            let mergePolicy =
+                (argv['export-merge-policy'] as MergePolicy) ||
+                (argv.m as MergePolicy);
+            if (!mergePolicy && argv['merge-policy']) {
+                logger.warn(
+                    'WARNING: "--merge-policy" is deprecated. Please use "--export-merge-policy" instead.',
+                );
+                mergePolicy = argv['merge-policy'] as MergePolicy;
+            }
+            mergePolicy = mergePolicy || 'error';
+
             await doExport({
                 sourcePath: argv.path as string,
                 outpath,
                 outputFormat,
-                mergePolicy: (argv.mergePolicy ||
-                    argv.m ||
-                    'error') as MergePolicy,
+                mergePolicy,
                 keyFilter,
                 textFilter,
                 languages: argv.languages as string[] | undefined,
@@ -262,7 +281,10 @@ export async function doExport(opts: {
             await removeStringsOutputs(outDir, outFile);
         }
 
-        const stringsPerLang = new Map<string, Map<string, { value: string; comment?: string }>>();
+        const stringsPerLang = new Map<
+            string,
+            Map<string, { value: string; comment?: string }>
+        >();
 
         for (const [key, unit] of Object.entries(data.strings ?? {})) {
             if (!matchKey(key)) continue;
@@ -277,7 +299,9 @@ export async function doExport(opts: {
                 if (!stringsPerLang.has(lang)) {
                     stringsPerLang.set(lang, new Map());
                 }
-                stringsPerLang.get(lang)!.set(key, { value: val, comment: unit.comment });
+                stringsPerLang
+                    .get(lang)!
+                    .set(key, { value: val, comment: unit.comment });
             }
         }
 
@@ -297,7 +321,10 @@ export async function doExport(opts: {
             const langFile = join(langDir, outFile);
 
             const exists = await fileExists(langFile);
-            const mergedMap = new Map<string, { value: string; comment?: string }>();
+            const mergedMap = new Map<
+                string,
+                { value: string; comment?: string }
+            >();
 
             if (
                 exists &&
@@ -322,7 +349,10 @@ export async function doExport(opts: {
             for (const [k, obj] of mapOfStrings.entries()) {
                 if (mergedMap.has(k) && opts.mergePolicy === 'existing-first') {
                     const existing = mergedMap.get(k)!;
-                    mergedMap.set(k, { value: existing.value, comment: obj.comment });
+                    mergedMap.set(k, {
+                        value: existing.value,
+                        comment: obj.comment,
+                    });
                     continue;
                 }
                 mergedMap.set(k, obj);
@@ -333,10 +363,14 @@ export async function doExport(opts: {
                 if (newContent.length > 0) {
                     newContent += '\n';
                 }
-                const commentText = obj.comment ? ` ${obj.comment} ` : ' No comment provided by engineer. ';
+                const commentText = obj.comment
+                    ? ` ${obj.comment} `
+                    : ' No comment provided by engineer. ';
                 newContent += `/*${commentText}*/\n`;
                 const escapedKey = k.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-                const escapedVal = obj.value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+                const escapedVal = obj.value
+                    .replace(/"/g, '\\"')
+                    .replace(/\n/g, '\\n');
                 newContent += `"${escapedKey}" = "${escapedVal}";\n`;
             }
 
