@@ -42,6 +42,17 @@ export async function writeXCStrings(
     path: string,
     data: XCStrings,
 ): Promise<void> {
+    if (data.strings) {
+        const sortedKeys = Object.keys(data.strings).sort((a, b) =>
+            a.localeCompare(b, 'en', { sensitivity: 'case' }),
+        );
+        const sortedStrings: Record<string, XCStringUnit> = {};
+        for (const key of sortedKeys) {
+            sortedStrings[key] = data.strings[key];
+        }
+        data.strings = sortedStrings;
+    }
+
     const json = JSON.stringify(data, null, 2);
     const formatted = formatXCStrings(json);
     await writeFile(path, formatted + '\n', 'utf-8');
