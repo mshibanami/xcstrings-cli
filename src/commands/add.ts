@@ -9,6 +9,7 @@ import {
     readXCStrings,
     writeXCStrings,
     XCStringUnit,
+    sortXCStringsKeys,
 } from './_shared';
 import { mergeTranslationUnit } from '../utils/unit-merger.js';
 import { captureInteractiveStringsInput } from '../utils/interactive.js';
@@ -595,6 +596,8 @@ export async function add(
         data.strings = {};
     }
 
+    const isNewKey = !(key in data.strings);
+
     const config = await loadConfig(configPath);
     const handleMissing: MissingLanguagePolicy =
         config?.missingLanguagePolicy || 'skip';
@@ -690,6 +693,10 @@ export async function add(
         mergePolicy: 'source-first',
         sortLocalizations: true,
     });
+
+    if (isNewKey) {
+        data.strings = sortXCStringsKeys(data.strings);
+    }
 
     await writeXCStrings(path, data);
 }

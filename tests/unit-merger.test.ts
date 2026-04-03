@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mergeTranslationUnit } from '../src/utils/unit-merger.js';
-import { XCStringUnit } from '../src/commands/_shared.js';
+import { XCStringUnit, sortXCStringsKeys } from '../src/commands/_shared.js';
 
 describe('mergeTranslationUnit', () => {
     const existingUnit: XCStringUnit = {
@@ -142,5 +142,76 @@ describe('mergeTranslationUnit', () => {
             extractionState: 'manual',
         });
         expect(merged.extractionState).toBe('manual');
+    });
+});
+
+describe('sortXCStringsKeys', () => {
+    it('should sort keys using Xcode/Finder-like natural sorting', () => {
+        const inputKeys = [
+            '10 items',
+            '2 items',
+            'item_1',
+            'item_10',
+            'item_2',
+            'Apple',
+            'APPLE',
+            'apple',
+            'banana',
+            '_hidden',
+            '-dash',
+            '.dot',
+            '@at_mark',
+            ' space_prefix',
+            'hello world',
+            'hello-world',
+            'hello_world',
+            'cafe',
+            'café',
+            'こんにちは',
+            'コンニチハ',
+            'テスト',
+            'test',
+            '你好',
+            '🍎 Apple',
+            '🚀 Rocket',
+        ];
+
+        const expectedOrder = [
+            ' space_prefix',
+            '_hidden',
+            '-dash',
+            '.dot',
+            '@at_mark',
+            '🍎 Apple',
+            '🚀 Rocket',
+            '2 items',
+            '10 items',
+            'Apple',
+            'APPLE',
+            'apple',
+            'banana',
+            'cafe',
+            'café',
+            'hello world',
+            'hello_world',
+            'hello-world',
+            'item_1',
+            'item_2',
+            'item_10',
+            'test',
+            'こんにちは',
+            'コンニチハ',
+            'テスト',
+            '你好',
+        ];
+
+        const strings: Record<string, XCStringUnit> = {};
+        for (const key of inputKeys) {
+            strings[key] = {};
+        }
+
+        const sorted = sortXCStringsKeys(strings);
+        const actualOrder = Object.keys(sorted);
+        expect(actualOrder).toEqual(expectedOrder);
     });
 });

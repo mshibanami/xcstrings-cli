@@ -12,6 +12,7 @@ import {
     XCStrings,
     XCStringUnit,
     LocalizationState,
+    sortXCStringsKeys,
 } from './_shared.js';
 import { loadConfig } from '../utils/config.js';
 import { resolveXCStringsPath } from '../utils/path.js';
@@ -118,6 +119,8 @@ export function createImportCommand(): CommandModule {
                 };
             }
 
+            const initialKeyCount = Object.keys(targetData.strings).length;
+
             for (const sourcePath of resolvedSources) {
                 const extension = extname(sourcePath).toLowerCase();
                 if (extension === '.xcstrings') {
@@ -142,6 +145,10 @@ export function createImportCommand(): CommandModule {
                         `Unsupported file type: ${sourcePath}. Skipping.`,
                     );
                 }
+            }
+
+            if (Object.keys(targetData.strings).length > initialKeyCount) {
+                targetData.strings = sortXCStringsKeys(targetData.strings);
             }
 
             await mkdir(dirname(targetPath), { recursive: true });
