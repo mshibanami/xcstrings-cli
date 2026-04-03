@@ -76,7 +76,7 @@ describe('cli: import command', () => {
         const targetFile = join(tempDir, 'Localizable.xcstrings');
 
         const { code, stderr } = await runImport([sourceFile], targetFile, [
-            '--source-language',
+            '--language',
             'en',
         ]);
 
@@ -116,7 +116,7 @@ describe('cli: import command', () => {
         const { code } = await runImport(
             [join(tempDir, '**/*.strings')],
             targetFile,
-            ['--source-language', 'en'],
+            ['--language', 'en'],
         );
 
         expect(code).toBe(0);
@@ -264,7 +264,7 @@ describe('cli: import command', () => {
         const { code } = await runImport([sourceFile], undefined, [
             '--config',
             configPath,
-            '--source-language',
+            '--language',
             'en',
         ]);
 
@@ -340,7 +340,7 @@ describe('cli: import command', () => {
 
         const targetFile = join(tempDir, 'Localizable.xcstrings');
         const { code } = await runImport([sourceFile], targetFile, [
-            '--source-language',
+            '--language',
             'en',
         ]);
 
@@ -412,7 +412,7 @@ describe('cli: import command', () => {
         );
 
         const targetFile = join(tempDir, 'Localizable.xcstrings');
-        await runImport([sourceFile], targetFile, ['--source-language', 'en']);
+        await runImport([sourceFile], targetFile, ['--language', 'en']);
 
         const content = JSON.parse(await readFile(targetFile, 'utf-8'));
         expect(content.strings.complex.localizations.ja.stringUnit.value).toBe(
@@ -471,7 +471,7 @@ describe('cli: import command', () => {
         const { code } = await runImport([sourceFile], 'main', [
             '--config',
             configFile,
-            '--source-language',
+            '--language',
             'en',
         ]);
 
@@ -493,7 +493,7 @@ describe('cli: import command', () => {
         await writeFile(sourceFile, content);
 
         const targetFile = join(tempDir, 'Localizable.xcstrings');
-        await runImport([sourceFile], targetFile, ['--source-language', 'en']);
+        await runImport([sourceFile], targetFile, ['--language', 'en']);
 
         const result = JSON.parse(await readFile(targetFile, 'utf-8'));
         expect(result.strings.utf16.localizations.ja.stringUnit.value).toBe(
@@ -551,7 +551,7 @@ describe('cli: import command', () => {
 
             const targetFile = join(tempDir, 'Localizable.xcstrings');
             const { code } = await runImport([sourceFile], targetFile, [
-                '--source-language',
+                '--language',
                 'en',
                 '--key',
                 'good*',
@@ -578,7 +578,7 @@ describe('cli: import command', () => {
 
             const targetFile = join(tempDir, 'Localizable.xcstrings');
             const { code } = await runImport([sourceFile], targetFile, [
-                '--source-language',
+                '--language',
                 'en',
                 '--text-substring',
                 '世界',
@@ -630,7 +630,7 @@ describe('cli: import command', () => {
 
             const targetFile = join(tempDir, 'Localizable.xcstrings');
             const { code, stderr } = await runImport([sourceFile], targetFile, [
-                '--source-language',
+                '--language',
                 'en',
                 '--languages',
                 'en',

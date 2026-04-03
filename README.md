@@ -301,9 +301,8 @@ Imports strings from `.xcstrings` or `.strings` files into a target `.xcstrings`
 - `--target, -t`: `string` (Optional)
     - The target xcstrings file path or alias.
 - `--language`: `string` (Optional)
-    - Explicit language for `.strings` files if it cannot be detected from the parent directory (e.g. `en.lproj`).
-- `--source-language`: `string` (Optional)
-    - The source language for the new xcstrings file if the target file does not exist.
+    - The target language for the imported strings if it cannot be detected from the parent directory (e.g. `en.lproj`).
+    - It's also used as the source language for the new xcstrings file if the target file does not exist.
 - `--merge-policy`: `string` (Optional)
     - How to handle existing keys in the target file. Options are:
         - `source-first`: (Default) Overwrite existing keys with source values.

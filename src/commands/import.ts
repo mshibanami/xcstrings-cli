@@ -62,13 +62,10 @@ export function createImportCommand(): CommandModule {
                     describe: 'Target xcstrings file (path or alias)',
                     demandOption: false,
                 })
-                .option('source-language', {
-                    type: 'string',
-                    describe: 'Source language for the new xcstrings file',
-                })
                 .option('language', {
                     type: 'string',
-                    describe: 'Explicit language for .strings files',
+                    describe:
+                        'Language to use for parsing source files, and as the default sourceLanguage if creating a new xcstrings catalog.',
                 })
                 .option('languages', {
                     type: 'string',
@@ -87,10 +84,7 @@ export function createImportCommand(): CommandModule {
         handler: async (argv) => {
             const sources = argv.sources as string[];
             const targetAttr = argv.target as string | undefined;
-            const sourceLanguageOpt = argv['source-language'] as
-                | string
-                | undefined;
-            const explicitLanguage = argv.language as string | undefined;
+            const languageOpt = argv['language'] as string | undefined;
 
             const config = await loadConfig(argv.config as string | undefined);
             const targetPath = await resolveXCStringsPath(
@@ -120,7 +114,25 @@ export function createImportCommand(): CommandModule {
             if (targetExists) {
                 targetData = await readXCStrings(targetPath);
             } else {
-                let sourceLanguage = sourceLanguageOpt;
+                let sourceLanguage = languageOpt;
+
+                if (!sourceLanguage && resolvedSources.length > 0) {
+                    const firstSource = resolvedSources[0];
+                    if (extname(firstSource).toLowerCase() === '.strings') {
+                        sourceLanguage =
+                            getLanguageFromPath(firstSource) ?? undefined;
+                    } else if (
+                        extname(firstSource).toLowerCase() === '.xcstrings'
+                    ) {
+                        try {
+                            const firstData = await readXCStrings(firstSource);
+                            sourceLanguage = firstData.sourceLanguage;
+                        } catch {
+                            // Ignored if fails
+                        }
+                    }
+                }
+
                 if (!sourceLanguage) {
                     sourceLanguage = await input({
                         message:
@@ -150,7 +162,7 @@ export function createImportCommand(): CommandModule {
                     );
                 } else if (extension === '.strings') {
                     const language =
-                        explicitLanguage || getLanguageFromPath(sourcePath);
+                        getLanguageFromPath(sourcePath) || languageOpt;
                     if (!language) {
                         logger.warn(
                             `Could not determine language for ${sourcePath}. Skipping.`,
