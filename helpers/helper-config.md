@@ -27,9 +27,15 @@ In addition:
 
 ## Output
 
-Formatted YAML data that includes translations in the specified languages like this:
+Formatted YAML data that includes translations in the specified languages.
 
-```yaml
+In your first response of the conversation only, provide the following explanation before the YAML output:
+
+"Copy the YAML below and run `xcs add -i` to import these translations into your String Catalog."
+
+Enclose the YAML output in `~~~~` like this:
+
+~~~~yaml
 greeting:
     comment: A greeting message.
     translations:
@@ -38,13 +44,11 @@ greeting:
         ...
 farewell:
     ...
-...
-```
+~~~~
 
-Please note:
+## Constraints
 
 - You must output valid YAML.
-- The output should only include the YAML data itself, without additional commentary or explanation.
 - If the original/translated texts include a trailing colon, use YAML's block style (`|`) to output it.
 - Generate YAML as soon as you receive user inputs. Don't ask back.
 - Output the full complete YAML, no matter how huge the output will be.
