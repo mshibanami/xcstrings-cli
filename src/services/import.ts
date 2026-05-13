@@ -14,7 +14,6 @@ import {
 } from '../commands/_shared.js';
 import { loadConfig } from '../utils/config.js';
 import { resolveXCStringsPath } from '../utils/path.js';
-import logger from '../utils/logger.js';
 import { isInteractiveMode } from '../utils/interactive.js';
 
 export type ImportMergePolicy = 'source-first' | 'destination-first' | 'error';
@@ -28,6 +27,7 @@ export interface RunImportCommandOptions {
     keyFilter?: unknown;
     textFilter?: unknown;
     languages?: string[];
+    onWarning?: (message: string) => void;
 }
 
 async function fileExists(path: string): Promise<boolean> {
@@ -131,7 +131,7 @@ export async function runImportCommand(
             const language =
                 getLanguageFromPath(sourcePath) || options.language;
             if (!language) {
-                logger.warn(
+                options.onWarning?.(
                     `Could not determine language for ${sourcePath}. Skipping.`,
                 );
                 continue;
@@ -146,7 +146,9 @@ export async function runImportCommand(
                 options.languages,
             );
         } else {
-            logger.warn(`Unsupported file type: ${sourcePath}. Skipping.`);
+            options.onWarning?.(
+                `Unsupported file type: ${sourcePath}. Skipping.`,
+            );
         }
     }
 

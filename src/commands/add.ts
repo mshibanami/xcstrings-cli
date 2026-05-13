@@ -64,6 +64,7 @@ export function createAddCommand(): CommandModule {
                 stdinReader: undefined,
                 configPath: argv.config as string | undefined,
                 interactive: argv.interactive as boolean | undefined,
+                onWarning: (message) => logger.warn(message),
             });
             logger.info(
                 chalk.green(

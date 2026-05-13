@@ -13,10 +13,10 @@ import { mergeTranslationUnit } from '../utils/unit-merger.js';
 import { captureInteractiveStringsInput } from '../utils/interactive.js';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';
 import { languages } from './languages.js';
-import logger from '../utils/logger.js';
 import { ArgumentError } from '../utils/errors';
 
 export type StringsFormat = 'auto' | 'yaml' | 'json';
+export type WarningHandler = (message: string) => void;
 
 export type InteractiveAddOptions = {
     path: string;
@@ -26,6 +26,7 @@ export type InteractiveAddOptions = {
     language?: string;
     configPath?: string;
     state: LocalizationState;
+    onWarning?: WarningHandler;
 };
 
 type MultiAddEntry = {
@@ -372,6 +373,7 @@ export async function runInteractiveAdd(
                 undefined,
                 undefined,
                 options.state,
+                options.onWarning,
             );
             addedKeys.push(entryKey);
         }
@@ -398,6 +400,7 @@ export async function runInteractiveAdd(
         options.defaultString,
         options.language,
         options.state,
+        options.onWarning,
     );
     return { kind: 'single', keys: [keyToUse] };
 }
@@ -414,6 +417,7 @@ export async function runAddCommand({
     configPath,
     state,
     interactive,
+    onWarning,
 }: {
     path: string;
     key?: string;
@@ -426,6 +430,7 @@ export async function runAddCommand({
     configPath?: string;
     state?: string;
     interactive?: boolean;
+    onWarning?: WarningHandler;
 }): Promise<AddResult> {
     const resolvedState = resolveState(state);
 
@@ -443,6 +448,7 @@ export async function runAddCommand({
             language,
             configPath,
             state: resolvedState,
+            onWarning,
         });
     }
 
@@ -469,6 +475,7 @@ export async function runAddCommand({
                 undefined,
                 undefined,
                 resolvedState,
+                onWarning,
             );
             addedKeys.push(entryKey);
         }
@@ -497,6 +504,7 @@ export async function runAddCommand({
         defaultString,
         language,
         resolvedState,
+        onWarning,
     );
     return { kind: 'single', keys: [keyToUse] };
 }
@@ -510,6 +518,7 @@ export async function add(
     defaultString?: string,
     language?: string,
     state?: LocalizationState,
+    onWarning?: WarningHandler,
 ): Promise<void> {
     const data = await readXCStrings(path);
 
@@ -541,7 +550,7 @@ export async function add(
     };
 
     const warnUnsupported = (lang: string): void => {
-        logger.warn(
+        onWarning?.(
             `Language "${lang}" is not supported. Skipped adding its translation (missingLanguagePolicy=skip).`,
         );
     };

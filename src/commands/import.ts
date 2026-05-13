@@ -61,6 +61,7 @@ export function createImportCommand(): CommandModule {
                 keyFilter,
                 textFilter,
                 languages: argv.languages as string[] | undefined,
+                onWarning: (message) => logger.warn(message),
             });
 
             logger.info(
