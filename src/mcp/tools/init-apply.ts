@@ -37,6 +37,11 @@ export function registerInitApplyTool(
         },
         async (args) => {
             try {
+                if (session.projectRoot === '/') {
+                    throw new ArgumentError(
+                        'MCP project root resolved to "/". Set --project-root to your repository root before using init tools.',
+                    );
+                }
                 const preview = await previewInitSetup(session.projectRoot);
                 if (preview.configExists && args.overwrite !== true) {
                     throw new ArgumentError(

@@ -133,6 +133,38 @@ describe('mcp tools: write', () => {
         );
     }, 20000);
 
+    it('import resolves relative sources and target against --project-root', async () => {
+        const tempDir = uniqueTempDir('mcp-import-relative');
+        createdDirs.push(tempDir);
+        await ensureDir(join(tempDir, 'ja.lproj'));
+        const sourceFile = join(tempDir, 'ja.lproj', 'Localizable.strings');
+        await writeFile(sourceFile, '"hello" = "こんにちは";', 'utf8');
+        const targetFile = join(tempDir, 'Catalog.xcstrings');
+
+        const session = await connectMcpClient({
+            args: ['--project-root', tempDir],
+        });
+        createdSessions.push(session);
+
+        const result = (await session.client.callTool({
+            name: 'import',
+            arguments: {
+                sources: ['ja.lproj/Localizable.strings'],
+                target: 'Catalog.xcstrings',
+                language: 'en',
+            },
+        })) as any;
+
+        expect(result.isError).not.toBe(true);
+        expect(result.structuredContent.targetPath).toBe(targetFile);
+        expect(await pathExists(targetFile)).toBe(true);
+
+        const content = JSON.parse(await readFile(targetFile, 'utf-8'));
+        expect(content.strings.hello.localizations.ja.stringUnit.value).toBe(
+            'こんにちは',
+        );
+    }, 20000);
+
     it('export exports filtered content to xcstrings', async () => {
         const sourceFile = resolve(FIXTURES_DIR, 'list-sample.xcstrings');
         const tempDir = uniqueTempDir('mcp-export');

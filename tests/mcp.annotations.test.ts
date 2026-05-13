@@ -32,49 +32,49 @@ describe('mcp tool annotations', () => {
                 openWorldHint: boolean;
             }
         > = {
-            'languages_list': {
+            languages_list: {
                 readOnlyHint: true,
                 destructiveHint: false,
                 idempotentHint: true,
                 openWorldHint: false,
             },
-            'strings_list': {
+            strings_list: {
                 readOnlyHint: true,
                 destructiveHint: false,
                 idempotentHint: true,
                 openWorldHint: false,
             },
-            'init_preview': {
+            init_preview: {
                 readOnlyHint: true,
                 destructiveHint: false,
                 idempotentHint: true,
                 openWorldHint: false,
             },
-            'add': {
+            add: {
                 readOnlyHint: false,
                 destructiveHint: false,
                 idempotentHint: false,
                 openWorldHint: false,
             },
-            'remove': {
+            remove: {
                 readOnlyHint: false,
                 destructiveHint: true,
                 idempotentHint: false,
                 openWorldHint: false,
             },
-            'import': {
+            import: {
                 readOnlyHint: false,
                 destructiveHint: false,
                 idempotentHint: false,
                 openWorldHint: false,
             },
-            'export': {
+            export: {
                 readOnlyHint: false,
                 destructiveHint: true,
                 idempotentHint: false,
                 openWorldHint: false,
             },
-            'init_apply': {
+            init_apply: {
                 readOnlyHint: false,
                 destructiveHint: true,
                 idempotentHint: false,

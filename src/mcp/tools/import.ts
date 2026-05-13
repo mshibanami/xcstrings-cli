@@ -5,6 +5,7 @@ import type { ImportMergePolicy } from '../../services/import.js';
 import type { McpSessionContext } from '../runtime.js';
 import {
     resolveToolCatalogPath,
+    resolveToolPath,
     toToolErrorResult,
     toToolTextResult,
 } from '../runtime.js';
@@ -44,8 +45,11 @@ export function registerImportTool(
                     args.target,
                     session,
                 );
+                const resolvedSources = args.sources.map((source) =>
+                    resolveToolPath(source, session),
+                );
                 const result = await runImportCommand({
-                    sources: args.sources,
+                    sources: resolvedSources,
                     resolvedTargetPath: resolvedTarget,
                     language: args.language,
                     languages: args.languages,

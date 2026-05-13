@@ -67,7 +67,8 @@ export async function createMcpServer(
     const server = new McpServer({
         name: 'xcstrings-cli',
         version: getPackageVersion(),
-        description: 'Tools for managing Xcode String Catalog (.xcstrings) localization files. Use this server when the user wants to inspect existing localized strings, find missing translations, add or remove localization entries, list supported languages, or import/export strings.',
+        description:
+            'Tools for managing Xcode String Catalog (.xcstrings) localization files. Use this server when the user wants to inspect existing localized strings, find missing translations, add or remove localization entries, list supported languages, or import/export strings.',
         websiteUrl: 'https://github.com/mshibanami/xcstrings-cli',
     });
 

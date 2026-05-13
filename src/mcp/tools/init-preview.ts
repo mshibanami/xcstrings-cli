@@ -1,5 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { previewInitSetup } from '../../services/init-core.js';
+import { ArgumentError } from '../../utils/errors.js';
 import type { McpSessionContext } from '../runtime.js';
 import { toToolErrorResult, toToolTextResult } from '../runtime.js';
 
@@ -23,6 +24,11 @@ export function registerInitPreviewTool(
         },
         async () => {
             try {
+                if (session.projectRoot === '/') {
+                    throw new ArgumentError(
+                        'MCP project root resolved to "/". Set --project-root to your repository root before using init tools.',
+                    );
+                }
                 const preview = await previewInitSetup(session.projectRoot);
                 const text = [
                     `Project root: ${preview.projectRoot}`,

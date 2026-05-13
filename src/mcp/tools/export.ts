@@ -6,6 +6,7 @@ import { ArgumentError } from '../../utils/errors.js';
 import type { McpSessionContext } from '../runtime.js';
 import {
     resolveToolCatalogPath,
+    resolveToolPath,
     toToolErrorResult,
     toToolTextResult,
 } from '../runtime.js';
@@ -68,9 +69,10 @@ export function registerExportTool(
                     args.path,
                     session,
                 );
+                const resolvedOutpath = resolveToolPath(args.outpath, session);
                 const outputFormat = resolveOutputFormat(
                     (args.output as OutputFormat | undefined) ?? 'auto',
-                    args.outpath,
+                    resolvedOutpath,
                 );
                 const mergePolicy =
                     (args.mergePolicy as ExportMergePolicy | undefined) ??
@@ -78,7 +80,7 @@ export function registerExportTool(
 
                 await doExport({
                     sourcePath,
-                    outpath: args.outpath,
+                    outpath: resolvedOutpath,
                     outputFormat,
                     mergePolicy,
                     languages: args.languages,
@@ -86,9 +88,9 @@ export function registerExportTool(
                     textFilter: toFilterSpec(args.textFilter),
                 });
 
-                return toToolTextResult(`Exported to ${args.outpath}`, {
+                return toToolTextResult(`Exported to ${resolvedOutpath}`, {
                     sourcePath,
-                    outpath: args.outpath,
+                    outpath: resolvedOutpath,
                     outputFormat,
                     mergePolicy,
                 });

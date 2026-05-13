@@ -19,7 +19,9 @@ describe('MCP Session Context (Phase 2)', () => {
         });
 
         expect(session.resolvedConfigPath).toBe(customConfig);
-        expect(session.resolvedConfig?.xcstringsPaths).toEqual(['custom/path']);
+        expect(session.resolvedConfig?.xcstringsPaths).toEqual([
+            resolve(fixtureRoot, 'custom/path'),
+        ]);
     });
 
     test('project-root governs cosmiconfig search and project-root default catalog', async () => {
@@ -30,7 +32,7 @@ describe('MCP Session Context (Phase 2)', () => {
 
         expect(session.projectRoot).toBe(pkgARoot);
         expect(session.resolvedConfig?.xcstringsPaths).toEqual([
-            'pkg-a/Localizable.xcstrings',
+            resolve(pkgARoot, 'pkg-a/Localizable.xcstrings'),
         ]);
         expect(session.defaultCatalogPath).toBe(
             resolve(pkgARoot, 'Localizable.xcstrings'),
@@ -48,10 +50,10 @@ describe('MCP Session Context (Phase 2)', () => {
         });
 
         expect(sessionA.resolvedConfig?.xcstringsPaths).toEqual([
-            'pkg-a/Localizable.xcstrings',
+            resolve(pkgARoot, 'pkg-a/Localizable.xcstrings'),
         ]);
         expect(sessionB.resolvedConfig?.xcstringsPaths).toEqual([
-            'pkg-b/Strings.xcstrings',
+            resolve(pkgBRoot, 'pkg-b/Strings.xcstrings'),
         ]);
     });
 
@@ -89,7 +91,7 @@ describe('MCP Session Context (Phase 2)', () => {
         });
 
         const resolved = await resolveToolCatalogPath(undefined, session);
-        expect(resolved).toBe('custom/path');
+        expect(resolved).toBe(resolve(fixtureRoot, 'custom/path'));
     });
 
     test('without explicitPath and without config, falls back to project-root default', async () => {

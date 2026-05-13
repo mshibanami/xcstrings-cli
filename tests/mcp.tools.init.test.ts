@@ -39,6 +39,25 @@ afterEach(async () => {
 });
 
 describe('mcp tools: init', () => {
+    it('init_preview returns an actionable error when project root is "/"', async () => {
+        const session = await connectMcpClient({
+            args: ['--project-root', '/'],
+        });
+        createdSessions.push(session);
+
+        const result = (await session.client.callTool({
+            name: 'init_preview',
+            arguments: {},
+        })) as any;
+
+        expect(result.isError).toBe(true);
+        const text = result.content
+            .filter((item: any) => item.type === 'text')
+            .map((item: any) => item.text ?? '')
+            .join('\n');
+        expect(text).toContain('Set --project-root');
+    }, 20000);
+
     it('init_preview returns discovered candidates and recommendations', async () => {
         const tempDir = uniqueTempDir('mcp-init-preview');
         createdDirs.push(tempDir);

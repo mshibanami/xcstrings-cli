@@ -1,5 +1,5 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { resolve } from 'node:path';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import { isAppError } from '../utils/errors.js';
 import { loadConfig } from '../utils/config.js';
 import { resolveXCStringsPath } from '../utils/path.js';
@@ -28,6 +28,65 @@ export interface CreateMcpSessionOptions {
     warningMode?: McpWarningMode;
 }
 
+function resolveMcpProjectRoot(options: CreateMcpSessionOptions): string {
+    if (options.projectRoot) {
+        return resolve(options.projectRoot);
+    }
+    if (options.configPath) {
+        return dirname(resolve(options.configPath));
+    }
+    if (options.explicitPath && isAbsolute(options.explicitPath)) {
+        return dirname(options.explicitPath);
+    }
+    if (process.cwd() !== '/') {
+        return process.cwd();
+    }
+    if (process.env.PWD && process.env.PWD !== '/') {
+        return resolve(process.env.PWD);
+    }
+    return process.cwd();
+}
+
+function resolveProjectPath(path: string, projectRoot: string): string {
+    if (isAbsolute(path)) {
+        return path;
+    }
+    return resolve(projectRoot, path);
+}
+
+function resolveConfigPaths(
+    config: Config | null,
+    projectRoot: string,
+): Config | null {
+    if (!config) {
+        return null;
+    }
+
+    const resolvedConfig: Config = { ...config };
+
+    if (resolvedConfig.xcstringsPaths) {
+        resolvedConfig.xcstringsPaths = resolvedConfig.xcstringsPaths.map(
+            (entry) => {
+                if (typeof entry === 'string') {
+                    return resolveProjectPath(entry, projectRoot);
+                }
+                return {
+                    ...entry,
+                    path: resolveProjectPath(entry.path, projectRoot),
+                };
+            },
+        );
+    }
+
+    if (resolvedConfig.xcodeprojPaths) {
+        resolvedConfig.xcodeprojPaths = resolvedConfig.xcodeprojPaths.map(
+            (entry) => resolveProjectPath(entry, projectRoot),
+        );
+    }
+
+    return resolvedConfig;
+}
+
 export async function resolveSessionContext(
     options: CreateMcpSessionOptions,
 ): Promise<McpSessionContext> {
@@ -41,21 +100,20 @@ export async function resolveSessionContext(
                   // no-op
               };
 
-    const projectRoot = options.projectRoot
-        ? resolve(options.projectRoot)
-        : process.cwd();
+    const projectRoot = resolveMcpProjectRoot(options);
 
     const config = await loadConfig(options.configPath, {
         suppressWarnings: true,
         searchFrom: projectRoot,
     });
+    const resolvedConfig = resolveConfigPaths(config, projectRoot);
 
     const defaultCatalogPath = resolve(projectRoot, 'Localizable.xcstrings');
 
     return {
         projectRoot,
         resolvedConfigPath: options.configPath,
-        resolvedConfig: config,
+        resolvedConfig,
         explicitPath: options.explicitPath,
         defaultCatalogPath,
         warningMode,
@@ -68,29 +126,39 @@ export async function resolveToolCatalogPath(
     session: McpSessionContext,
 ): Promise<string> {
     if (argsPath !== undefined) {
-        return resolveXCStringsPath(
+        const resolved = await resolveXCStringsPath(
             argsPath,
             session.resolvedConfig,
             session.defaultCatalogPath,
             { interactive: false },
         );
+        return resolveProjectPath(resolved, session.projectRoot);
     }
 
     if (session.explicitPath !== undefined) {
-        return resolveXCStringsPath(
+        const resolved = await resolveXCStringsPath(
             session.explicitPath,
             session.resolvedConfig,
             session.defaultCatalogPath,
             { interactive: false, preferRequestedPath: true },
         );
+        return resolveProjectPath(resolved, session.projectRoot);
     }
 
-    return resolveXCStringsPath(
+    const resolved = await resolveXCStringsPath(
         undefined,
         session.resolvedConfig,
         session.defaultCatalogPath,
         { interactive: false },
     );
+    return resolveProjectPath(resolved, session.projectRoot);
+}
+
+export function resolveToolPath(
+    rawPath: string,
+    session: McpSessionContext,
+): string {
+    return resolveProjectPath(rawPath, session.projectRoot);
 }
 
 export function toToolTextResult(
