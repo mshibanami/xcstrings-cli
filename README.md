@@ -9,8 +9,8 @@ Here are some of the key features of xcstrings-cli:
 - Preserves the structure and formatting of your existing `.xcstrings` files as much as possible, minimizing unnecessary diffs and merge conflicts.
 - Works on macOS, Windows, and Linux, as it's built with Node.js.
 - LLM friendly for both manual and automated workflows:
-  - It offers [a Custom GPT](https://chatgpt.com/g/g-69365945f8bc8191be3146f880238957-xcstrings-cli-helper) that can help you generate translations and output them in the form that you can easily import with the `xcs` command.
-  - It also supports MCP (Model Context Protocol) as `xcs mcp`.
+    - It offers [a Custom GPT](https://chatgpt.com/g/g-69365945f8bc8191be3146f880238957-xcstrings-cli-helper) that can help you generate translations and output them in the form that you can easily import with the `xcs` command.
+    - It also supports MCP (Model Context Protocol) as `xcs mcp`.
 
 ## Installation
 
@@ -34,12 +34,12 @@ Here are some of the key features of xcstrings-cli:
 
 ```json
 {
-  "mcpServers": {
-    "xcstrings-cli": {
-      "command": "xcs",
-      "args": ["mcp"],
+    "mcpServers": {
+        "xcstrings-cli": {
+            "command": "xcs",
+            "args": ["mcp"]
+        }
     }
-  }
 }
 ```
 
@@ -357,6 +357,10 @@ In this mode, `stdout` is used only for MCP JSON-RPC messages. Optional warning 
     - Inputs: `path?`
 - `xcs.strings.list` (read-only)
     - Inputs: `path?`, `languages?`, `missingLanguages?`, `format?`, `keyFilter?`, `textFilter?`
+- `xcs.init.preview` (read-only, discovers candidates and recommended config for initialization)
+    - Inputs: none
+- `xcs.init.apply` (write, performs initialization)
+    - Inputs: `xcstringsPaths?`, `xcodeprojPaths?`, `missingLanguagePolicy?`, `createMissingXCStrings?`, `sourceLanguage?`, `overwrite?`
 - `xcs.add` (write)
     - Inputs: `path?`, `key?`, `comment?`, `language?`, `state?`, `text?`, `strings?`
 - `xcs.remove` (write)
