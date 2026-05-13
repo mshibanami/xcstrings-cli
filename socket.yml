@@ -1,17 +1,17 @@
 version: 2
 
 githubApp:
-  enabled: true
-  dependencyOverviewEnabled: true
+    enabled: true
+    dependencyOverviewEnabled: true
 
 projectIgnorePaths:
-  - "dist/**"
-  - "node_modules/**"
-  - "helpers/**"
-  - "tests/**"
+    - 'dist/**'
+    - 'node_modules/**'
+    - 'helpers/**'
+    - 'tests/**'
 
 triggerPaths:
-  - "package.json"
-  - "pnpm-lock.yaml"
-  - "socket.yml"
-  - ".npmrc"
+    - 'package.json'
+    - 'pnpm-lock.yaml'
+    - 'socket.yml'
+    - '.npmrc'
