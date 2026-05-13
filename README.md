@@ -409,6 +409,10 @@ A: By default, `xcs` only adds translations for languages that are recognized in
 
 If you want to add translations for languages not included in your Xcode project, you can change the `missingLanguagePolicy` in your config file to `include`.
 
+## Security
+
+We prioritize security by using strict pnpm policies, pinned dependencies, and [Socket.dev](https://socket.dev/) monitoring to protect the codebase from supply chain attacks. Furthermore, releases are securely published from GitHub Actions using npm's Trusted Publishing to ensure build integrity and provenance.
+
 ## LICENSE
 
 MIT
