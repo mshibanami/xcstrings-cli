@@ -2,9 +2,15 @@
 
 [![Test](https://github.com/mshibanami/Docsloth/actions/workflows/test.yml/badge.svg)](https://github.com/mshibanami/Docsloth/actions/workflows/test.yml) [![npm version](https://badge.fury.io/js/xcstrings-cli.svg)](https://badge.fury.io/js/xcstrings-cli) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This is a command-line tool designed for working with **String Catalog** (`.xcstrings`) files, such as adding and removing localized strings. It supports JSON5 and YAML formats for inputting translations.
+This is a command-line tool designed for working with String Catalog (`.xcstrings`) files, such as adding and removing localized strings. It supports JSON5 and YAML formats for inputting translations.
 
-We also provide a Custom GPT that can help you generate translations and output them in the form of an `xcs` command. Check it out here: [xcstrings-cli Helper](https://chatgpt.com/g/g-69365945f8bc8191be3146f880238957-xcstrings-cli-helper). (The configuration is in [helpers/helper-config.md](./helpers/helper-config.md).)
+Here are some of the key features of xcstrings-cli:
+
+- Preserves the structure and formatting of your existing `.xcstrings` files as much as possible, minimizing unnecessary diffs and merge conflicts.
+- Works on macOS, Windows, and Linux, as it's built with Node.js.
+- LLM friendly for both manual and automated workflows:
+    - It offers [a Custom GPT](https://chatgpt.com/g/g-69365945f8bc8191be3146f880238957-xcstrings-cli-helper) that can help you generate translations and output them in the form that you can easily import with the `xcs` command.
+    - It also supports MCP (Model Context Protocol) as `xcs mcp`.
 
 ## Installation
 
@@ -23,6 +29,19 @@ We also provide a Custom GPT that can help you generate translations and output 
     ```
 
     This will ask you some questions and create an `xcstrings-cli.yaml` file in the current directory.
+
+(Optional) You can also configure your AI agent to run `xcs` as an MCP server:
+
+```json
+{
+    "mcpServers": {
+        "xcstrings-cli": {
+            "command": "xcs",
+            "args": ["mcp"]
+        }
+    }
+}
+```
 
 ## Usage
 
@@ -312,6 +331,55 @@ Imports strings from `.xcstrings` or `.strings` files into a target `.xcstrings`
     - `--key`, `--key-glob`, `--key-regex`, `--key-substring`
     - `--text`, `--text-glob`, `--text-regex`, `--text-substring`
     - `--languages, -l`
+
+### `mcp` command
+
+Starts `xcs` as an MCP server over stdio.
+
+In this mode, `stdout` is used only for MCP JSON-RPC messages. Optional warning output can be sent to `stderr`.
+
+**`mcp` command options:**
+
+- `--project-root`: `string` (Optional)
+    - Base directory for config discovery and default catalog resolution in the MCP session.
+    - If omitted, the current working directory is used.
+- `--warnings`: `string` (Optional, default: `silent`)
+    - Where MCP warnings are written.
+    - Available values:
+        - `silent`: Suppress warnings.
+        - `stderr`: Write warnings to stderr with `[xcs mcp]` prefix.
+
+**Supported MCP tools:**
+
+`xcs mcp` exposes the same localization workflows as MCP tools:
+
+- `languages_list` (read-only)
+    - Inputs: `path?`
+- `strings_list` (read-only)
+    - Inputs: `path?`, `languages?`, `missingLanguages?`, `format?`, `keyFilter?`, `textFilter?`
+- `init_preview` (read-only, discovers candidates and recommended config for initialization)
+    - Inputs: none
+- `init_apply` (write, performs initialization)
+    - Inputs: `xcstringsPaths?`, `xcodeprojPaths?`, `missingLanguagePolicy?`, `createMissingXCStrings?`, `sourceLanguage?`, `overwrite?`
+- `add` (write)
+    - Inputs: `path?`, `key?`, `comment?`, `language?`, `state?`, `text?`, `strings?`
+- `remove` (write)
+    - Inputs: `path?`, `key?`, `languages?`, `dryRun?`
+- `import` (write)
+    - Inputs: `sources`, `target?`, `language?`, `languages?`, `mergePolicy?`, `keyFilter?`, `textFilter?`
+- `export` (write)
+    - Inputs: `path?`, `outpath`, `output?`, `mergePolicy?`, `languages?`, `keyFilter?`, `textFilter?`
+
+For `keyFilter` and `textFilter`, use:
+
+```json
+{
+    "pattern": "good*",
+    "mode": "glob"
+}
+```
+
+`mode` supports `glob`, `regex`, and `substring`.
 
 ## Configuration file
 

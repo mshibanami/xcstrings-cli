@@ -8,13 +8,32 @@ import {
     writeXCStrings,
 } from './shared/xcstrings.js';
 import { captureInteractiveStringsInput } from '../utils/interactive.js';
-import { loadConfig, MissingLanguagePolicy } from '../utils/config';
+import { MissingLanguagePolicy, Config, loadConfig } from '../utils/config.js';
 import { languages } from './languages.js';
-import { ArgumentError, DomainError } from '../utils/errors';
+import { ArgumentError, DomainError } from '../utils/errors.js';
 import { addToCatalog } from './core/add-core.js';
 
 export type StringsFormat = 'auto' | 'yaml' | 'json';
 export type WarningHandler = (message: string) => void;
+type ConfigOrPath = Config | null | string | undefined;
+
+async function resolveConfigInput(
+    config: ConfigOrPath,
+    configPath?: string,
+): Promise<Config | null> {
+    if (config !== undefined) {
+        if (typeof config === 'string') {
+            return (await loadConfig(config)) ?? null;
+        }
+        return config ?? null;
+    }
+
+    if (configPath) {
+        return (await loadConfig(configPath)) ?? null;
+    }
+
+    return null;
+}
 
 export type InteractiveAddOptions = {
     path: string;
@@ -22,6 +41,8 @@ export type InteractiveAddOptions = {
     comment?: string;
     defaultString?: string;
     language?: string;
+    config?: Config | null;
+    /** @deprecated Prefer `config`. Kept for backward compatibility. */
     configPath?: string;
     state: LocalizationState;
     onWarning?: WarningHandler;
@@ -372,6 +393,11 @@ export async function runInteractiveAdd(
         );
     }
 
+    const resolvedConfig = await resolveConfigInput(
+        options.config,
+        options.configPath,
+    );
+
     if (parsed.kind === 'multi') {
         if (
             options.key ||
@@ -390,7 +416,7 @@ export async function runInteractiveAdd(
                 entryKey,
                 entry.comment,
                 entry.translations,
-                options.configPath,
+                resolvedConfig,
                 undefined,
                 undefined,
                 options.state,
@@ -417,7 +443,7 @@ export async function runInteractiveAdd(
         keyToUse,
         options.comment ?? commentFromPayload,
         translations,
-        options.configPath,
+        resolvedConfig,
         options.defaultString,
         options.language,
         options.state,
@@ -435,6 +461,7 @@ export async function runAddCommand({
     defaultString,
     language,
     stdinReader = readStdinToString,
+    config,
     configPath,
     state,
     interactive,
@@ -448,12 +475,15 @@ export async function runAddCommand({
     defaultString?: string;
     language?: string;
     stdinReader?: () => Promise<string>;
+    config?: Config | null;
+    /** @deprecated Prefer `config`. Kept for backward compatibility. */
     configPath?: string;
     state?: string;
     interactive?: boolean;
     onWarning?: WarningHandler;
 }): Promise<AddResult> {
     const resolvedState = resolveState(state);
+    const resolvedConfig = await resolveConfigInput(config, configPath);
 
     if (interactive) {
         if (stringsArg !== undefined) {
@@ -467,7 +497,7 @@ export async function runAddCommand({
             comment,
             defaultString,
             language,
-            configPath,
+            config: resolvedConfig,
             state: resolvedState,
             onWarning,
         });
@@ -492,7 +522,7 @@ export async function runAddCommand({
                 entryKey,
                 entry.comment,
                 entry.translations,
-                configPath,
+                resolvedConfig,
                 undefined,
                 undefined,
                 resolvedState,
@@ -521,7 +551,7 @@ export async function runAddCommand({
         keyToUse,
         comment ?? commentFromPayload,
         strings,
-        configPath,
+        resolvedConfig,
         defaultString,
         language,
         resolvedState,
@@ -535,7 +565,7 @@ export async function add(
     key: string,
     comment: string | undefined,
     strings: Record<string, LocalizationPayload | string> | undefined,
-    configPath?: string,
+    config?: Config | null | string,
     defaultString?: string,
     language?: string,
     state?: LocalizationState,
@@ -552,9 +582,9 @@ export async function add(
 
     const sourceLanguage = data.sourceLanguage;
 
-    const config = await loadConfig(configPath);
+    const resolvedConfig = await resolveConfigInput(config);
     const handleMissing: MissingLanguagePolicy =
-        config?.missingLanguagePolicy || 'skip';
+        resolvedConfig?.missingLanguagePolicy || 'skip';
     let supportedLanguages: string[] | undefined;
 
     const ensureSupported = async (lang: string): Promise<boolean> => {
@@ -562,7 +592,7 @@ export async function add(
             return true;
         }
         if (!supportedLanguages) {
-            supportedLanguages = await languages(path, configPath);
+            supportedLanguages = await languages(path, resolvedConfig);
         }
         return supportedLanguages.includes(lang);
     };

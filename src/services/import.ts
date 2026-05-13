@@ -9,7 +9,6 @@ import {
     XCStrings,
     sortXCStringsKeys,
 } from './shared/xcstrings.js';
-import { loadConfig } from '../utils/config.js';
 import { resolveXCStringsPath } from '../utils/path.js';
 import { isInteractiveMode } from '../utils/interactive.js';
 import {
@@ -23,8 +22,10 @@ export type ImportMergePolicy = 'source-first' | 'destination-first' | 'error';
 export interface RunImportCommandOptions {
     sources: string[];
     target?: string;
+    /** Already-resolved target path. When provided, target resolution is skipped. */
+    resolvedTargetPath?: string;
     language?: string;
-    configPath?: string;
+    config?: import('../utils/config.js').Config | null;
     mergePolicy?: ImportMergePolicy;
     keyFilter?: unknown;
     textFilter?: unknown;
@@ -55,13 +56,15 @@ export async function runImportCommand(
 ): Promise<{ targetPath: string }> {
     const interactive = isInteractiveMode();
 
-    const config = await loadConfig(options.configPath);
-    const targetPath = await resolveXCStringsPath(
-        options.target,
-        config,
-        resolve(process.cwd(), 'Localizable.xcstrings'),
-        { interactive },
-    );
+    const config = options.config;
+    const targetPath =
+        options.resolvedTargetPath ??
+        (await resolveXCStringsPath(
+            options.target,
+            config || null,
+            resolve(process.cwd(), 'Localizable.xcstrings'),
+            { interactive },
+        ));
 
     const mergePolicy =
         options.mergePolicy ||

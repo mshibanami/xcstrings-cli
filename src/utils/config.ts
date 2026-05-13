@@ -41,25 +41,66 @@ export interface Config {
     mergePolicy?: ExportMergePolicy;
 }
 
-export async function loadConfig(
-    explicitPath?: string,
-): Promise<Config | null> {
-    if (explicitPath) {
-        const result = await explorer.load(explicitPath);
-        return result ? (result.config as Config) : null;
+export interface LoadConfigOptions {
+    suppressWarnings?: boolean;
+    searchFrom?: string;
+}
+
+export interface LoadedConfigResult {
+    config: Config | null;
+    filepath?: string;
+}
+
+function applyDeprecatedMergePolicy(
+    config: Config | null,
+    options: LoadConfigOptions,
+): void {
+    if (!config) {
+        return;
     }
 
-    const result = await explorer.search();
-    const config = result ? (result.config as Config) : null;
+    const suppressWarnings =
+        options.suppressWarnings ||
+        process.env.XCS_SUPPRESS_CONFIG_WARNINGS === '1';
 
-    if (config?.mergePolicy) {
+    if (config.mergePolicy && !suppressWarnings) {
         logger.warn(
             'WARNING: "mergePolicy" is deprecated. Please use "exportMergePolicy" instead.',
         );
-        if (!config.exportMergePolicy) {
-            config.exportMergePolicy = config.mergePolicy;
-        }
+    }
+    if (config.mergePolicy && !config.exportMergePolicy) {
+        config.exportMergePolicy = config.mergePolicy;
+    }
+}
+
+export async function loadConfigWithMeta(
+    explicitPath?: string,
+    options: LoadConfigOptions = {},
+): Promise<LoadedConfigResult> {
+    if (explicitPath) {
+        const result = await explorer.load(explicitPath);
+        const config = result ? (result.config as Config) : null;
+        applyDeprecatedMergePolicy(config, options);
+        return {
+            config,
+            filepath: result?.filepath,
+        };
     }
 
+    const searchFrom = options.searchFrom;
+    const result = await explorer.search(searchFrom);
+    const config = result ? (result.config as Config) : null;
+    applyDeprecatedMergePolicy(config, options);
+    return {
+        config,
+        filepath: result?.filepath,
+    };
+}
+
+export async function loadConfig(
+    explicitPath?: string,
+    options: LoadConfigOptions = {},
+): Promise<Config | null> {
+    const { config } = await loadConfigWithMeta(explicitPath, options);
     return config;
 }

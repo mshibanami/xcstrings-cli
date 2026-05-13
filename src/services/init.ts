@@ -1,65 +1,15 @@
-import { writeFile, readdir, access } from 'node:fs/promises';
-import { resolve, relative } from 'node:path';
+import { access } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import chalk from 'chalk';
 import { checkbox, confirm, input, select } from '@inquirer/prompts';
+import { SwiftPackageState } from '../utils/swift-package.js';
 import {
-    detectSwiftPackage,
-    SwiftPackageState,
-} from '../utils/swift-package.js';
-import { isMatch } from 'micromatch';
-import { writeXCStrings } from './shared/xcstrings.js';
-
-const INIT_FILE_NAME = 'xcstrings-cli.yaml';
-
-const IGNORE_DIR_PATTERNS = [
-    '.*',
-    'node_modules',
-    'build',
-    'dist',
-    'DerivedData',
-];
-
-async function findXCStringsFiles(dir: string): Promise<string[]> {
-    const results: string[] = [];
-
-    async function walk(currentDir: string): Promise<void> {
-        try {
-            const entries = await readdir(currentDir, { withFileTypes: true });
-            for (const entry of entries) {
-                const fullPath = resolve(currentDir, entry.name);
-                if (entry.isDirectory()) {
-                    // Skip ignored patterns
-                    if (!isMatch(entry.name, IGNORE_DIR_PATTERNS)) {
-                        await walk(fullPath);
-                    }
-                } else if (entry.name.endsWith('.xcstrings')) {
-                    results.push(fullPath);
-                }
-            }
-        } catch {
-            // Ignore permission errors
-        }
-    }
-
-    await walk(dir);
-    return results;
-}
-
-async function findXcodeprojDirs(startDir: string): Promise<string[]> {
-    const results: string[] = [];
-    const currentDir = startDir;
-    try {
-        const entries = await readdir(currentDir, { withFileTypes: true });
-        for (const entry of entries) {
-            if (entry.isDirectory() && entry.name.endsWith('.xcodeproj')) {
-                results.push(resolve(currentDir, entry.name));
-            }
-        }
-    } catch {
-        // Ignore permission errors
-    }
-    return results;
-}
+    INIT_FILE_NAME,
+    applyInitConfigPlan,
+    createInitConfigPlan,
+    discoverInitContext,
+    ensureXCStringsCatalog,
+} from './init-core.js';
 
 export async function init(): Promise<void> {
     const cwd = process.cwd();
@@ -69,7 +19,9 @@ export async function init(): Promise<void> {
     console.log(chalk.dim('─'.repeat(40)));
     console.log();
 
-    const swiftPackageInfo = await detectSwiftPackage(cwd);
+    const discovery = await discoverInitContext(cwd);
+    const swiftPackageInfo = discovery.swiftPackageInfo;
+
     if (swiftPackageInfo.state !== SwiftPackageState.None) {
         console.log(
             chalk.cyan(
@@ -87,10 +39,10 @@ export async function init(): Promise<void> {
     }
 
     console.log(chalk.yellow('🔍 Searching for .xcstrings files...'));
-    const xcstringsFiles = await findXCStringsFiles(cwd);
+    const xcstringsFiles = discovery.xcstringsPaths;
 
     console.log(chalk.yellow('🔍 Searching for .xcodeproj directories...'));
-    const xcodeprojDirs = await findXcodeprojDirs(cwd);
+    const xcodeprojDirs = discovery.xcodeprojPaths;
 
     console.log();
 
@@ -102,8 +54,8 @@ export async function init(): Promise<void> {
         console.log();
 
         const choices = xcstringsFiles.map((file) => ({
-            name: chalk.white(relative(cwd, file)) + chalk.dim(` (${file})`),
-            value: relative(cwd, file),
+            name: chalk.white(file),
+            value: file,
             checked: true,
         }));
 
@@ -117,7 +69,6 @@ export async function init(): Promise<void> {
         );
     }
 
-    // Allow manual path entry if no files found or user wants to add more
     const xcstringsChoices = [];
     if (
         swiftPackageInfo.suggestedXCStringsPaths &&
@@ -125,7 +76,7 @@ export async function init(): Promise<void> {
     ) {
         for (const path of swiftPackageInfo.suggestedXCStringsPaths) {
             xcstringsChoices.push({
-                name: `${path}`,
+                name: path,
                 value: path,
             });
         }
@@ -183,12 +134,11 @@ export async function init(): Promise<void> {
                     default: swiftPackageInfo.defaultLocalization || 'en',
                 });
 
-                const initialContent = {
-                    sourceLanguage: defaultLang || 'en',
-                    strings: {},
-                    version: '1.0',
-                };
-                await writeXCStrings(fullManualPath, initialContent);
+                await ensureXCStringsCatalog(
+                    cwd,
+                    manualPath,
+                    defaultLang || 'en',
+                );
                 console.log(
                     chalk.green(
                         `✓ Created new .xcstrings file at ${manualPath}`,
@@ -214,9 +164,8 @@ export async function init(): Promise<void> {
         console.log();
 
         const choices = xcodeprojDirs.map((dir) => ({
-            name:
-                chalk.white(relative(cwd, dir) || dir) + chalk.dim(` (${dir})`),
-            value: relative(cwd, dir) || dir,
+            name: chalk.white(dir),
+            value: dir,
             checked: true,
         }));
 
@@ -240,12 +189,15 @@ export async function init(): Promise<void> {
         });
 
         if (xcodeprojSelection === 'manual') {
-            const manualPath = await input({
+            const manualXcodeprojPath = await input({
                 message: chalk.bold('Enter the path to .xcodeproj directory:'),
             });
 
-            if (manualPath && !selectedXcodeproj.includes(manualPath)) {
-                selectedXcodeproj.push(manualPath);
+            if (
+                manualXcodeprojPath &&
+                !selectedXcodeproj.includes(manualXcodeprojPath)
+            ) {
+                selectedXcodeproj.push(manualXcodeprojPath);
             }
         }
     } else {
@@ -253,14 +205,14 @@ export async function init(): Promise<void> {
             console.log(chalk.dim('  No .xcodeproj directories found'));
         }
 
-        const manualPath = await input({
+        const manualXcodeprojPath = await input({
             message: chalk.bold(
                 'Enter the path to .xcodeproj directory (leave empty to skip):',
             ),
         });
 
-        if (manualPath) {
-            selectedXcodeproj.push(manualPath);
+        if (manualXcodeprojPath) {
+            selectedXcodeproj.push(manualXcodeprojPath);
         }
     }
 
@@ -273,8 +225,8 @@ export async function init(): Promise<void> {
 
     console.log(chalk.cyan('  xcstringsPaths:'));
     if (selectedXCStrings.length > 0) {
-        selectedXCStrings.forEach((p) =>
-            console.log(chalk.white(`    • ${p}`)),
+        selectedXCStrings.forEach((path) =>
+            console.log(chalk.white(`    • ${path}`)),
         );
     } else {
         console.log(chalk.dim('    (none)'));
@@ -284,8 +236,8 @@ export async function init(): Promise<void> {
         console.log();
         console.log(chalk.cyan('  xcodeprojPaths:'));
         if (selectedXcodeproj.length > 0) {
-            selectedXcodeproj.forEach((p) =>
-                console.log(chalk.white(`    • ${p}`)),
+            selectedXcodeproj.forEach((path) =>
+                console.log(chalk.white(`    • ${path}`)),
             );
         } else {
             console.log(chalk.dim('    (none)'));
@@ -304,40 +256,21 @@ export async function init(): Promise<void> {
         return;
     }
 
-    const xcstringsArray =
-        selectedXCStrings.length > 0
-            ? '\n' + selectedXCStrings.map((p) => `  - "${p}"`).join('\n')
-            : ' []';
+    const plan = createInitConfigPlan({
+        projectRoot: cwd,
+        swiftPackageState: swiftPackageInfo.state,
+        xcstringsPaths: selectedXCStrings,
+        xcodeprojPaths: selectedXcodeproj,
+        missingLanguagePolicy: 'skip',
+    });
 
-    const xcodeprojArray =
-        selectedXcodeproj.length > 0
-            ? '\n' + selectedXcodeproj.map((p) => `  - "${p}"`).join('\n')
-            : ' []';
-
-    let config = `# Behavior for handling missing languages when adding strings.
-missingLanguagePolicy: "skip"
-
-# Paths to .xcstrings files to manage. Specify relative or absolute paths.
-xcstringsPaths:${xcstringsArray}
-`;
-    const isSwiftPackage = swiftPackageInfo.state !== SwiftPackageState.None;
-    const shouldExcludeXcodeproj =
-        isSwiftPackage && selectedXcodeproj.length === 0;
-
-    if (!shouldExcludeXcodeproj) {
-        config += `
-# Paths to .xcodeproj directories. Used for discovering supported languages.
-xcodeprojPaths:${xcodeprojArray}
-`;
-    }
-
-    await writeFile(resolve(cwd, INIT_FILE_NAME), config, 'utf-8');
+    await applyInitConfigPlan(plan);
 
     console.log();
     console.log(chalk.bold.green(`✓ Created ${INIT_FILE_NAME}`));
     console.log(
         chalk.dim(
-            `   Run ${chalk.cyan('xcstrings --help')} to see available commands.`,
+            `   Run ${chalk.cyan('xcs --help')} to see available commands.`,
         ),
     );
     console.log();
