@@ -1,5 +1,11 @@
 # xcstrings-cli
 
+## 2.8.3
+
+### Patch Changes
+
+- 0513b34: Harden dependency security and integrate Socket.dev for supply chain attack protection. This includes pinning dependencies to exact versions and configuring strict pnpm security policies.
+
 ## 2.8.2
 
 ### Patch Changes
