@@ -2,6 +2,7 @@
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import type { Argv, CommandModule, MiddlewareFunction } from 'yargs';
 import { resolve } from 'node:path';
 import { loadConfig } from './utils/config';
 import { resolveXCStringsPath } from './utils/path';
@@ -13,11 +14,72 @@ import { createLanguagesCommand } from './commands/languages';
 import { createStringsCommand } from './commands/strings';
 import { createExportCommand } from './commands/export';
 import { createImportCommand } from './commands/import';
-import { ArgumentError } from './utils/errors';
+import { isAppError } from './utils/errors';
+import { isInteractiveMode } from './utils/interactive.js';
 
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
 
-yargs(hideBin(process.argv))
+const resolvePathMiddleware: MiddlewareFunction = async (argv) => {
+    const config = await loadConfig(argv.config as string | undefined);
+    argv.path = await resolveXCStringsPath(
+        argv.path as string | undefined,
+        config,
+        defaultPath,
+        { interactive: isInteractiveMode() },
+    );
+};
+
+function registerCommandWithMiddlewares(
+    cli: Argv,
+    commandModule: CommandModule,
+    middlewares: MiddlewareFunction[],
+): void {
+    if (!commandModule.command) {
+        throw new Error('Command module must define command.');
+    }
+
+    const builder =
+        (commandModule.builder as any) ??
+        ((yargsInstance: Argv) => yargsInstance);
+    const handler = commandModule.handler as any;
+    const deprecated = commandModule.deprecated;
+
+    if (commandModule.describe === false) {
+        cli.command(
+            commandModule.command,
+            false,
+            builder,
+            handler,
+            middlewares,
+            deprecated,
+        );
+        return;
+    }
+
+    cli.command(
+        commandModule.command,
+        commandModule.describe ?? '',
+        builder,
+        handler,
+        middlewares,
+        deprecated,
+    );
+}
+
+const pathAwareCommands: CommandModule[] = [
+    createAddCommand(),
+    createRemoveCommand(),
+    createLanguagesCommand(),
+    createStringsCommand(),
+    createExportCommand(),
+];
+
+const pathIndependentCommands: CommandModule[] = [
+    createInitCommand(),
+    createImportCommand(),
+];
+
+const cli = yargs(hideBin(process.argv))
     .scriptName('xcs')
     .usage('$0 <cmd> [args]')
     .option('config', {
@@ -28,31 +90,25 @@ yargs(hideBin(process.argv))
         type: 'string',
         describe: 'Path or alias to xcstrings file',
         default: defaultPath,
-    })
-    .middleware(async (argv) => {
-        const config = await loadConfig(argv.config as string | undefined);
-        argv.path = await resolveXCStringsPath(
-            argv.path as string,
-            config,
-            defaultPath,
-        );
-    })
-    .command([
-        createAddCommand(),
-        createRemoveCommand(),
-        createInitCommand(),
-        createLanguagesCommand(),
-        createStringsCommand(),
-        createExportCommand(),
-        createImportCommand(),
-    ])
+    });
+
+for (const commandModule of pathAwareCommands) {
+    registerCommandWithMiddlewares(cli, commandModule, [resolvePathMiddleware]);
+}
+
+for (const commandModule of pathIndependentCommands) {
+    cli.command(commandModule);
+}
+
+cli
     .demandCommand(1, 'Please specify a command')
     .strictCommands()
     .recommendCommands()
     .fail((msg, err, yargsInstance) => {
-        const isArgumentError = err instanceof ArgumentError;
+        const shouldShowHelp =
+            Boolean(msg) || (err && isAppError(err) && err.showHelp);
 
-        if (msg || isArgumentError) {
+        if (shouldShowHelp) {
             console.error(chalk.red(msg || err?.message || err));
             console.log();
             yargsInstance.showHelp();

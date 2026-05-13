@@ -1,4 +1,5 @@
 export type FilterMode = 'glob' | 'regex' | 'substring';
+import { ArgumentError } from './errors.js';
 
 export interface FilterSpec {
     pattern: string;
@@ -16,7 +17,7 @@ export function resolveFilter(
     const provided = [glob, regex, substring].filter((v) => v !== undefined);
     if (provided.length === 0) return undefined;
     if (provided.length > 1) {
-        throw new Error(
+        throw new ArgumentError(
             `Specify only one of --${label}, --${label}-glob, --${label}-regex, --${label}-substring`,
         );
     }
@@ -92,7 +93,7 @@ export function checkFilterOptions(argv: any): boolean {
     const keyRegexCount = argv['key-regex'] ? 1 : 0;
     const keySubstringCount = argv['key-substring'] ? 1 : 0;
     if (keyGlobCount + keyRegexCount + keySubstringCount > 1) {
-        throw new Error(
+        throw new ArgumentError(
             'Specify only one of --key/--key-glob, --key-regex, or --key-substring',
         );
     }
@@ -103,7 +104,7 @@ export function checkFilterOptions(argv: any): boolean {
     const textRegexCount = argv['text-regex'] ? 1 : 0;
     const textSubstringCount = argv['text-substring'] ? 1 : 0;
     if (textGlobCount + textRegexCount + textSubstringCount > 1) {
-        throw new Error(
+        throw new ArgumentError(
             'Specify only one of --text/--text-glob, --text-regex, or --text-substring',
         );
     }

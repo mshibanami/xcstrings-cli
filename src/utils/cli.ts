@@ -1,3 +1,6 @@
+import logger from './logger.js';
+import { runAddCommand as runAddCommandCore } from '../services/add.js';
+
 export {
     AddResult,
     InteractiveAddOptions,
@@ -5,6 +8,14 @@ export {
     StringsFormat,
     parseStringsArg,
     readStdinToString,
-    runAddCommand,
     runInteractiveAdd,
-} from '../commands/add.js';
+} from '../services/add.js';
+
+export async function runAddCommand(
+    options: Parameters<typeof runAddCommandCore>[0],
+): ReturnType<typeof runAddCommandCore> {
+    return runAddCommandCore({
+        ...options,
+        onWarning: options.onWarning ?? ((message) => logger.warn(message)),
+    });
+}

@@ -1,5 +1,7 @@
 import { select } from '@inquirer/prompts';
 import { Config } from './config.js';
+import { InteractiveModeOptions, isInteractiveMode } from './interactive.js';
+import { DomainError } from './errors.js';
 
 export function findAliasPath(
     entries: (string | { alias: string; path: string })[] | undefined,
@@ -18,7 +20,9 @@ export async function resolveXCStringsPath(
     requestedPath: string | undefined,
     config: Config | null,
     defaultPath: string,
+    interactiveModeOptions: InteractiveModeOptions = {},
 ): Promise<string> {
+    const interactive = isInteractiveMode(interactiveModeOptions);
     const entries = config?.xcstringsPaths;
 
     if (!requestedPath) {
@@ -39,7 +43,11 @@ export async function resolveXCStringsPath(
     if (aliasFromPrefix) {
         const resolved = findAliasPath(entries, aliasFromPrefix);
         if (!resolved) {
-            throw new Error(`Unknown alias: ${aliasFromPrefix}`);
+            throw new DomainError(
+                'UNKNOWN_ALIAS',
+                `Unknown alias: ${aliasFromPrefix}`,
+                { alias: aliasFromPrefix },
+            );
         }
         return resolved;
     }
@@ -52,13 +60,26 @@ export async function resolveXCStringsPath(
     const looksLikeAlias =
         !requestedPath.includes('/') && !requestedPath.endsWith('.xcstrings');
     if (hasAliasEntries && looksLikeAlias) {
-        throw new Error(`Unknown alias: ${requestedPath}`);
+        throw new DomainError(
+            'UNKNOWN_ALIAS',
+            `Unknown alias: ${requestedPath}`,
+            {
+                alias: requestedPath,
+            },
+        );
     }
 
     if (requestedPath === defaultPath && entries && entries.length > 0) {
         if (entries.length === 1) {
             const entry = entries[0];
             return typeof entry === 'string' ? entry : entry.path;
+        }
+
+        if (!interactive) {
+            throw new DomainError(
+                'NON_INTERACTIVE_REQUIRED_ARGUMENT',
+                'Non-interactive mode cannot prompt for xcstrings file selection. Specify --path (or --target for import) explicitly.',
+            );
         }
 
         const choices = entries.map((entry) => {
