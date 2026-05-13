@@ -109,10 +109,14 @@ export function mergeStringsEntriesIntoTarget(
             },
         };
 
-        targetData.strings[key] = mergeTranslationUnit(existingUnit, sourceUnit, {
-            mergePolicy: options.mergePolicy,
-            keyName: key,
-            sortLocalizations: 'auto',
-        });
+        targetData.strings[key] = mergeTranslationUnit(
+            existingUnit,
+            sourceUnit,
+            {
+                mergePolicy: options.mergePolicy,
+                keyName: key,
+                sortLocalizations: 'auto',
+            },
+        );
     }
 }

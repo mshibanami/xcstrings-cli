@@ -582,7 +582,9 @@ export async function add(
         }
     }
 
-    let filteredStrings: Record<string, LocalizationPayload | string> | undefined;
+    let filteredStrings:
+        | Record<string, LocalizationPayload | string>
+        | undefined;
     if (strings) {
         filteredStrings = {};
         for (const [lang, value] of Object.entries(strings)) {

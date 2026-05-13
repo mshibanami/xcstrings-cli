@@ -60,9 +60,13 @@ export async function resolveXCStringsPath(
     const looksLikeAlias =
         !requestedPath.includes('/') && !requestedPath.endsWith('.xcstrings');
     if (hasAliasEntries && looksLikeAlias) {
-        throw new DomainError('UNKNOWN_ALIAS', `Unknown alias: ${requestedPath}`, {
-            alias: requestedPath,
-        });
+        throw new DomainError(
+            'UNKNOWN_ALIAS',
+            `Unknown alias: ${requestedPath}`,
+            {
+                alias: requestedPath,
+            },
+        );
     }
 
     if (requestedPath === defaultPath && entries && entries.length > 0) {

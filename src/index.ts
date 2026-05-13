@@ -105,7 +105,8 @@ cli
     .strictCommands()
     .recommendCommands()
     .fail((msg, err, yargsInstance) => {
-        const shouldShowHelp = Boolean(msg) || (err && isAppError(err) && err.showHelp);
+        const shouldShowHelp =
+            Boolean(msg) || (err && isAppError(err) && err.showHelp);
 
         if (shouldShowHelp) {
             console.error(chalk.red(msg || err?.message || err));
