@@ -1,6 +1,6 @@
 import { XcodeProject } from '@bacons/xcode';
 import { resolve } from 'node:path';
-import { loadConfig } from '../utils/config.js';
+import { loadConfig, Config } from '../utils/config.js';
 import { readXCStrings } from './shared/xcstrings.js';
 import { DomainError } from '../utils/errors.js';
 
@@ -41,7 +41,7 @@ export async function getLanguagesFromXCStrings(
 
 export async function languages(
     xcstringsPath: string,
-    configPath?: string,
+    config?: Config | null,
 ): Promise<string[]> {
     const { sourceLanguage } = await readXCStrings(xcstringsPath);
 
@@ -52,11 +52,14 @@ export async function languages(
         );
     }
 
-    const config = await loadConfig(configPath);
-    if (config?.xcodeprojPaths && config.xcodeprojPaths.length > 0) {
+    const resolvedConfig = config !== undefined ? config : await loadConfig();
+    if (
+        resolvedConfig?.xcodeprojPaths &&
+        resolvedConfig.xcodeprojPaths.length > 0
+    ) {
         const allLanguages = new Set<string>();
         allLanguages.add(sourceLanguage);
-        for (const xcodeprojPath of config.xcodeprojPaths) {
+        for (const xcodeprojPath of resolvedConfig.xcodeprojPaths) {
             const langs = getLanguagesFromXcodeproj(xcodeprojPath);
             langs.forEach((lang) => allLanguages.add(lang));
         }

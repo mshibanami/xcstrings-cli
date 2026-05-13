@@ -2,9 +2,9 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as z from 'zod/v4';
 import { runImportCommand } from '../../services/import.js';
 import type { ImportMergePolicy } from '../../services/import.js';
-import type { McpRuntimeContext } from '../runtime.js';
+import type { McpSessionContext } from '../runtime.js';
 import {
-    resolveConfigPath,
+    resolveToolCatalogPath,
     toToolErrorResult,
     toToolTextResult,
 } from '../runtime.js';
@@ -12,7 +12,7 @@ import { filterSpecInputSchema, toFilterSpec } from './shared.js';
 
 export function registerImportTool(
     server: McpServer,
-    runtime: McpRuntimeContext,
+    session: McpSessionContext,
 ): void {
     server.registerTool(
         'xcs.import',
@@ -28,7 +28,6 @@ export function registerImportTool(
                 mergePolicy: z
                     .enum(['source-first', 'destination-first', 'error'])
                     .optional(),
-                configPath: z.string().optional(),
                 keyFilter: filterSpecInputSchema,
                 textFilter: filterSpecInputSchema,
             },
@@ -41,18 +40,22 @@ export function registerImportTool(
         },
         async (args) => {
             try {
+                const resolvedTarget = await resolveToolCatalogPath(
+                    args.target,
+                    session,
+                );
                 const result = await runImportCommand({
                     sources: args.sources,
-                    target: args.target,
+                    resolvedTargetPath: resolvedTarget,
                     language: args.language,
                     languages: args.languages,
                     mergePolicy: args.mergePolicy as
                         | ImportMergePolicy
                         | undefined,
-                    configPath: resolveConfigPath(args.configPath, runtime),
+                    config: session.resolvedConfig,
                     keyFilter: toFilterSpec(args.keyFilter),
                     textFilter: toFilterSpec(args.textFilter),
-                    onWarning: runtime.onWarning,
+                    onWarning: session.onWarning,
                 });
 
                 return toToolTextResult(

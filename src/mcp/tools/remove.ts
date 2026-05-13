@@ -2,16 +2,16 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as z from 'zod/v4';
 import { remove } from '../../services/remove.js';
 import { ArgumentError } from '../../utils/errors.js';
-import type { McpRuntimeContext } from '../runtime.js';
+import type { McpSessionContext } from '../runtime.js';
 import {
-    resolveXCStringsInputPath,
+    resolveToolCatalogPath,
     toToolErrorResult,
     toToolTextResult,
 } from '../runtime.js';
 
 export function registerRemoveTool(
     server: McpServer,
-    runtime: McpRuntimeContext,
+    session: McpSessionContext,
 ): void {
     server.registerTool(
         'xcs.remove',
@@ -21,7 +21,6 @@ export function registerRemoveTool(
                 'Remove strings by key or languages from an xcstrings file.',
             inputSchema: {
                 path: z.string().optional(),
-                configPath: z.string().optional(),
                 key: z.string().optional(),
                 languages: z.array(z.string()).optional(),
                 dryRun: z.boolean().optional(),
@@ -44,10 +43,9 @@ export function registerRemoveTool(
                     );
                 }
 
-                const resolvedPath = await resolveXCStringsInputPath(
+                const resolvedPath = await resolveToolCatalogPath(
                     args.path,
-                    args.configPath,
-                    runtime,
+                    session,
                 );
                 const dryRun = args.dryRun === true;
                 const result = await remove(

@@ -4,6 +4,7 @@ import { LOCALIZATION_STATES } from './_shared';
 import logger from '../utils/logger.js';
 import { runAddCommand } from '../services/add.js';
 import type { StringsFormat } from '../services/add.js';
+import { loadConfig } from '../utils/config.js';
 
 export function createAddCommand(): CommandModule {
     return {
@@ -52,6 +53,7 @@ export function createAddCommand(): CommandModule {
                     describe: 'Add strings in an interactive flow',
                 }),
         handler: async (argv) => {
+            const config = await loadConfig(argv.config as string | undefined);
             const result = await runAddCommand({
                 path: argv.path as string,
                 key: argv.key as string,
@@ -62,7 +64,7 @@ export function createAddCommand(): CommandModule {
                 language: argv.language as string | undefined,
                 state: argv.state as string | undefined,
                 stdinReader: undefined,
-                configPath: argv.config as string | undefined,
+                config,
                 interactive: argv.interactive as boolean | undefined,
                 onWarning: (message) => logger.warn(message),
             });

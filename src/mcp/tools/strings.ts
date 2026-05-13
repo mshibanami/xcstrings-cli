@@ -1,9 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as z from 'zod/v4';
 import { strings } from '../../services/strings.js';
-import type { McpRuntimeContext } from '../runtime.js';
+import type { McpSessionContext } from '../runtime.js';
 import {
-    resolveXCStringsInputPath,
+    resolveToolCatalogPath,
     toToolErrorResult,
     toToolTextResult,
 } from '../runtime.js';
@@ -11,7 +11,7 @@ import { filterSpecInputSchema, toFilterSpec } from './shared.js';
 
 export function registerStringsTool(
     server: McpServer,
-    runtime: McpRuntimeContext,
+    session: McpSessionContext,
 ): void {
     server.registerTool(
         'xcs.strings.list',
@@ -20,7 +20,6 @@ export function registerStringsTool(
             description: 'List strings in the xcstrings file.',
             inputSchema: {
                 path: z.string().optional(),
-                configPath: z.string().optional(),
                 languages: z.array(z.string()).optional(),
                 missingLanguages: z.array(z.string()).optional(),
                 format: z.string().optional(),
@@ -36,10 +35,9 @@ export function registerStringsTool(
         },
         async (args) => {
             try {
-                const resolvedPath = await resolveXCStringsInputPath(
+                const resolvedPath = await resolveToolCatalogPath(
                     args.path,
-                    args.configPath,
-                    runtime,
+                    session,
                 );
                 const output = await strings({
                     path: resolvedPath,

@@ -8,6 +8,7 @@ import chalk from 'chalk';
 import logger from '../utils/logger.js';
 import { runImportCommand } from '../services/import.js';
 import type { ImportMergePolicy } from '../services/import.js';
+import { loadConfig } from '../utils/config.js';
 
 export function createImportCommand(): CommandModule {
     return {
@@ -49,12 +50,13 @@ export function createImportCommand(): CommandModule {
                 }),
         handler: async (argv) => {
             const { keyFilter, textFilter } = extractFilterOptions(argv);
+            const config = await loadConfig(argv.config as string | undefined);
 
             const result = await runImportCommand({
                 sources: argv.sources as string[],
                 target: argv.target as string | undefined,
                 language: argv.language as string | undefined,
-                configPath: argv.config as string | undefined,
+                config,
                 mergePolicy: argv['merge-policy'] as
                     | ImportMergePolicy
                     | undefined,

@@ -1,26 +1,36 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { resolve } from 'node:path';
 import { isAppError } from '../utils/errors.js';
 import { loadConfig } from '../utils/config.js';
 import { resolveXCStringsPath } from '../utils/path.js';
 
+import type { Config } from '../utils/config.js';
+
 export type McpWarningMode = 'silent' | 'stderr';
 
-export interface McpRuntimeContext {
-    defaultPath: string;
-    configPath?: string;
+export interface McpSessionContext {
+    projectRoot: string;
+    resolvedConfigPath?: string;
+    resolvedConfig: Config | null;
+    /** User-provided `--path` (high precedence). Distinct from defaultCatalogPath (lowest fallback). */
+    explicitPath?: string;
+    /** Project-root fallback used when no path is otherwise specified (lowest). */
+    defaultCatalogPath: string;
     warningMode: McpWarningMode;
     onWarning: (message: string) => void;
 }
 
-export interface CreateMcpRuntimeOptions {
-    defaultPath: string;
+export interface CreateMcpSessionOptions {
+    /** User-supplied `--path` argument (undefined if not provided). */
+    explicitPath?: string;
     configPath?: string;
+    projectRoot?: string;
     warningMode?: McpWarningMode;
 }
 
-export function createMcpRuntimeContext(
-    options: CreateMcpRuntimeOptions,
-): McpRuntimeContext {
+export async function resolveSessionContext(
+    options: CreateMcpSessionOptions,
+): Promise<McpSessionContext> {
     const warningMode = options.warningMode ?? 'silent';
     const onWarning =
         warningMode === 'stderr'
@@ -31,36 +41,56 @@ export function createMcpRuntimeContext(
                   // no-op
               };
 
+    const projectRoot = options.projectRoot
+        ? resolve(options.projectRoot)
+        : process.cwd();
+
+    const config = await loadConfig(options.configPath, {
+        suppressWarnings: true,
+        searchFrom: projectRoot,
+    });
+
+    const defaultCatalogPath = resolve(projectRoot, 'Localizable.xcstrings');
+
     return {
-        defaultPath: options.defaultPath,
-        configPath: options.configPath,
+        projectRoot,
+        resolvedConfigPath: options.configPath,
+        resolvedConfig: config,
+        explicitPath: options.explicitPath,
+        defaultCatalogPath,
         warningMode,
         onWarning,
     };
 }
 
-export async function resolveXCStringsInputPath(
-    path: string | undefined,
-    configPath: string | undefined,
-    runtime: McpRuntimeContext,
+export async function resolveToolCatalogPath(
+    argsPath: string | undefined,
+    session: McpSessionContext,
 ): Promise<string> {
-    const resolvedConfigPath = resolveConfigPath(configPath, runtime);
-    const config = await loadConfig(resolvedConfigPath, {
-        suppressWarnings: true,
-    });
-    return resolveXCStringsPath(path, config, runtime.defaultPath, {
-        interactive: false,
-    });
-}
-
-export function resolveConfigPath(
-    configPath: string | undefined,
-    runtime: McpRuntimeContext,
-): string | undefined {
-    if (configPath && configPath.length > 0) {
-        return configPath;
+    if (argsPath !== undefined) {
+        return resolveXCStringsPath(
+            argsPath,
+            session.resolvedConfig,
+            session.defaultCatalogPath,
+            { interactive: false },
+        );
     }
-    return runtime.configPath;
+
+    if (session.explicitPath !== undefined) {
+        return resolveXCStringsPath(
+            session.explicitPath,
+            session.resolvedConfig,
+            session.defaultCatalogPath,
+            { interactive: false, preferRequestedPath: true },
+        );
+    }
+
+    return resolveXCStringsPath(
+        undefined,
+        session.resolvedConfig,
+        session.defaultCatalogPath,
+        { interactive: false },
+    );
 }
 
 export function toToolTextResult(

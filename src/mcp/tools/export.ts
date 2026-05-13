@@ -3,9 +3,9 @@ import * as z from 'zod/v4';
 import { doExport } from '../../services/export.js';
 import type { ExportMergePolicy, OutputFormat } from '../../services/export.js';
 import { ArgumentError } from '../../utils/errors.js';
-import type { McpRuntimeContext } from '../runtime.js';
+import type { McpSessionContext } from '../runtime.js';
 import {
-    resolveXCStringsInputPath,
+    resolveToolCatalogPath,
     toToolErrorResult,
     toToolTextResult,
 } from '../runtime.js';
@@ -36,7 +36,7 @@ function resolveOutputFormat(
 
 export function registerExportTool(
     server: McpServer,
-    runtime: McpRuntimeContext,
+    session: McpSessionContext,
 ): void {
     server.registerTool(
         'xcs.export',
@@ -46,7 +46,6 @@ export function registerExportTool(
                 'Export xcstrings to filtered xcstrings or .strings files.',
             inputSchema: {
                 path: z.string().optional(),
-                configPath: z.string().optional(),
                 outpath: z.string(),
                 output: z.enum(['auto', 'xcstrings', 'strings']).optional(),
                 mergePolicy: z
@@ -65,10 +64,9 @@ export function registerExportTool(
         },
         async (args) => {
             try {
-                const sourcePath = await resolveXCStringsInputPath(
+                const sourcePath = await resolveToolCatalogPath(
                     args.path,
-                    args.configPath,
-                    runtime,
+                    session,
                 );
                 const outputFormat = resolveOutputFormat(
                     (args.output as OutputFormat | undefined) ?? 'auto',

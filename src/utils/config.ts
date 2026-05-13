@@ -43,6 +43,7 @@ export interface Config {
 
 export interface LoadConfigOptions {
     suppressWarnings?: boolean;
+    searchFrom?: string;
 }
 
 export async function loadConfig(
@@ -54,7 +55,8 @@ export async function loadConfig(
         return result ? (result.config as Config) : null;
     }
 
-    const result = await explorer.search();
+    const searchFrom = options.searchFrom;
+    const result = await explorer.search(searchFrom);
     const config = result ? (result.config as Config) : null;
 
     const suppressWarnings =

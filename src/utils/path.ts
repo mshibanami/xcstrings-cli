@@ -16,20 +16,56 @@ export function findAliasPath(
     return null;
 }
 
+export interface ResolveXCStringsPathOptions extends InteractiveModeOptions {
+    /**
+     * When true, do not substitute the requested path with `xcstringsPaths`
+     * even if the requested path matches the project-root default. Used by
+     * MCP to enforce explicit `--path` priority over config-defined paths.
+     */
+    preferRequestedPath?: boolean;
+}
+
 export async function resolveXCStringsPath(
     requestedPath: string | undefined,
     config: Config | null,
     defaultPath: string,
-    interactiveModeOptions: InteractiveModeOptions = {},
+    options: ResolveXCStringsPathOptions = {},
 ): Promise<string> {
-    const interactive = isInteractiveMode(interactiveModeOptions);
+    const interactive = isInteractiveMode(options);
     const entries = config?.xcstringsPaths;
+    const preferRequested = options.preferRequestedPath === true;
 
-    if (!requestedPath) {
-        if (entries && entries.length > 0) {
+    const promptForEntry = async (): Promise<string | null> => {
+        if (!entries || entries.length === 0) return null;
+        if (entries.length === 1) {
             const entry = entries[0];
             return typeof entry === 'string' ? entry : entry.path;
         }
+        if (!interactive) {
+            throw new DomainError(
+                'NON_INTERACTIVE_REQUIRED_ARGUMENT',
+                'Non-interactive mode cannot prompt for xcstrings file selection. Specify --path (or --target for import) explicitly.',
+            );
+        }
+        const choices = entries.map((entry) => {
+            if (typeof entry === 'string') {
+                return { name: entry, value: entry };
+            } else {
+                return {
+                    name: `${entry.alias} (${entry.path})`,
+                    value: entry.path,
+                };
+            }
+        });
+        return await select({
+            message: 'Select xcstrings file:',
+            choices: choices,
+        });
+    };
+
+    if (!requestedPath) {
+        const fromEntries = await promptForEntry();
+        if (fromEntries !== null) return fromEntries;
         return defaultPath;
     }
 
@@ -69,35 +105,9 @@ export async function resolveXCStringsPath(
         );
     }
 
-    if (requestedPath === defaultPath && entries && entries.length > 0) {
-        if (entries.length === 1) {
-            const entry = entries[0];
-            return typeof entry === 'string' ? entry : entry.path;
-        }
-
-        if (!interactive) {
-            throw new DomainError(
-                'NON_INTERACTIVE_REQUIRED_ARGUMENT',
-                'Non-interactive mode cannot prompt for xcstrings file selection. Specify --path (or --target for import) explicitly.',
-            );
-        }
-
-        const choices = entries.map((entry) => {
-            if (typeof entry === 'string') {
-                return { name: entry, value: entry };
-            } else {
-                return {
-                    name: `${entry.alias} (${entry.path})`,
-                    value: entry.path,
-                };
-            }
-        });
-
-        const selectedPath = await select({
-            message: 'Select xcstrings file:',
-            choices: choices,
-        });
-        return selectedPath;
+    if (!preferRequested && requestedPath === defaultPath) {
+        const fromEntries = await promptForEntry();
+        if (fromEntries !== null) return fromEntries;
     }
 
     return requestedPath;

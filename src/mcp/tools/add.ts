@@ -2,17 +2,16 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as z from 'zod/v4';
 import { runAddCommand } from '../../services/add.js';
 import { LOCALIZATION_STATES } from '../../services/shared/xcstrings.js';
-import type { McpRuntimeContext } from '../runtime.js';
+import type { McpSessionContext } from '../runtime.js';
 import {
-    resolveConfigPath,
-    resolveXCStringsInputPath,
+    resolveToolCatalogPath,
     toToolErrorResult,
     toToolTextResult,
 } from '../runtime.js';
 
 export function registerAddTool(
     server: McpServer,
-    runtime: McpRuntimeContext,
+    session: McpSessionContext,
 ): void {
     server.registerTool(
         'xcs.add',
@@ -22,7 +21,6 @@ export function registerAddTool(
                 'Add or update one or more strings in an xcstrings file.',
             inputSchema: {
                 path: z.string().optional(),
-                configPath: z.string().optional(),
                 key: z.string().optional(),
                 comment: z.string().optional(),
                 language: z.string().optional(),
@@ -39,12 +37,10 @@ export function registerAddTool(
         },
         async (args) => {
             try {
-                const resolvedPath = await resolveXCStringsInputPath(
+                const resolvedPath = await resolveToolCatalogPath(
                     args.path,
-                    args.configPath,
-                    runtime,
+                    session,
                 );
-                const configPath = resolveConfigPath(args.configPath, runtime);
 
                 const result = await runAddCommand({
                     path: resolvedPath,
@@ -58,10 +54,10 @@ export function registerAddTool(
                     defaultString: args.text,
                     language: args.language,
                     stdinReader: async () => Promise.resolve(''),
-                    configPath,
+                    config: session.resolvedConfig,
                     state: args.state,
                     interactive: false,
-                    onWarning: runtime.onWarning,
+                    onWarning: session.onWarning,
                 });
 
                 return toToolTextResult(

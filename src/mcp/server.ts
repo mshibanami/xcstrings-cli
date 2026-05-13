@@ -1,42 +1,82 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
-    createMcpRuntimeContext,
-    type McpRuntimeContext,
+    resolveSessionContext,
+    type McpSessionContext,
     type McpWarningMode,
 } from './runtime.js';
 import { registerAllMcpTools } from './tools/index.js';
 
+declare const __XCS_VERSION__: string | undefined;
+let cachedPackageVersion: string | undefined;
+
+function loadVersionFromPackageJson(): string {
+    const thisFilePath = fileURLToPath(import.meta.url);
+    const packageJsonPath = resolve(
+        dirname(thisFilePath),
+        '../../package.json',
+    );
+    const raw = readFileSync(packageJsonPath, 'utf-8');
+    const parsed = JSON.parse(raw) as { version?: unknown };
+
+    if (typeof parsed.version !== 'string' || parsed.version.length === 0) {
+        throw new Error('package.json version is missing or invalid.');
+    }
+
+    return parsed.version;
+}
+
+function getPackageVersion(): string {
+    if (process.env.npm_package_version) {
+        return process.env.npm_package_version;
+    }
+    if (typeof __XCS_VERSION__ !== 'undefined' && __XCS_VERSION__) {
+        return __XCS_VERSION__;
+    }
+
+    if (!cachedPackageVersion) {
+        cachedPackageVersion = loadVersionFromPackageJson();
+    }
+
+    return cachedPackageVersion;
+}
+
 export interface CreateMcpServerOptions {
-    defaultPath: string;
+    explicitPath?: string;
     configPath?: string;
+    projectRoot?: string;
     warningMode?: McpWarningMode;
 }
 
-export function createMcpServer(options: CreateMcpServerOptions): {
+export async function createMcpServer(
+    options: CreateMcpServerOptions,
+): Promise<{
     server: McpServer;
-    runtime: McpRuntimeContext;
-} {
-    const runtime = createMcpRuntimeContext({
-        defaultPath: options.defaultPath,
+    session: McpSessionContext;
+}> {
+    const session = await resolveSessionContext({
+        explicitPath: options.explicitPath,
         configPath: options.configPath,
+        projectRoot: options.projectRoot,
         warningMode: options.warningMode,
     });
-    const serverVersion = process.env.npm_package_version ?? '0.0.0';
 
     const server = new McpServer({
         name: 'xcstrings-cli',
-        version: serverVersion,
+        version: getPackageVersion(),
     });
 
-    registerAllMcpTools(server, runtime);
-    return { server, runtime };
+    registerAllMcpTools(server, session);
+    return { server, session };
 }
 
 export async function startMcpServer(
     options: CreateMcpServerOptions,
 ): Promise<void> {
-    const { server } = createMcpServer(options);
+    const { server } = await createMcpServer(options);
     const transport = new StdioServerTransport();
     await server.connect(transport);
 
