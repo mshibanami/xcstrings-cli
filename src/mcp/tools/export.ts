@@ -39,7 +39,7 @@ export function registerExportTool(
     session: McpSessionContext,
 ): void {
     server.registerTool(
-        'xcs.export',
+        'export',
         {
             title: 'Export Strings',
             description:

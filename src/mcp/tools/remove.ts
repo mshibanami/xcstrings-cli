@@ -14,7 +14,7 @@ export function registerRemoveTool(
     session: McpSessionContext,
 ): void {
     server.registerTool(
-        'xcs.remove',
+        'remove',
         {
             title: 'Remove Strings',
             description:

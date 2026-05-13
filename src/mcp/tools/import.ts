@@ -15,7 +15,7 @@ export function registerImportTool(
     session: McpSessionContext,
 ): void {
     server.registerTool(
-        'xcs.import',
+        'import',
         {
             title: 'Import Strings',
             description:

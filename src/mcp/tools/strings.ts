@@ -14,7 +14,7 @@ export function registerStringsTool(
     session: McpSessionContext,
 ): void {
     server.registerTool(
-        'xcs.strings.list',
+        'strings_list',
         {
             title: 'List Strings',
             description: 'List strings in the xcstrings file.',

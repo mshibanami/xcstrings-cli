@@ -13,7 +13,7 @@ export function registerLanguagesTool(
     session: McpSessionContext,
 ): void {
     server.registerTool(
-        'xcs.languages.list',
+        'languages_list',
         {
             title: 'List Languages',
             description:

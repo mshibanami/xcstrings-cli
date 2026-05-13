@@ -49,13 +49,13 @@ afterEach(async () => {
 });
 
 describe('mcp tools: write', () => {
-    it('xcs.add adds a key and returns structured result', async () => {
+    it('add adds a key and returns structured result', async () => {
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const session = await connectMcpClient();
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.add',
+            name: 'add',
             arguments: {
                 path: tempFile,
                 key: 'mcp.greeting',
@@ -76,14 +76,14 @@ describe('mcp tools: write', () => {
         ).toBe('Hello from MCP');
     }, 20000);
 
-    it('xcs.remove supports dry-run without changing file', async () => {
+    it('remove supports dry-run without changing file', async () => {
         const tempFile = await setupTempFile('manual-comment-3langs.xcstrings');
         const before = JSON.parse(await readFile(tempFile, 'utf-8'));
         const session = await connectMcpClient();
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.remove',
+            name: 'remove',
             arguments: {
                 path: tempFile,
                 key: 'closeAction',
@@ -102,7 +102,7 @@ describe('mcp tools: write', () => {
         ).toBe(before.strings.closeAction.localizations.ja.stringUnit.value);
     }, 20000);
 
-    it('xcs.import imports from .strings into target catalog', async () => {
+    it('import imports from .strings into target catalog', async () => {
         const tempDir = uniqueTempDir('mcp-import');
         createdDirs.push(tempDir);
         await ensureDir(join(tempDir, 'ja.lproj'));
@@ -114,7 +114,7 @@ describe('mcp tools: write', () => {
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.import',
+            name: 'import',
             arguments: {
                 sources: [sourceFile],
                 target: targetFile,
@@ -133,7 +133,7 @@ describe('mcp tools: write', () => {
         );
     }, 20000);
 
-    it('xcs.export exports filtered content to xcstrings', async () => {
+    it('export exports filtered content to xcstrings', async () => {
         const sourceFile = resolve(FIXTURES_DIR, 'list-sample.xcstrings');
         const tempDir = uniqueTempDir('mcp-export');
         createdDirs.push(tempDir);
@@ -144,7 +144,7 @@ describe('mcp tools: write', () => {
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.export',
+            name: 'export',
             arguments: {
                 path: sourceFile,
                 outpath,

@@ -8,7 +8,7 @@ export function registerInitPreviewTool(
     session: McpSessionContext,
 ): void {
     server.registerTool(
-        'xcs.init.preview',
+        'init_preview',
         {
             title: 'Preview Init Configuration',
             description:

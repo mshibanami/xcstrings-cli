@@ -39,7 +39,7 @@ afterEach(async () => {
 });
 
 describe('mcp tools: init', () => {
-    it('xcs.init.preview returns discovered candidates and recommendations', async () => {
+    it('init_preview returns discovered candidates and recommendations', async () => {
         const tempDir = uniqueTempDir('mcp-init-preview');
         createdDirs.push(tempDir);
         await mkdir(join(tempDir, 'src'), { recursive: true });
@@ -60,7 +60,7 @@ describe('mcp tools: init', () => {
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.init.preview',
+            name: 'init_preview',
             arguments: {},
         })) as any;
 
@@ -78,7 +78,7 @@ describe('mcp tools: init', () => {
         );
     }, 20000);
 
-    it('xcs.init.apply writes config and can create missing xcstrings catalogs', async () => {
+    it('init_apply writes config and can create missing xcstrings catalogs', async () => {
         const tempDir = uniqueTempDir('mcp-init-apply');
         createdDirs.push(tempDir);
         await mkdir(tempDir, { recursive: true });
@@ -89,7 +89,7 @@ describe('mcp tools: init', () => {
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.init.apply',
+            name: 'init_apply',
             arguments: {
                 xcstringsPaths: ['Resources/Localizable.xcstrings'],
                 xcodeprojPaths: [],
@@ -119,7 +119,7 @@ describe('mcp tools: init', () => {
         expect(catalog.sourceLanguage).toBe('ja');
     }, 20000);
 
-    it('xcs.init.apply requires overwrite=true when config already exists', async () => {
+    it('init_apply requires overwrite=true when config already exists', async () => {
         const tempDir = uniqueTempDir('mcp-init-overwrite-guard');
         createdDirs.push(tempDir);
         await mkdir(tempDir, { recursive: true });
@@ -135,7 +135,7 @@ describe('mcp tools: init', () => {
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.init.apply',
+            name: 'init_apply',
             arguments: {
                 xcstringsPaths: ['Localizable.xcstrings'],
             },

@@ -22,6 +22,6 @@ describe('mcp stdio handshake', () => {
         const toolNames = result.tools.map((tool) => tool.name);
 
         expect(toolNames.length).toBeGreaterThan(0);
-        expect(toolNames).toContain('xcs.languages.list');
+        expect(toolNames).toContain('languages_list');
     }, 20000);
 });

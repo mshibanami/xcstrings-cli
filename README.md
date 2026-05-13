@@ -353,21 +353,21 @@ In this mode, `stdout` is used only for MCP JSON-RPC messages. Optional warning 
 
 `xcs mcp` exposes the same localization workflows as MCP tools:
 
-- `xcs.languages.list` (read-only)
+- `languages_list` (read-only)
     - Inputs: `path?`
-- `xcs.strings.list` (read-only)
+- `strings_list` (read-only)
     - Inputs: `path?`, `languages?`, `missingLanguages?`, `format?`, `keyFilter?`, `textFilter?`
-- `xcs.init.preview` (read-only, discovers candidates and recommended config for initialization)
+- `init_preview` (read-only, discovers candidates and recommended config for initialization)
     - Inputs: none
-- `xcs.init.apply` (write, performs initialization)
+- `init_apply` (write, performs initialization)
     - Inputs: `xcstringsPaths?`, `xcodeprojPaths?`, `missingLanguagePolicy?`, `createMissingXCStrings?`, `sourceLanguage?`, `overwrite?`
-- `xcs.add` (write)
+- `add` (write)
     - Inputs: `path?`, `key?`, `comment?`, `language?`, `state?`, `text?`, `strings?`
-- `xcs.remove` (write)
+- `remove` (write)
     - Inputs: `path?`, `key?`, `languages?`, `dryRun?`
-- `xcs.import` (write)
+- `import` (write)
     - Inputs: `sources`, `target?`, `language?`, `languages?`, `mergePolicy?`, `keyFilter?`, `textFilter?`
-- `xcs.export` (write)
+- `export` (write)
     - Inputs: `path?`, `outpath`, `output?`, `mergePolicy?`, `languages?`, `keyFilter?`, `textFilter?`
 
 For `keyFilter` and `textFilter`, use:

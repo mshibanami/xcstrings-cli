@@ -27,13 +27,13 @@ afterEach(async () => {
 });
 
 describe('mcp tools: readonly', () => {
-    it('xcs.languages.list returns languages from a catalog', async () => {
+    it('languages_list returns languages from a catalog', async () => {
         const tempFile = await setupTempFile('no-strings.xcstrings');
         const session = await connectMcpClient();
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.languages.list',
+            name: 'languages_list',
             arguments: {
                 path: tempFile,
             },
@@ -45,13 +45,13 @@ describe('mcp tools: readonly', () => {
         expect(result.structuredContent.path).toBe(tempFile);
     }, 20000);
 
-    it('xcs.strings.list supports filters and formats', async () => {
+    it('strings_list supports filters and formats', async () => {
         const fixturePath = resolve(FIXTURES_DIR, 'list-sample.xcstrings');
         const session = await connectMcpClient();
         createdSessions.push(session);
 
         const result = (await session.client.callTool({
-            name: 'xcs.strings.list',
+            name: 'strings_list',
             arguments: {
                 path: fixturePath,
                 languages: ['en'],

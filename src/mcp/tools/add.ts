@@ -14,7 +14,7 @@ export function registerAddTool(
     session: McpSessionContext,
 ): void {
     server.registerTool(
-        'xcs.add',
+        'add',
         {
             title: 'Add Strings',
             description:

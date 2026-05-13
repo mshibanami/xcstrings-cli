@@ -15,7 +15,7 @@ export function registerInitApplyTool(
     session: McpSessionContext,
 ): void {
     server.registerTool(
-        'xcs.init.apply',
+        'init_apply',
         {
             title: 'Apply Init Configuration',
             description:

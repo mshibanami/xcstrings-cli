@@ -32,49 +32,49 @@ describe('mcp tool annotations', () => {
                 openWorldHint: boolean;
             }
         > = {
-            'xcs.languages.list': {
+            'languages_list': {
                 readOnlyHint: true,
                 destructiveHint: false,
                 idempotentHint: true,
                 openWorldHint: false,
             },
-            'xcs.strings.list': {
+            'strings_list': {
                 readOnlyHint: true,
                 destructiveHint: false,
                 idempotentHint: true,
                 openWorldHint: false,
             },
-            'xcs.init.preview': {
+            'init_preview': {
                 readOnlyHint: true,
                 destructiveHint: false,
                 idempotentHint: true,
                 openWorldHint: false,
             },
-            'xcs.add': {
+            'add': {
                 readOnlyHint: false,
                 destructiveHint: false,
                 idempotentHint: false,
                 openWorldHint: false,
             },
-            'xcs.remove': {
+            'remove': {
                 readOnlyHint: false,
                 destructiveHint: true,
                 idempotentHint: false,
                 openWorldHint: false,
             },
-            'xcs.import': {
+            'import': {
                 readOnlyHint: false,
                 destructiveHint: false,
                 idempotentHint: false,
                 openWorldHint: false,
             },
-            'xcs.export': {
+            'export': {
                 readOnlyHint: false,
                 destructiveHint: true,
                 idempotentHint: false,
                 openWorldHint: false,
             },
-            'xcs.init.apply': {
+            'init_apply': {
                 readOnlyHint: false,
                 destructiveHint: true,
                 idempotentHint: false,
