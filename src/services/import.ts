@@ -3,18 +3,19 @@ import { readFile, stat, mkdir } from 'node:fs/promises';
 import { input } from '@inquirer/prompts';
 import fg from 'fast-glob';
 import { parseStrings } from '../utils/strings-parser.js';
-import { mergeTranslationUnit } from '../utils/unit-merger.js';
-import { buildMatcher } from '../utils/filters.js';
 import {
     readXCStrings,
     writeXCStrings,
     XCStrings,
-    XCStringUnit,
     sortXCStringsKeys,
 } from './shared/xcstrings.js';
 import { loadConfig } from '../utils/config.js';
 import { resolveXCStringsPath } from '../utils/path.js';
 import { isInteractiveMode } from '../utils/interactive.js';
+import {
+    mergeStringsEntriesIntoTarget,
+    mergeXCStringsEntriesIntoTarget,
+} from './core/import-core.js';
 
 export type ImportMergePolicy = 'source-first' | 'destination-first' | 'error';
 
@@ -171,52 +172,12 @@ async function importXCStrings(
     languages?: string[],
 ) {
     const sourceData = await readXCStrings(sourcePath);
-    const matchKey = buildMatcher(keyFilter as any);
-    const matchText = buildMatcher(textFilter as any);
-    const languageSet = languages ? new Set(languages) : null;
-
-    for (const [key, sourceUnit] of Object.entries(sourceData.strings ?? {})) {
-        if (!matchKey(key)) continue;
-
-        const newUnit = JSON.parse(JSON.stringify(sourceUnit)) as XCStringUnit;
-
-        if (newUnit.localizations) {
-            for (const lang of Object.keys(newUnit.localizations)) {
-                if (languageSet && !languageSet.has(lang)) {
-                    delete newUnit.localizations[lang];
-                    continue;
-                }
-                const val =
-                    newUnit.localizations[lang]?.stringUnit?.value ?? '';
-                if (!matchText(val)) {
-                    delete newUnit.localizations[lang];
-                }
-            }
-        }
-
-        if (
-            newUnit.localizations &&
-            Object.keys(newUnit.localizations).length === 0
-        ) {
-            continue;
-        }
-
-        if (targetData.strings[key]) {
-            if (mergePolicy === 'error') {
-                throw new Error(`Key already exists in target: ${key}`);
-            }
-            if (mergePolicy === 'destination-first') {
-                continue;
-            }
-        }
-
-        const targetUnit = targetData.strings[key];
-        targetData.strings[key] = mergeTranslationUnit(targetUnit, newUnit, {
-            mergePolicy,
-            keyName: key,
-            sortLocalizations: 'auto',
-        });
-    }
+    mergeXCStringsEntriesIntoTarget(sourceData.strings ?? {}, targetData, {
+        mergePolicy,
+        keyFilter,
+        textFilter,
+        languages,
+    });
 }
 
 async function importStrings(
@@ -228,54 +189,12 @@ async function importStrings(
     textFilter?: unknown,
     languages?: string[],
 ) {
-    const languageSet = languages ? new Set(languages) : null;
-    if (languageSet && !languageSet.has(language)) {
-        return;
-    }
-
-    const matchKey = buildMatcher(keyFilter as any);
-    const matchText = buildMatcher(textFilter as any);
-
     const content = await readFile(sourcePath);
     const parsed = parseStrings(content);
-
-    for (const [key, entry] of Object.entries(parsed)) {
-        if (!matchKey(key)) continue;
-
-        const stringValue = entry.text;
-        if (!matchText(stringValue)) continue;
-
-        let comment = entry.comment;
-
-        if (
-            comment?.trim() === 'No comment provided by engineer.' ||
-            comment?.trim() === ''
-        ) {
-            comment = undefined;
-        }
-
-        const existingUnit = targetData.strings[key];
-        const sourceUnit: XCStringUnit = {
-            extractionState: 'migrated',
-            comment,
-            localizations: {
-                [language]: {
-                    stringUnit: {
-                        state: 'translated',
-                        value: stringValue,
-                    },
-                },
-            },
-        };
-
-        targetData.strings[key] = mergeTranslationUnit(
-            existingUnit,
-            sourceUnit,
-            {
-                mergePolicy,
-                keyName: key,
-                sortLocalizations: 'auto',
-            },
-        );
-    }
+    mergeStringsEntriesIntoTarget(parsed, targetData, language, {
+        mergePolicy,
+        keyFilter,
+        textFilter,
+        languages,
+    });
 }

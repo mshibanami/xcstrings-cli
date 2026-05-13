@@ -6,14 +6,12 @@ import {
     LocalizationState,
     readXCStrings,
     writeXCStrings,
-    XCStringUnit,
-    sortXCStringsKeys,
 } from './shared/xcstrings.js';
-import { mergeTranslationUnit } from '../utils/unit-merger.js';
 import { captureInteractiveStringsInput } from '../utils/interactive.js';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';
 import { languages } from './languages.js';
 import { ArgumentError } from '../utils/errors';
+import { addToCatalog } from './core/add-core.js';
 
 export type StringsFormat = 'auto' | 'yaml' | 'json';
 export type WarningHandler = (message: string) => void;
@@ -528,12 +526,6 @@ export async function add(
 
     const sourceLanguage = data.sourceLanguage;
 
-    if (!data.strings) {
-        data.strings = {};
-    }
-
-    const isNewKey = !(key in data.strings);
-
     const config = await loadConfig(configPath);
     const handleMissing: MissingLanguagePolicy =
         config?.missingLanguagePolicy || 'skip';
@@ -556,83 +548,37 @@ export async function add(
     };
 
     const resolvedState: LocalizationState = state ?? 'translated';
-
-    const toPayload = (
-        input?: LocalizationPayload | string,
-    ): LocalizationPayload | undefined => {
-        if (input === undefined) return undefined;
-        if (typeof input === 'string') {
-            return { value: input };
-        }
-        return input;
-    };
-
-    const sourceUnit: XCStringUnit = {
-        extractionState: 'manual',
-    };
-    if (comment) {
-        sourceUnit.comment = comment;
-    }
-
+    const targetLanguage = language ?? sourceLanguage;
     if (defaultString !== undefined) {
-        const targetLanguage = language ?? sourceLanguage;
         if (!(await ensureSupported(targetLanguage))) {
             warnUnsupported(targetLanguage);
-        } else {
-            sourceUnit.localizations = sourceUnit.localizations || {};
-            const payload = toPayload(strings?.[targetLanguage]);
-            sourceUnit.localizations[targetLanguage] = {
-                stringUnit: {
-                    state: payload?.state ?? resolvedState,
-                    value: defaultString,
-                },
-            };
+            defaultString = undefined;
         }
     }
 
-    const mergedStrings = strings ? { ...strings } : undefined;
-
-    if (mergedStrings) {
-        const toAdd: Array<[string, LocalizationPayload]> = [];
-        for (const [lang, value] of Object.entries(mergedStrings)) {
-            const targetLanguage = language ?? sourceLanguage;
-            if (defaultString !== undefined && lang === targetLanguage) {
-                continue;
-            }
+    let filteredStrings: Record<string, LocalizationPayload | string> | undefined;
+    if (strings) {
+        filteredStrings = {};
+        for (const [lang, value] of Object.entries(strings)) {
             const supported =
                 handleMissing === 'include'
                     ? true
                     : lang === sourceLanguage || (await ensureSupported(lang));
             if (supported) {
-                const payload = toPayload(value);
-                if (payload) {
-                    toAdd.push([lang, payload]);
-                }
+                filteredStrings[lang] = value;
             } else {
                 warnUnsupported(lang);
             }
         }
-        if (toAdd.length > 0) {
-            sourceUnit.localizations = sourceUnit.localizations || {};
-            for (const [lang, value] of toAdd) {
-                sourceUnit.localizations[lang] = {
-                    stringUnit: {
-                        state: value.state ?? resolvedState,
-                        value: value.value,
-                    },
-                };
-            }
-        }
     }
-
-    data.strings[key] = mergeTranslationUnit(data.strings[key], sourceUnit, {
-        mergePolicy: 'source-first',
-        sortLocalizations: 'auto',
+    addToCatalog(data, {
+        key,
+        comment,
+        defaultString,
+        defaultLanguage: targetLanguage,
+        translations: filteredStrings,
+        state: resolvedState,
     });
-
-    if (isNewKey) {
-        data.strings = sortXCStringsKeys(data.strings);
-    }
 
     await writeXCStrings(path, data);
 }
