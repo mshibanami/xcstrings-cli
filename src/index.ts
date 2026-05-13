@@ -14,6 +14,7 @@ import { createLanguagesCommand } from './commands/languages';
 import { createStringsCommand } from './commands/strings';
 import { createExportCommand } from './commands/export';
 import { createImportCommand } from './commands/import';
+import { createMcpCommand } from './commands/mcp';
 import { isAppError } from './utils/errors';
 import { isInteractiveMode } from './utils/interactive.js';
 
@@ -77,6 +78,7 @@ const pathAwareCommands: CommandModule[] = [
 const pathIndependentCommands: CommandModule[] = [
     createInitCommand(),
     createImportCommand(),
+    createMcpCommand(),
 ];
 
 const cli = yargs(hideBin(process.argv))
