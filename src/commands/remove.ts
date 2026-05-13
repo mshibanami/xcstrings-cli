@@ -2,6 +2,7 @@ import { CommandModule } from 'yargs';
 import logger from '../utils/logger.js';
 import chalk from 'chalk';
 import { remove } from '../services/remove.js';
+import { ArgumentError } from '../utils/errors.js';
 
 export function createRemoveCommand(): CommandModule {
     return {
@@ -35,7 +36,7 @@ export function createRemoveCommand(): CommandModule {
                     ) {
                         return true;
                     }
-                    throw new Error(
+                    throw new ArgumentError(
                         'Either --key or --languages must be provided',
                     );
                 }),

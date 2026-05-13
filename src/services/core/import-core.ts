@@ -3,6 +3,7 @@ import { buildMatcher } from '../../utils/filters.js';
 import { mergeTranslationUnit } from '../../utils/unit-merger.js';
 import { XCStrings, XCStringUnit } from '../shared/xcstrings.js';
 import type { ImportMergePolicy } from '../import.js';
+import { DomainError } from '../../utils/errors.js';
 
 export interface ImportCoreOptions {
     mergePolicy: ImportMergePolicy;
@@ -48,7 +49,11 @@ export function mergeXCStringsEntriesIntoTarget(
 
         if (targetData.strings[key]) {
             if (options.mergePolicy === 'error') {
-                throw new Error(`Key already exists in target: ${key}`);
+                throw new DomainError(
+                    'MERGE_CONFLICT',
+                    `Key already exists in target: ${key}`,
+                    { key },
+                );
             }
             if (options.mergePolicy === 'destination-first') {
                 continue;

@@ -13,6 +13,7 @@ import {
     rm,
     readdir,
 } from 'node:fs/promises';
+import { DomainError } from '../utils/errors.js';
 
 export type OutputFormat = 'auto' | 'xcstrings' | 'strings';
 export type ExportMergePolicy =
@@ -88,7 +89,8 @@ export async function doExport(opts: {
         const exists = await fileExists(resolvedPath);
         if (exists) {
             if (opts.mergePolicy === 'error') {
-                throw new Error(
+                throw new DomainError(
+                    'MERGE_CONFLICT',
                     `Output file already exists: ${resolvedPath}. Use --merge-policy to override.`,
                 );
             }
@@ -208,7 +210,8 @@ export async function doExport(opts: {
             for (const lang of stringsPerLang.keys()) {
                 const langFile = join(outDir, `${lang}.lproj`, outFile);
                 if (await fileExists(langFile)) {
-                    throw new Error(
+                    throw new DomainError(
+                        'MERGE_CONFLICT',
                         `Output file already exists: ${langFile}. Use --merge-policy to override.`,
                     );
                 }

@@ -10,7 +10,7 @@ import {
 import { captureInteractiveStringsInput } from '../utils/interactive.js';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';
 import { languages } from './languages.js';
-import { ArgumentError } from '../utils/errors';
+import { ArgumentError, DomainError } from '../utils/errors';
 import { addToCatalog } from './core/add-core.js';
 
 export type StringsFormat = 'auto' | 'yaml' | 'json';
@@ -50,7 +50,10 @@ const parseAnyObject = (
     if (value && typeof value === 'object' && !Array.isArray(value)) {
         return value as Record<string, unknown>;
     }
-    throw new Error(`Parsed --strings as ${kind}, but it was not an object.`);
+    throw new DomainError(
+        'INVALID_INPUT',
+        `Parsed --strings as ${kind}, but it was not an object.`,
+    );
 };
 
 const parseContent = (
@@ -65,7 +68,8 @@ const parseContent = (
         try {
             return parseAnyObject(JSON5.parse(trimmed), 'json');
         } catch (err) {
-            throw new Error(
+            throw new DomainError(
+                'INVALID_INPUT',
                 `Failed to parse --strings as JSON. Hint: check --strings-format=json. ${errorMessage(err)}`,
             );
         }
@@ -74,7 +78,8 @@ const parseContent = (
         try {
             return parseAnyObject(yaml.load(trimmed), 'yaml');
         } catch (err) {
-            throw new Error(
+            throw new DomainError(
+                'INVALID_INPUT',
                 `Failed to parse --strings as YAML. Hint: check --strings-format=yaml. ${errorMessage(err)}`,
             );
         }
@@ -90,7 +95,8 @@ const parseContent = (
     } catch (err) {
         errors.push(`json error: ${errorMessage(err)}`);
     }
-    throw new Error(
+    throw new DomainError(
+        'INVALID_INPUT',
         `Failed to parse --strings input. Provide valid YAML or JSON, or specify --strings-format. ${errors.join(' | ')}`,
     );
 };
@@ -116,7 +122,8 @@ const resolveState = (value: string | undefined): LocalizationState => {
     if ((LOCALIZATION_STATES as readonly string[]).includes(value)) {
         return value as LocalizationState;
     }
-    throw new Error(
+    throw new DomainError(
+        'INVALID_INPUT',
         `Invalid state "${value}". Allowed values: ${LOCALIZATION_STATES.join(', ')}.`,
     );
 };
@@ -131,7 +138,10 @@ const normalizeTranslationValue = (
     if (value && typeof value === 'object' && !Array.isArray(value)) {
         const obj = value as Record<string, unknown>;
         if (typeof obj.value !== 'string') {
-            throw new Error(`${context} must include a string "value".`);
+            throw new DomainError(
+                'INVALID_INPUT',
+                `${context} must include a string "value".`,
+            );
         }
         let state: LocalizationState | undefined;
         if (obj.state !== undefined) {
@@ -139,7 +149,8 @@ const normalizeTranslationValue = (
         }
         return { value: obj.value, state };
     }
-    throw new Error(
+    throw new DomainError(
+        'INVALID_INPUT',
         `${context} must be a string or an object with "value" (and optional "state").`,
     );
 };
@@ -150,7 +161,10 @@ const normalizeTranslations = (
 ): Record<string, LocalizationPayload> | undefined => {
     if (value === undefined) return undefined;
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
-        throw new Error(`${context} must be an object of language -> text.`);
+        throw new DomainError(
+            'INVALID_INPUT',
+            `${context} must be an object of language -> text.`,
+        );
     }
     const translations: Record<string, LocalizationPayload> = {};
     for (const [lang, text] of Object.entries(value)) {
@@ -170,7 +184,10 @@ const normalizeMultiEntry = (value: unknown, key: string): MultiAddEntry => {
         return { comment: value };
     }
     if (typeof value !== 'object' || Array.isArray(value)) {
-        throw new Error(`Value for "${key}" must be an object.`);
+        throw new DomainError(
+            'INVALID_INPUT',
+            `Value for "${key}" must be an object.`,
+        );
     }
 
     const obj = value as Record<string, unknown>;
@@ -246,7 +263,8 @@ const mergeParsed = (
 ): ParsedStringsArg => {
     if (!base) return next;
     if (base.kind !== next.kind) {
-        throw new Error(
+        throw new DomainError(
+            'INVALID_INPUT',
             'Cannot merge single and multi --strings payloads. Provide one consistent shape.',
         );
     }
@@ -324,7 +342,8 @@ export async function runInteractiveAdd(
 ): Promise<AddResult> {
     const rawInput = await captureInteractiveStringsInput();
     if (!rawInput.trim()) {
-        throw new Error(
+        throw new DomainError(
+            'INVALID_INPUT',
             'Interactive input was empty. Provide YAML or JSON payload.',
         );
     }
@@ -340,11 +359,15 @@ export async function runInteractiveAdd(
             'auto',
         );
     } catch (err) {
-        throw new Error(`Failed to parse interactive input. ${toMessage(err)}`);
+        throw new DomainError(
+            'INVALID_INPUT',
+            `Failed to parse interactive input. ${toMessage(err)}`,
+        );
     }
 
     if (!parsed) {
-        throw new Error(
+        throw new DomainError(
+            'INVALID_INPUT',
             'Interactive input was empty. Provide YAML or JSON payload.',
         );
     }
@@ -521,7 +544,10 @@ export async function add(
     const data = await readXCStrings(path);
 
     if (!data.sourceLanguage) {
-        throw new Error('The xcstrings file is missing "sourceLanguage".');
+        throw new DomainError(
+            'MISSING_SOURCE_LANGUAGE',
+            'The xcstrings file is missing "sourceLanguage".',
+        );
     }
 
     const sourceLanguage = data.sourceLanguage;

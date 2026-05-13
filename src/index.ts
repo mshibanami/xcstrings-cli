@@ -14,7 +14,7 @@ import { createLanguagesCommand } from './commands/languages';
 import { createStringsCommand } from './commands/strings';
 import { createExportCommand } from './commands/export';
 import { createImportCommand } from './commands/import';
-import { ArgumentError } from './utils/errors';
+import { isAppError } from './utils/errors';
 import { isInteractiveMode } from './utils/interactive.js';
 
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
@@ -105,9 +105,9 @@ cli
     .strictCommands()
     .recommendCommands()
     .fail((msg, err, yargsInstance) => {
-        const isArgumentError = err instanceof ArgumentError;
+        const shouldShowHelp = Boolean(msg) || (err && isAppError(err) && err.showHelp);
 
-        if (msg || isArgumentError) {
+        if (shouldShowHelp) {
             console.error(chalk.red(msg || err?.message || err));
             console.log();
             yargsInstance.showHelp();

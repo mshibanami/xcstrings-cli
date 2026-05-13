@@ -2,6 +2,7 @@ import { XcodeProject } from '@bacons/xcode';
 import { resolve } from 'node:path';
 import { loadConfig } from '../utils/config.js';
 import { readXCStrings } from './shared/xcstrings.js';
+import { DomainError } from '../utils/errors.js';
 
 export function getLanguagesFromXcodeproj(xcodeprojPath: string): string[] {
     const pbxprojPath = resolve(xcodeprojPath, 'project.pbxproj');
@@ -18,7 +19,10 @@ export async function getLanguagesFromXCStrings(
     const languages = new Set<string>();
 
     if (!xcstrings.sourceLanguage) {
-        throw new Error('The xcstrings file is missing "sourceLanguage".');
+        throw new DomainError(
+            'MISSING_SOURCE_LANGUAGE',
+            'The xcstrings file is missing "sourceLanguage".',
+        );
     }
 
     languages.add(xcstrings.sourceLanguage);
@@ -42,7 +46,10 @@ export async function languages(
     const { sourceLanguage } = await readXCStrings(xcstringsPath);
 
     if (!sourceLanguage) {
-        throw new Error('The xcstrings file is missing "sourceLanguage".');
+        throw new DomainError(
+            'MISSING_SOURCE_LANGUAGE',
+            'The xcstrings file is missing "sourceLanguage".',
+        );
     }
 
     const config = await loadConfig(configPath);

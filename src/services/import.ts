@@ -16,6 +16,7 @@ import {
     mergeStringsEntriesIntoTarget,
     mergeXCStringsEntriesIntoTarget,
 } from './core/import-core.js';
+import { DomainError } from '../utils/errors.js';
 
 export type ImportMergePolicy = 'source-first' | 'destination-first' | 'error';
 
@@ -69,7 +70,8 @@ export async function runImportCommand(
 
     const resolvedSources = await fg(options.sources, { absolute: true });
     if (resolvedSources.length === 0) {
-        throw new Error(
+        throw new DomainError(
+            'NO_SOURCE_FILES',
             'No source files found matching the provided patterns.',
         );
     }
@@ -98,7 +100,8 @@ export async function runImportCommand(
 
         if (!sourceLanguage) {
             if (!interactive) {
-                throw new Error(
+                throw new DomainError(
+                    'NON_INTERACTIVE_REQUIRED_ARGUMENT',
                     'Non-interactive mode requires --language when creating a new xcstrings file and source language cannot be inferred.',
                 );
             }

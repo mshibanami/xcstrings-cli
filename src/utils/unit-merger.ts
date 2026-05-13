@@ -1,5 +1,6 @@
 import { XCStringUnit } from '../services/shared/xcstrings.js';
 import type { ImportMergePolicy } from '../services/import.js';
+import { DomainError } from './errors.js';
 
 type LocalizationMap = NonNullable<XCStringUnit['localizations']>;
 
@@ -63,10 +64,12 @@ export function mergeTranslationUnit(
 
             if (hasExistingLoc) {
                 if (policy === 'error') {
-                    throw new Error(
+                    throw new DomainError(
+                        'MERGE_CONFLICT',
                         `Key${
                             options?.keyName ? ` "${options.keyName}"` : ''
                         } already has localization for "${lang}" in target.`,
+                        { key: options?.keyName, language: lang },
                     );
                 }
                 if (policy === 'destination-first') {

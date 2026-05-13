@@ -6,6 +6,7 @@ import {
 } from '../utils/filters.js';
 import { doExport } from '../services/export.js';
 import type { OutputFormat, ExportMergePolicy } from '../services/export.js';
+import { ArgumentError } from '../utils/errors.js';
 
 export function createExportCommand(): CommandModule {
     return {
@@ -64,7 +65,7 @@ export function createExportCommand(): CommandModule {
                 outputFormat === 'strings' &&
                 outpath.toLowerCase().endsWith('.xcstrings')
             ) {
-                throw new Error(
+                throw new ArgumentError(
                     'Output format mismatch: specified --output strings but the outpath has .xcstrings extension.',
                 );
             }
