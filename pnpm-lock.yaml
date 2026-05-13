@@ -80,6 +80,9 @@ importers:
       prettier:
         specifier: 3.8.3
         version: 3.8.3
+      socket:
+        specifier: 1.1.93
+        version: 1.1.93
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -622,6 +625,61 @@ packages:
     resolution: {integrity: sha512-hPt/bgL5cE+Qp+/TPHBqptcAgPzgj46mPcg/16zNUmbQk0j+mOEQV/+Lqu8QRtDV3Ek95Q6FeFITpuhl6OTsAA==}
     cpu: [x64]
     os: [win32]
+
+  '@socketsecurity/socket-patch-android-arm64@2.0.0':
+    resolution: {integrity: sha512-R/xsoKr0pRpxHeqoIxMj7R4w77mBPQ5Asv4PpNg2UTIEhxUx9XyXW7MVq9XjjrnWIEMpV1TwOptjvBicFTZZAQ==}
+    cpu: [arm64]
+    os: [android]
+
+  '@socketsecurity/socket-patch-darwin-arm64@2.0.0':
+    resolution: {integrity: sha512-Qtra40wpKeH59VggrXIopdxr0OcyDj/1bOlUqHfyNkoKWwFoifZ3IQGb4N2DP5FfTXKRGcc8GkBntHkv2xqnnw==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@socketsecurity/socket-patch-darwin-x64@2.0.0':
+    resolution: {integrity: sha512-ZXpbjqEg6JOD/Kbrd7pN1DgrMCqwRzngheFHjTZ4PCBmF6c631ePWTHgKcxUIFakiTLCU11+hhX97wZ/gZ0Krg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@socketsecurity/socket-patch-linux-arm64@2.0.0':
+    resolution: {integrity: sha512-kA04/a41J4LrTTidM+kn4FCcViCqccrnhsKOSwdVrhP+d7c8Op0uCtcJZ1HdmT5iwFKQsiHkg/99gIUsJ9vUzQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@socketsecurity/socket-patch-linux-arm@2.0.0':
+    resolution: {integrity: sha512-ynXffPV/Ay/T+rT/spcHyexxBhwmrXQ5nTI8z48dHIlnv0utnWsVq2zhC9fffzxRwhLC/949A0pSaBaCIGih+A==}
+    cpu: [arm]
+    os: [linux]
+
+  '@socketsecurity/socket-patch-linux-ia32@2.0.0':
+    resolution: {integrity: sha512-N7rMgHf0q1U0Fl4YQn8/DhheSSsP72uH9+irADyVwtx7BJMAk4jsryynwqBQvBul9556M4ObmcH91AnIqIrvNg==}
+    cpu: [ia32]
+    os: [linux]
+
+  '@socketsecurity/socket-patch-linux-x64@2.0.0':
+    resolution: {integrity: sha512-WpPUqgbYxGGe0OSbxyol+lMbB3F7uhTaH2r7wbyq5ks8qwiHzFn2IXSFjkeJSaeMuqrFfsu2yWrSfgyN1ybP2Q==}
+    cpu: [x64]
+    os: [linux]
+
+  '@socketsecurity/socket-patch-win32-arm64@2.0.0':
+    resolution: {integrity: sha512-Hqp0qKxqHlEkqszOChFPOihnxbqON0Sv0i5G+twCAtMB277KlfwOkEuLVvlFnSHxbwOyQ9MVJ0NpzSIN6ovOlQ==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@socketsecurity/socket-patch-win32-ia32@2.0.0':
+    resolution: {integrity: sha512-WB8suzfmTgyIWbF/4FRLqsMKbNg64pYZsZhMwIRG2Dct3JQH6XK0wVNeH289LOHEQ0+isEpCNYFiQzEdRHfZOg==}
+    cpu: [ia32]
+    os: [win32]
+
+  '@socketsecurity/socket-patch-win32-x64@2.0.0':
+    resolution: {integrity: sha512-TimHyh/FoHYvYao8MDHXnfd69+K1Js9Uak1BjU62Bk2VKSQUS279eOwrMSltyyzZ8LvnJIhMispe+a+12/2VHw==}
+    cpu: [x64]
+    os: [win32]
+
+  '@socketsecurity/socket-patch@2.0.0':
+    resolution: {integrity: sha512-WyKOelgSuE17ReOdcrYQ2fBm6kHvdkDm55b3owHC7WoU1FLNzRnv47J0bkoNgNObB6KedTiQLVzf/ZvbuIl5oQ==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -1260,6 +1318,11 @@ packages:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
 
+  socket@1.1.93:
+    resolution: {integrity: sha512-vPAXEDxa/F2rKcBEr+KxdACTleLQ4VVmizoUHe4Iywoc28MjfaZITQk2A+rB9tiaXn1ECHaf+x7u7cO7z/FMxw==}
+    engines: {node: '>=18.20.8', pnpm: '>=10.33.0'}
+    hasBin: true
+
   sonic-boom@3.8.1:
     resolution: {integrity: sha512-y4Z8LCDBuum+PBP3lSV7RHrXscqksve/bi0as7mhwVnBW+/wUqKT/2Kb7um8yqcFy0duYbbPxzt89Zy2nOCaxg==}
 
@@ -1465,6 +1528,9 @@ packages:
   yargs@18.0.0:
     resolution: {integrity: sha512-4UEqdc2RYGHZc7Doyqkrqiln3p9X2DZVxaGbwhn2pi7MrRagKaOcIKe8L3OxYcbhXLgLFUS3zAYuQjKBQgmuNg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=23}
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
 
@@ -1943,6 +2009,51 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.60.3':
     optional: true
+
+  '@socketsecurity/socket-patch-android-arm64@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-darwin-arm64@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-darwin-x64@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-linux-arm64@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-linux-arm@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-linux-ia32@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-linux-x64@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-win32-arm64@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-win32-ia32@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch-win32-x64@2.0.0':
+    optional: true
+
+  '@socketsecurity/socket-patch@2.0.0':
+    dependencies:
+      zod: 3.25.76
+    optionalDependencies:
+      '@socketsecurity/socket-patch-android-arm64': 2.0.0
+      '@socketsecurity/socket-patch-darwin-arm64': 2.0.0
+      '@socketsecurity/socket-patch-darwin-x64': 2.0.0
+      '@socketsecurity/socket-patch-linux-arm': 2.0.0
+      '@socketsecurity/socket-patch-linux-arm64': 2.0.0
+      '@socketsecurity/socket-patch-linux-ia32': 2.0.0
+      '@socketsecurity/socket-patch-linux-x64': 2.0.0
+      '@socketsecurity/socket-patch-win32-arm64': 2.0.0
+      '@socketsecurity/socket-patch-win32-ia32': 2.0.0
+      '@socketsecurity/socket-patch-win32-x64': 2.0.0
 
   '@standard-schema/spec@1.1.0': {}
 
@@ -2547,6 +2658,10 @@ snapshots:
 
   slash@3.0.0: {}
 
+  socket@1.1.93:
+    dependencies:
+      '@socketsecurity/socket-patch': 2.0.0
+
   sonic-boom@3.8.1:
     dependencies:
       atomic-sleep: 1.0.0
@@ -2691,3 +2806,5 @@ snapshots:
       string-width: 7.2.0
       y18n: 5.0.8
       yargs-parser: 22.0.0
+
+  zod@3.25.76: {}
