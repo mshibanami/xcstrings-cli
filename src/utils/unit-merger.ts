@@ -1,5 +1,5 @@
-import { XCStringUnit } from '../commands/_shared.js';
-import { ImportMergePolicy } from '../commands/import.js';
+import { XCStringUnit } from '../services/shared/xcstrings.js';
+import type { ImportMergePolicy } from '../services/import.js';
 
 type LocalizationMap = NonNullable<XCStringUnit['localizations']>;
 

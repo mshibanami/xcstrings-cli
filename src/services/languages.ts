@@ -1,7 +1,7 @@
 import { XcodeProject } from '@bacons/xcode';
 import { resolve } from 'node:path';
 import { loadConfig } from '../utils/config.js';
-import { readXCStrings } from '../commands/_shared.js';
+import { readXCStrings } from './shared/xcstrings.js';
 
 export function getLanguagesFromXcodeproj(xcodeprojPath: string): string[] {
     const pbxprojPath = resolve(xcodeprojPath, 'project.pbxproj');

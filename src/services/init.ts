@@ -7,7 +7,7 @@ import {
     SwiftPackageState,
 } from '../utils/swift-package.js';
 import { isMatch } from 'micromatch';
-import { writeXCStrings } from '../commands/_shared.js';
+import { writeXCStrings } from './shared/xcstrings.js';
 
 const INIT_FILE_NAME = 'xcstrings-cli.yaml';
 

@@ -3,7 +3,7 @@ import {
     readXCStrings,
     writeXCStrings,
     XCStrings,
-} from '../commands/_shared.js';
+} from './shared/xcstrings.js';
 import { extname, dirname, basename, join } from 'node:path';
 import {
     mkdir,

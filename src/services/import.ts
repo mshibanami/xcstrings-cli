@@ -11,7 +11,7 @@ import {
     XCStrings,
     XCStringUnit,
     sortXCStringsKeys,
-} from '../commands/_shared.js';
+} from './shared/xcstrings.js';
 import { loadConfig } from '../utils/config.js';
 import { resolveXCStringsPath } from '../utils/path.js';
 import { isInteractiveMode } from '../utils/interactive.js';

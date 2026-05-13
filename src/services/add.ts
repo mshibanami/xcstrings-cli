@@ -8,7 +8,7 @@ import {
     writeXCStrings,
     XCStringUnit,
     sortXCStringsKeys,
-} from '../commands/_shared.js';
+} from './shared/xcstrings.js';
 import { mergeTranslationUnit } from '../utils/unit-merger.js';
 import { captureInteractiveStringsInput } from '../utils/interactive.js';
 import { loadConfig, MissingLanguagePolicy } from '../utils/config';

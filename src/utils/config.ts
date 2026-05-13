@@ -26,8 +26,8 @@ const explorer = cosmiconfig(moduleName, {
     cache: false,
 });
 
-import type { ExportMergePolicy } from '../commands/export.js';
-import type { ImportMergePolicy } from '../commands/import.js';
+import type { ExportMergePolicy } from '../services/export.js';
+import type { ImportMergePolicy } from '../services/import.js';
 
 export type MissingLanguagePolicy = 'skip' | 'include';
 

@@ -1,5 +1,5 @@
 import Mustache from 'mustache';
-import { readXCStrings } from '../commands/_shared.js';
+import { readXCStrings } from './shared/xcstrings.js';
 import { FilterSpec, buildMatcher } from '../utils/filters.js';
 
 export interface ListOptions {

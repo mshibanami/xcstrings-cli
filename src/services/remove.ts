@@ -2,7 +2,7 @@ import {
     readXCStrings,
     writeXCStrings,
     XCStringUnit,
-} from '../commands/_shared.js';
+} from './shared/xcstrings.js';
 
 function removeLanguagesFromUnit(
     unit: XCStringUnit,
