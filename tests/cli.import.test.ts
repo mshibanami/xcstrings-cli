@@ -21,6 +21,7 @@ async function runImport(
     sources: string[],
     target?: string,
     extraArgs: string[] = [],
+    envOverrides?: NodeJS.ProcessEnv,
 ) {
     const args = [
         '--enable-source-maps',
@@ -30,7 +31,10 @@ async function runImport(
         ...(target ? ['--target', target] : []),
         ...extraArgs,
     ];
-    const child = spawn(node, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn(node, args, {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, ...envOverrides },
+    });
 
     const stdoutChunks: Buffer[] = [];
     const stderrChunks: Buffer[] = [];
@@ -275,6 +279,23 @@ describe('cli: import command', () => {
         expect(content.strings.hello.localizations.ja.stringUnit.value).toBe(
             'こんにちは',
         );
+    });
+
+    it('fails fast in non-interactive mode when source language cannot be inferred for a new target', async () => {
+        const tempDir = getTempPath('import-non-interactive-source-language');
+        await mkdir(tempDir, { recursive: true });
+
+        const sourceFile = join(tempDir, 'raw-keys.txt');
+        await writeFile(sourceFile, 'hello=world', 'utf8');
+        const targetFile = join(tempDir, 'Localizable.xcstrings');
+
+        const { code, stderr } = await runImport([sourceFile], targetFile, [], {
+            XCS_NON_INTERACTIVE: '1',
+        });
+
+        expect(code).not.toBe(0);
+        expect(stderr).toMatch(/non-interactive mode requires --language/i);
+        expect(await pathExists(targetFile)).toBe(false);
     });
 
     it('imports from another .xcstrings file', async () => {

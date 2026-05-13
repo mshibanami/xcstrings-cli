@@ -15,6 +15,7 @@ import { createStringsCommand } from './commands/strings';
 import { createExportCommand } from './commands/export';
 import { createImportCommand } from './commands/import';
 import { ArgumentError } from './utils/errors';
+import { isInteractiveMode } from './utils/interactive.js';
 
 const defaultPath = resolve(process.cwd(), 'Localizable.xcstrings');
 
@@ -24,6 +25,7 @@ const resolvePathMiddleware: MiddlewareFunction = async (argv) => {
         argv.path as string | undefined,
         config,
         defaultPath,
+        { interactive: isInteractiveMode() },
     );
 };
 

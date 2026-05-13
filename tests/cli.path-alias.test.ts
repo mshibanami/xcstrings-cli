@@ -39,10 +39,12 @@ async function cleanupConfigs(): Promise<void> {
 
 async function runCli(
     args: string[],
+    envOverrides?: NodeJS.ProcessEnv,
 ): Promise<{ code: number | null; stdout: string; stderr: string }> {
     return await new Promise((resolvePromise) => {
         const child = spawn(node, ['--enable-source-maps', cliPath, ...args], {
             stdio: ['ignore', 'pipe', 'pipe'],
+            env: { ...process.env, ...envOverrides },
         });
         let stdout = '';
         let stderr = '';
@@ -137,5 +139,41 @@ describe('cli: --path alias resolution', () => {
 
         const content = JSON.parse(await readFile(tempFile, 'utf-8'));
         expect(content.strings).not.toHaveProperty('alias-missing');
+    });
+
+    it('fails fast in non-interactive mode when multiple xcstrings paths are configured and --path is omitted', async () => {
+        const tempFileA = await setupTempFile('no-strings.xcstrings');
+        const tempFileB = await setupTempFile('no-strings.xcstrings');
+        const configPath = await createTempConfig({
+            xcstringsPaths: [tempFileA, tempFileB],
+        });
+
+        const { code, stderr } = await runCli(
+            [
+                'add',
+                '--key',
+                'non-interactive-selection',
+                '--comment',
+                'hello',
+                '--text',
+                'Hello',
+                '--config',
+                configPath,
+            ],
+            { XCS_NON_INTERACTIVE: '1' },
+        );
+
+        expect(code).not.toBe(0);
+        expect(stderr).toMatch(/non-interactive mode cannot prompt/i);
+        expect(stderr).toMatch(/--path/i);
+
+        const contentA = JSON.parse(await readFile(tempFileA, 'utf-8'));
+        const contentB = JSON.parse(await readFile(tempFileB, 'utf-8'));
+        expect(contentA.strings).not.toHaveProperty(
+            'non-interactive-selection',
+        );
+        expect(contentB.strings).not.toHaveProperty(
+            'non-interactive-selection',
+        );
     });
 });

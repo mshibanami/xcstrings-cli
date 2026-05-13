@@ -22,6 +22,7 @@ import {
 import { loadConfig } from '../utils/config.js';
 import { resolveXCStringsPath } from '../utils/path.js';
 import logger from '../utils/logger.js';
+import { isInteractiveMode } from '../utils/interactive.js';
 
 export type ImportMergePolicy = 'source-first' | 'destination-first' | 'error';
 
@@ -85,12 +86,14 @@ export function createImportCommand(): CommandModule {
             const sources = argv.sources as string[];
             const targetAttr = argv.target as string | undefined;
             const languageOpt = argv['language'] as string | undefined;
+            const interactive = isInteractiveMode();
 
             const config = await loadConfig(argv.config as string | undefined);
             const targetPath = await resolveXCStringsPath(
                 targetAttr,
                 config,
                 resolve(process.cwd(), 'Localizable.xcstrings'),
+                { interactive },
             );
 
             const mergePolicy =
@@ -134,6 +137,11 @@ export function createImportCommand(): CommandModule {
                 }
 
                 if (!sourceLanguage) {
+                    if (!interactive) {
+                        throw new Error(
+                            'Non-interactive mode requires --language when creating a new xcstrings file and source language cannot be inferred.',
+                        );
+                    }
                     sourceLanguage = await input({
                         message:
                             'Enter the source language for the new xcstrings file:',

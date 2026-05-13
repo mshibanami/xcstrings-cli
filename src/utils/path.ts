@@ -1,5 +1,6 @@
 import { select } from '@inquirer/prompts';
 import { Config } from './config.js';
+import { InteractiveModeOptions, isInteractiveMode } from './interactive.js';
 
 export function findAliasPath(
     entries: (string | { alias: string; path: string })[] | undefined,
@@ -18,7 +19,9 @@ export async function resolveXCStringsPath(
     requestedPath: string | undefined,
     config: Config | null,
     defaultPath: string,
+    interactiveModeOptions: InteractiveModeOptions = {},
 ): Promise<string> {
+    const interactive = isInteractiveMode(interactiveModeOptions);
     const entries = config?.xcstringsPaths;
 
     if (!requestedPath) {
@@ -59,6 +62,12 @@ export async function resolveXCStringsPath(
         if (entries.length === 1) {
             const entry = entries[0];
             return typeof entry === 'string' ? entry : entry.path;
+        }
+
+        if (!interactive) {
+            throw new Error(
+                'Non-interactive mode cannot prompt for xcstrings file selection. Specify --path (or --target for import) explicitly.',
+            );
         }
 
         const choices = entries.map((entry) => {
