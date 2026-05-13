@@ -44,6 +44,12 @@ describe('mcp tool annotations', () => {
                 idempotentHint: true,
                 openWorldHint: false,
             },
+            'xcs.init.preview': {
+                readOnlyHint: true,
+                destructiveHint: false,
+                idempotentHint: true,
+                openWorldHint: false,
+            },
             'xcs.add': {
                 readOnlyHint: false,
                 destructiveHint: false,
@@ -63,6 +69,12 @@ describe('mcp tool annotations', () => {
                 openWorldHint: false,
             },
             'xcs.export': {
+                readOnlyHint: false,
+                destructiveHint: true,
+                idempotentHint: false,
+                openWorldHint: false,
+            },
+            'xcs.init.apply': {
                 readOnlyHint: false,
                 destructiveHint: true,
                 idempotentHint: false,

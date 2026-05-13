@@ -12,6 +12,7 @@ const TEST_DIR = resolve(__dirname, 'temp-init-test');
 
 describe('init command', () => {
     beforeEach(async () => {
+        await rm(TEST_DIR, { recursive: true, force: true });
         await mkdir(TEST_DIR, { recursive: true });
         vi.spyOn(process, 'cwd').mockReturnValue(TEST_DIR);
         // vi.spyOn(console, 'log').mockImplementation(() => {});

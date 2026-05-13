@@ -9,7 +9,7 @@ vi.mock('@inquirer/prompts');
 const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
 
 describe('init command - directory skipping', () => {
-    const testDir = resolve(process.cwd(), 'tests/temp-init-test');
+    const testDir = resolve(__dirname, 'temp-init-ignore-test');
 
     beforeEach(async () => {
         if (existsSync(testDir)) {
