@@ -1,2 +1,7 @@
+packages:
+  - '.'
+allowBuilds:
+  esbuild: true
+  iconv: true
 patchedDependencies:
-    i18n-strings-files: patches/i18n-strings-files.patch
+  i18n-strings-files: patches/i18n-strings-files.patch

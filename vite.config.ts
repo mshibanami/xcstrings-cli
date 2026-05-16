@@ -22,7 +22,7 @@ export default defineConfig({
                 'cosmiconfig',
                 'json5',
                 '@inquirer/prompts',
-                '@bacons/xcode',
+                '@mshibanami-org/xcode',
                 'chalk',
                 'i18n-strings-files',
                 'fast-glob',

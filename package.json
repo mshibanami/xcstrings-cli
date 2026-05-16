@@ -36,7 +36,7 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "@bacons/xcode": "1.0.0-alpha.33",
+        "@mshibanami-org/xcode": "1.0.0",
         "@inquirer/prompts": "8.4.3",
         "chalk": "5.6.2",
         "cosmiconfig": "9.0.1",
@@ -64,10 +64,5 @@
         "typescript": "5.9.3",
         "vite": "7.3.3",
         "vitest": "4.1.6"
-    },
-    "pnpm": {
-        "onlyBuiltDependencies": [
-            "esbuild"
-        ]
     }
 }

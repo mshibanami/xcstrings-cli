@@ -1,4 +1,4 @@
-import { XcodeProject } from '@bacons/xcode';
+import { XcodeProject } from '@mshibanami-org/xcode';
 import { resolve } from 'node:path';
 import { loadConfig } from '../utils/config.js';
 import { readXCStrings } from './shared/xcstrings.js';
