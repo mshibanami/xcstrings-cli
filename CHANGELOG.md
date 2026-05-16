@@ -1,5 +1,12 @@
 # xcstrings-cli
 
+## 2.8.4
+
+### Patch Changes
+
+- 6622416: Refactoring for MCP support
+- dc3a6a3: Replace @bacons/xcode with @mshibanami-org/xcode to avoid depending on vulnerable packages.
+
 ## 2.8.3
 
 ### Patch Changes
